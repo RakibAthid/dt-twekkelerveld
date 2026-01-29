@@ -998,6 +998,7 @@
   #layerInfoBody, #layerInfoBody * { color: rgba(248,250,252,0.90); }
 
 </style>
+  <script src="config.js"></script>
 </head>
 <body>
 
@@ -1599,16 +1600,25 @@ Cesium.Ion.defaultAccessToken =
 // Your ION asset (LOD 2.2)
 const ION_LOD22_ASSET_ID = 4261194;
 
-// Hidden (backend) building attributes file (LOD1 polygons)
-const LOD1_BUILDINGS_GEOJSON = "twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson";
+// ---- Cloud / R2 configuration (works for local + cloud) ----
+const DT_R2_BASE = (window.DT_CONFIG && window.DT_CONFIG.R2_BASE) ? String(window.DT_CONFIG.R2_BASE).replace(/\/$/, '') : "";
+const DT_R2_PREFIX = (window.DT_CONFIG && window.DT_CONFIG.R2_PREFIX) ? String(window.DT_CONFIG.R2_PREFIX).replace(/^\/+|\/+$/g, '') : "";
+function dataUrl(p){
+  const key = String(p || '').replace(/^\/+/, '');
+  if(!DT_R2_BASE) return key; // local relative path
+  return DT_R2_BASE + (DT_R2_PREFIX ? '/' + DT_R2_PREFIX : '') + '/' + key;
+}
+
+// Hidden \(backend\) building attributes file \(LOD1 polygons\)
+const LOD1_BUILDINGS_GEOJSON = dataUrl("twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson");
 
 // Files
-const GREENSPACES_GEOJSON     = "greenspace_4326.geojson";
-const TREES_OPEN_GEOJSON      = "trees_co2_4326_final.geojson"; // Updated filename
+const GREENSPACES_GEOJSON     = dataUrl("greenspace_4326.geojson");
+const TREES_OPEN_GEOJSON      = dataUrl("trees_co2_4326_final.geojson"); // Updated filename
 // Municipality trees dataset; use correct filename (plural trees_ and point)
-const TREES_MUNI_GEOJSON      = "trees_point_municipality.geojson";
-const NDVI_PNG                = "NDVI.png";
-const UHI_PNG                 = "Uhi.png";
+const TREES_MUNI_GEOJSON      = dataUrl("trees_point_municipality.geojson");
+const NDVI_PNG                = dataUrl("NDVI.png");
+const UHI_PNG                 = dataUrl("Uhi.png");
 
 // for age normalization
 const NOW_YEAR = 2025;

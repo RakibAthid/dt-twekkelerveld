@@ -537,6 +537,7 @@
     color: var(--accent-primary);
   }
 </style>
+  <script src="config.js"></script>
 </head>
 
 <body>
@@ -1064,11 +1065,20 @@
 // =============================
 // 0) FILES 
 // =============================
-const LOCAL_SHADOW_PNG = "Aggregated Shadow Raster.png";
-const LOCAL_SHADOW_PGW = "Aggregated Shadow Raster.pgw";
+// ---- Cloud / R2 configuration (works for local + cloud) ----
+const DT_R2_BASE = (window.DT_CONFIG && window.DT_CONFIG.R2_BASE) ? String(window.DT_CONFIG.R2_BASE).replace(/\/$/, '') : "";
+const DT_R2_PREFIX = (window.DT_CONFIG && window.DT_CONFIG.R2_PREFIX) ? String(window.DT_CONFIG.R2_PREFIX).replace(/^\/+|\/+$/g, '') : "";
+function dataUrl(p){
+  const key = String(p || '').replace(/^\/+/, '');
+  if(!DT_R2_BASE) return key; // local relative path
+  return DT_R2_BASE + (DT_R2_PREFIX ? '/' + DT_R2_PREFIX : '') + '/' + key;
+}
 
-const LOCAL_IRR_PNG    = "Roof Irradiance Raster(kWh).png";
-const LOCAL_IRR_PGW    = "Roof Irradiance Raster(kWh).pgw";
+const LOCAL_SHADOW_PNG = dataUrl("Aggregated Shadow Raster.png");
+const LOCAL_SHADOW_PGW = dataUrl("Aggregated Shadow Raster.pgw");
+
+const LOCAL_IRR_PNG    = dataUrl("Roof Irradiance Raster(kWh).png");
+const LOCAL_IRR_PGW    = dataUrl("Roof Irradiance Raster(kWh).pgw");
 
 
 const IRR_SCALE_JSON   = null;
@@ -1078,11 +1088,11 @@ const CSV_CANDIDATES = [
   "Twekkelerveld_bag_pand_FIXED.csv",
   "twekkelerveld_bag_pand_FIXED.csv",
   "Twekkelerveld_bag_pand_Fixed.csv"
-];
+].map(dataUrl);
 let CSV_FILE_ACTUAL = null;
 
 // LOD 1 footprint file
-const GEOJSON_FILE = "twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson";
+const GEOJSON_FILE = dataUrl("twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson");
 
 // =============================
 // 1) CONFIG
@@ -1183,11 +1193,11 @@ const LABEL_COLOR_MAP = {
 // candidate defines both a URL (relative to this HTML file) and the
 // expected type.
 const LABEL_SOURCES = [
-  { url: "energy_labels_meta.json",       type: "json" },
-  { url: "energy_labels_meta",            type: "json" },
-  { url: "energy_labels_twekkelerveld.csv", type: "csv" },
-  { url: "energy_labels_twekkelerveld.xlsx", type: "xlsx" },
-  { url: "energy_labels_twekkelerveld",    type: "csv" }
+  { url: dataUrl("energy_labels_meta.json"),       type: "json" },
+  { url: dataUrl("energy_labels_meta"),            type: "json" },
+  { url: dataUrl("energy_labels_twekkelerveld.csv"), type: "csv" },
+  { url: dataUrl("energy_labels_twekkelerveld.xlsx"), type: "xlsx" },
+  { url: dataUrl("energy_labels_twekkelerveld"),    type: "csv" }
 ];
 let labelMap = new Map();
 let labelCoverageCount = 0;
