@@ -6,3 +6,4 @@ window.DT_CONFIG = {
   // Example: R2_PREFIX: "data"
   R2_PREFIX: ""
 };
+
