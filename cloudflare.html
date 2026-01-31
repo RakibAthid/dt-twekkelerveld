@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Twekkelerveld Digital Twin – Cloudflare</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--
+    Configuration values for the Twekkelerveld digital twin.
+    These values are derived from the updated ecology and energy HTML files.  They
+    provide default paths and constants such as the Cesium Ion token, GeoJSON
+    filenames, raster references, and energy calculation parameters.  When
+    deployed on Cloudflare, the embedded pages can access these values via
+    `window.CONFIG` to override their internal defaults without editing each
+    individual HTML file.  If you need to change datasets or API keys in the
+    future, modify this object instead of the embedded pages.
+  -->
+  <script>
+    // Expose a global configuration object.  Embedded iframes can read these
+    // values via window.parent.CONFIG if needed.  For security, avoid
+    // including sensitive secrets here.
+    window.CONFIG = {
+      cesiumIonToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1NmE1ZGMwYy0xNTQxLTRmMzgtYWM3NS0wYWUzMjk3MjNmYTAiLCJpZCI6MzYwODkxLCJpYXQiOjE3NjM0ODU3MTF9.D_qofjwKf6t1mnUO06Hkz-t7xr2UrPHklhG3a5Lfz8E",
+      ION_LOD22_ASSET_ID: 4261194,
+      LOD1_BUILDINGS_GEOJSON: "twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson",
+      GREENSPACES_GEOJSON: "greenspace_4326.geojson",
+      TREES_OPEN_GEOJSON: "trees_co2_4326_final.geojson",
+      TREES_MUNI_GEOJSON: "trees_point_municipality.geojson",
+      NDVI_PNG: "NDVI.png",
+      UHI_PNG: "Uhi.png",
+      NOW_YEAR: 2025,
+      // Offset adjustments for the UHI raster overlay, derived from ecology.html
+      UHI_OFFSET: { lon: 0.0, lat: 0.0 },
+      // Geographic bounds used for the study area in ecology.html
+      studyBounds: { west: 6.8445, south: 52.2249, east: 6.8661, north: 52.2363 },
+      // Energy module parameters, derived from energy.html
+      energy: {
+        csvCandidates: [
+          "Twekkelerveld_bag_pand_FIXED.csv",
+          "twekkelerveld_bag_pand_FIXED.csv",
+          "Twekkelerveld_bag_pand_Fixed.csv"
+        ],
+        params: {
+          co2: { elec: 0.268, gas: 2.134 },
+          prices: { elecImport: 0.30, gas: 1.45, feedIn: 0.05, p2p: 0.15 },
+          costs: { pvPerWp: 1.13, hybridPump: 6000, allElectric: 14000, insulationSqM: 50 }
+        },
+        months: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        solarCurve: [0.02, 0.05, 0.09, 0.13, 0.15, 0.16, 0.15, 0.13, 0.08, 0.04, 0.02, 0.01],
+        heatCurve:  [0.18, 0.16, 0.13, 0.07, 0.03, 0.01, 0.00, 0.01, 0.02, 0.07, 0.12, 0.17]
+      }
+    };
+  </script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #020617;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+    /* Wrapper to ensure the iframe fills the viewport */
+    .iframe-wrapper {
+      width: 100%;
+      height: 100%;
+    }
+    .iframe-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    Embed the main digital twin hub (index.html) in an iframe.  When deployed
+    on Cloudflare Pages, this wrapper serves as a convenient entry point that
+    exposes configuration values to the embedded application.  If you need
+    to embed a different file, adjust the src attribute accordingly.
+  -->
+  <div class="iframe-wrapper">
+    <iframe src="index.html"></iframe>
+  </div>
+</body>
+</html>
