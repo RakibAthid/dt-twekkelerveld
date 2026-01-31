@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Twekkelerveld Smart Energy Twin</title>
 
+<!-- Cloudflare/R2 config (optional). If missing, the app falls back to local files. -->
+<script src="config.js"></script>
+
 <!-- CesiumJS -->
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/Cesium.js"></script>
 <link href="https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/Cesium.js" rel="preload" as="script">
@@ -475,21 +478,23 @@
   }
 
 
+  /*
+   * Collapsed panels: simplify the styling for a cleaner, professional look.  When either the
+   * legend (left panel) or sidebar (right panel) is collapsed the contents are hidden and the
+   * container shrinks to a narrow strip.  We remove the rotated text entirely and rely solely
+   * on the toggle arrow to indicate the panel can be expanded.  Increasing the width slightly
+   * (45px) improves readability without taking up too much screen space.
+   */
   #leftLegend.collapsed {
-    width: 40px;
+    width: 45px;
     padding: 8px;
     overflow: hidden;
   }
   #leftLegend.collapsed .leg-body,
   #leftLegend.collapsed .leg-sub,
-  #leftLegend.collapsed .layer-info {
-    display: none;
-  }
+  #leftLegend.collapsed .layer-info,
   #leftLegend.collapsed .leg-title {
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    white-space: nowrap;
-    font-size: 12px;
+    display: none !important;
   }
   #leftLegend .toggle {
     cursor: pointer;
@@ -503,7 +508,7 @@
   }
 
   #rightPanel.collapsed {
-    width: 40px;
+    width: 45px;
     padding-top: 30px;
     position: absolute;
   }
@@ -512,19 +517,11 @@
   #rightPanel.collapsed h4,
   #rightPanel.collapsed .hint,
   #rightPanel.collapsed #lod2LegendNumbers {
-    display: none;
+    display: none !important;
   }
-
-
+  /* In collapsed mode the first heading should also disappear */
   #rightPanel.collapsed h3:first-of-type {
-    display: block !important;
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    white-space: nowrap;
-    font-size: 12px;
-    margin: 0;
-    padding: 0;
-    color: var(--text-main);
+    display: none !important;
   }
   #rightPanel .toggle {
     cursor: pointer;
@@ -535,6 +532,34 @@
     right: 8px;
     z-index: 1;
     color: var(--accent-primary);
+  }
+
+  /* Improve collapsed behaviour: hide text completely instead of rotating
+     and adjust panel widths for a cleaner collapsed state.  Keep the width
+     consistent with the primary collapsed definition above (45px). */
+  #leftLegend.collapsed {
+    width: 45px;
+  }
+  #leftLegend.collapsed .leg-title {
+    display: none !important;
+  }
+
+  #rightPanel.collapsed {
+    width: 45px;
+  }
+  #rightPanel.collapsed h3,
+  #rightPanel.collapsed h4 {
+    display: none !important;
+  }
+  #rightPanel.collapsed h3:first-of-type {
+    display: none !important;
+  }
+  /* Hide section labels and the energy segment chart when the sidebar is collapsed to prevent misaligned content.
+     Without these rules the "Energy segment overview" title and chart remain visible in collapsed mode and
+     overlap other elements.  Hiding them ensures a clean, narrow strip containing only the toggle arrow. */
+  #rightPanel.collapsed .section-label,
+  #rightPanel.collapsed #energySegChartContainer {
+    display: none !important;
   }
 </style>
 </head>
@@ -547,22 +572,19 @@
     <div style="width:50px; height:50px; background:var(--accent-primary); border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:24px;">⚡</div>
                      <h1>Twekkelerveld Smart Energy Twin</h1>
     <p>
-      Twekkelerveld contains roughly <b>1 465 residential buildings</b>, many of which now have a
-      <b>certified energy label (A–G)</b>.  Buildings without
-      an official label fall back to proxy estimates based on age and typology.  These labels
-      measure energy efficiency: A means highly efficient while G indicates a poor performer.
-      The 3D models are styled with a warm reddish‑brown roof and light façades to evoke
-      typical Dutch houses.<br><br>
-      <b>LOD&nbsp;1 – Neighbourhood Energy Map</b><br>
-      View aggregated indicators such as <i>energy use per m²</i>, <i>solar electricity potential</i>,
-      <i>carbon emissions</i> and the new <i>energy label layer</i>.  Colours reflect the active layer and
-      scenario.  
-      <br><br>
-      <b>LOD&nbsp;2.2 – Building Prototype View</b><br>
-      Select an individual building in 3D to inspect its annual energy estimate, roof
-      conditions, solar “what‑if” simulations and certified label.  The detailed
-      view helps you understand energy efficiency at the building level and how upgrades such
-      as insulation, heat pumps or extra solar panels would affect consumption.
+      The Twekkelerveld district comprises approximately <b>1 465 residential buildings</b>. For most properties a
+      <b>certified energy label (A–G)</b> has been issued; for the remainder, proxy estimates are derived from
+      construction year and typology. In this scale, a label of <b>A</b> denotes a highly efficient building whereas a
+      <b>G</b> signifies poor performance. 3D models use realistic roof and façade colours to evoke the Dutch
+      architectural context.<br><br>
+      <b>Level of Detail&nbsp;1 – Neighbourhood Energy Map</b><br>
+      This mode visualises aggregated indicators across the neighbourhood: <em>energy use intensity</em> (kWh per m²),
+      <em>solar electricity potential</em>, <em>annual carbon emissions</em> and a discrete <em>energy label</em> map. Colours
+      dynamically adjust to the selected indicator and scenario to aid intuitive comparison.<br><br>
+      <b>Level of Detail&nbsp;2.2 – Building Prototype View</b><br>
+      Selecting a building in 3D reveals detailed annual energy estimates, roof irradiation and shading conditions and
+      “what‑if” simulations. You can explore the impact of upgrades such as insulation, heat pumps and additional
+      solar panels at the individual building level, supported by certified label information where available.
     </p>
     <button class="modal-btn" onclick="document.getElementById('overviewModal').style.display='none'">Start Exploring</button>
   </div>
@@ -807,6 +829,11 @@
           <div class="layer-info" onclick="openLayerInfo(event,'lod1_label')" title="What is this?">i</div>
         </div>
       </button>
+      <!-- Certified filter: show only buildings with an official energy label -->
+      <label class="check-row" style="margin-top:8px;">
+        <input type="checkbox" id="showCertified" onchange="toggleCertifiedOnly(this.checked)">
+        Show certified only
+      </label>
     </div>
 
     <h3>Scenarios (LOD 1)</h3>
@@ -841,44 +868,21 @@
       </button>
     </div>
 
-    <!-- 3. Targeted scenarios: apply upgrades only to certain energy‑label groups.  These examples
-         illustrate how policy can prioritise buildings based on certified energy labels.  The
-         corresponding logic is implemented in the getVal() function below. -->
-    <span class="section-label">3. Targeted policies</span>
-    <div class="section-group">
-      <!-- Retrofit D–G buildings first: apply insulation only to label groups C–D–E–G -->
-      <button id="scenRetroDG" class="mode-btn" onclick="setScenario('retroDG')">
-        <span>Retrofit D–G first</span>
-        <div class="layer-right">
-          <div class="indicator-icon" style="background:#f59e0b; box-shadow:0 0 8px #f59e0b;"></div>
-          <div class="layer-info" onclick="openLayerInfo(event,'scen_insulate')">i</div>
-        </div>
-      </button>
-      <!-- Heat pumps for A–C buildings only: electrify heating for A–C labels first -->
-      <button id="scenHeatAC" class="mode-btn" onclick="setScenario('heatAC')">
-        <span>Heat pump A–C first</span>
-        <div class="layer-right">
-          <div class="indicator-icon" style="background:#0ea5e9; box-shadow:0 0 8px #0ea5e9;"></div>
-          <div class="layer-info" onclick="openLayerInfo(event,'scen_hp')">i</div>
-        </div>
-      </button>
-      <!-- PV rollout prioritising poor labels (E–G): solar first for the least efficient buildings -->
-      <button id="scenPVLow" class="mode-btn" onclick="setScenario('pvLow')">
-        <span>PV priority for E–G</span>
-        <div class="layer-right">
-          <div class="indicator-icon" style="background:#34d399; box-shadow:0 0 8px #34d399;"></div>
-          <div class="layer-info" onclick="openLayerInfo(event,'scen_addpv')">i</div>
-        </div>
-      </button>
+    <!-- 3. Energy segment overview: summarises how many buildings fall into the low, medium and high energy
+         consumption clusters.  This replaces the targeted policy section and provides a simple
+         bar chart that reflects the consumption profiles of the district.  The chart is populated
+         dynamically after the entities are loaded and clustered. -->
+    <span class="section-label">3. Energy segment overview</span>
+    <div id="energySegChartContainer" class="section-group">
+      <h4 style="margin:0 0 8px 0; font-size:13px; font-weight:600; color:var(--text-main);">Energy consumption segments</h4>
+      <canvas id="energySegChart" height="140"></canvas>
     </div>
 
-    <!-- Filter by data provenance: show only certified buildings (energy label exists) -->
-    <label class="check-row" style="margin-top:8px;">
-      <input type="checkbox" id="showCertified" onchange="toggleCertifiedOnly(this.checked)"> Show certified only
-    </label>
   </div>
 
   <!-- LOD 2.2 -->
+  <!-- Wrap all prototype/LOD2-specific controls inside a container so we can toggle visibility -->
+  <div id="lod2ControlsWrap" style="display:none;">
   <h3>Prototype Layers (LOD 2.2)</h3>
   <div class="section-group">
     <button id="lod2L_buildings" class="mode-btn active" onclick="toggleLod2Layer('buildings')">
@@ -922,7 +926,7 @@
     <div class="hint" id="lod2LegendNumbers" style="margin-top:8px; color:#cbd5e1;">
       Classification bands are computed from the energy estimate distribution.
     </div>
-  </div>
+    </div>
 
   <h4>Sunlight scaling</h4>
   <div class="section-group">
@@ -986,7 +990,7 @@
     <div class="hint">
       Solar output uses roof sunlight and roof area. Open the (i) buttons to see formulas and unit definitions.
     </div>
-  </div>
+    </div>
 
   <h4>Seasonal Context</h4>
   <div id="contextGraph"><canvas id="seasonCanvas"></canvas></div>
@@ -996,6 +1000,10 @@
     <input id="monthSlider" type="range" min="0" max="11" step="1" value="5" oninput="setMonth(this.value)" />
   </div>
 
+  <!-- End of prototype/LOD2 controls wrapper -->
+  </div>
+
+  <!-- Continue with the shared filter (visible in both LOD 1 and LOD 2) -->
   <h4>Filter</h4>
   <div class="flex-between" style="margin-bottom:5px">
     <span>Hide small values</span> <span id="threshVal" style="color:var(--accent-primary); font-weight:700;">0</span>
@@ -1056,25 +1064,26 @@
   </div>
 </div>
 
-<script src="./config.js"></script>
-<script>// -----------------------------
-// R2 helper (safe in all cases)
-// -----------------------------
-// ===== R2 CONFIG (self-contained) =====
-const R2_BASE = "https://pub-c7a9f574067e4d9a90f1ef4557eb1434.r2.dev";
-const R2_PREFIX = "";
-function dataUrl(name){
-  const base = (R2_BASE || "").replace(/\/$/, "");
-  const prefix = (R2_PREFIX || "").replace(/^\/+|\/+$/g, "");
-  const clean = String(name || "").replace(/^\/+/, "");
-  if (!base) return clean; // fallback to local
-  return prefix ? `${base}/${prefix}/${clean}` : `${base}/${clean}`;
-}
-
-
+<script>
 /* ------------------------------------------------------------
   Run via local server (Live Server).
 ------------------------------------------------------------ */
+
+// ------------------------------------------------------------
+// Cloudflare Pages + R2 support
+// If config.js defines window.DT_CONFIG.R2_BASE, all data assets
+// are loaded from that public R2 bucket. If empty, local relative
+// paths are used (works on localhost / Live Server).
+// ------------------------------------------------------------
+const R2_BASE   = (window.DT_CONFIG?.R2_BASE || "").replace(/\/+$/, "");
+const R2_PREFIX = (window.DT_CONFIG?.R2_PREFIX || "").replace(/^\/+|\/+$/g, "");
+function dataUrl(name){
+  if(!R2_BASE) return name;
+  const parts = [R2_BASE];
+  if(R2_PREFIX) parts.push(R2_PREFIX);
+  parts.push(String(name || "").replace(/^\/+/, ""));
+  return parts.join("/");
+}
 
 // =============================
 // 0) FILES 
@@ -1138,10 +1147,12 @@ viewer.scene.globe.enableLighting = true;
 viewer.scene.light.intensity = 2.0;
 
 viewer.camera.setView({
-  destination: Cesium.Cartesian3.fromDegrees(6.89366, 52.22632, 1500),
+  // Set a lower altitude and steeper downward pitch so that the scene starts directly on
+  // the neighbourhood.  A pitch of -1.2 (≈‑69°) provides a more top‑down view.
+  destination: Cesium.Cartesian3.fromDegrees(6.89366, 52.22632, 1000),
   orientation: {
     heading: 0.0,
-    pitch: -0.5,
+    pitch: -1.2,
     roll: 0.0
   }
 });
@@ -1198,11 +1209,11 @@ const LABEL_COLOR_MAP = {
 // candidate defines both a URL (relative to this HTML file) and the
 // expected type.
 const LABEL_SOURCES = [
-  { url: dataUrl("energy_labels_meta.json"),       type: "json" },
-  { url: "energy_labels_meta",            type: "json" },
+  { url: dataUrl("energy_labels_meta.json"),         type: "json" },
+  { url: dataUrl("energy_labels_meta"),              type: "json" },
   { url: dataUrl("energy_labels_twekkelerveld.csv"), type: "csv" },
-  { url: "energy_labels_twekkelerveld.xlsx", type: "xlsx" },
-  { url: "energy_labels_twekkelerveld",    type: "csv" }
+  { url: dataUrl("energy_labels_twekkelerveld.xlsx"), type: "xlsx" },
+  { url: dataUrl("energy_labels_twekkelerveld"),     type: "csv" }
 ];
 let labelMap = new Map();
 let labelCoverageCount = 0;
@@ -2349,11 +2360,16 @@ async function loadGeoJSONLOD1(){
 
     initSeasonChart();
     updateEnvironment();
-    // compute clustering on energy values to segment buildings
+    // compute clustering on energy values to segment buildings and refresh the energy segment chart
     computeEnergyClusters();
-
+    // After clustering, populate the energy segment chart to summarise the distribution
+    updateEnergySegChart();
     if (myEntities.length > 0) {
-      viewer.flyTo(myEntities, { duration: 4.0, offset: new Cesium.HeadingPitchRange(0, -0.5, 1500) });
+      // Fly to the loaded entities with a steeper pitch so that the scene initially
+      // focuses directly on the neighbourhood instead of a distant horizon.  A
+      // shorter range (1000m) brings the camera closer and delivers a clearer
+      // top‑down view.
+      viewer.flyTo(myEntities, { duration: 3.0, offset: new Cesium.HeadingPitchRange(0, -1.2, 1000) });
     }
 
     setupInteraction();
@@ -2374,6 +2390,9 @@ window.toggleView = function(viewMode) {
   clearLod2Highlight();
 
   if (viewMode === 'data') {
+    // When switching to LOD1 (data) view, hide the prototype control panel
+    const lod2Wrap = document.getElementById('lod2ControlsWrap');
+    if(lod2Wrap) lod2Wrap.style.display = 'none';
     document.getElementById('viewData').classList.add('active');
     document.getElementById('lod1ControlsWrap').style.display = '';
 
@@ -2387,6 +2406,9 @@ window.toggleView = function(viewMode) {
     applyLod2Overlays();
     updateVis();
   } else {
+    // When switching to LOD2 (real) view, show the prototype control panel and hide LOD1 controls
+    const lod2Wrap = document.getElementById('lod2ControlsWrap');
+    if(lod2Wrap) lod2Wrap.style.display = '';
     document.getElementById('viewReal').classList.add('active');
     document.getElementById('lod1ControlsWrap').style.display = 'none';
     myEntities.forEach(e => e.show = false);
@@ -2441,6 +2463,67 @@ function applyLod2Overlays(){
   const inLod2 = document.getElementById('viewReal').classList.contains('active');
   if(irrRaster && irrRaster.imageryLayer) irrRaster.imageryLayer.show = (inLod2 && L2_SHOW_IRR_OVERLAY);
   if(shadowRaster && shadowRaster.imageryLayer) shadowRaster.imageryLayer.show = (inLod2 && L2_SHOW_SHADOW_OVERLAY);
+}
+
+// =======================================
+//  Energy segment chart (dynamic)
+//
+//  This chart summarises the number of buildings falling into each energy consumption
+//  segment (Low, Medium, High).  It replaces the hard‑coded targeted policy chart.  The
+//  function should be called after entities are loaded and the clustering has been
+//  computed.  It destroys any previous chart instance to avoid memory leaks.
+let energySegChart = null;
+function updateEnergySegChart() {
+  const chartElem = document.getElementById('energySegChart');
+  if(!chartElem || !myEntities || myEntities.length === 0) return;
+  const ctx = chartElem.getContext('2d');
+  // Count entities by cluster label.  Default counts are zero in case some
+  // clusters have no members.
+  const counts = { Low: 0, Medium: 0, High: 0 };
+  for (const e of myEntities) {
+    const b = e._b || {};
+    const lbl = b.ClusterLabel;
+    if(lbl && Object.prototype.hasOwnProperty.call(counts, lbl)) {
+      counts[lbl] += 1;
+    }
+  }
+  const labels = Object.keys(counts);
+  const data = labels.map(l => counts[l]);
+  // Destroy any existing chart before creating a new one
+  if (energySegChart) {
+    try { energySegChart.destroy(); } catch(ex) { /* ignore */ }
+  }
+  energySegChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Number of buildings',
+        data: data,
+        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+        borderColor: ['#10b981', '#f59e0b', '#ef4444'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-main') },
+          grid: { color: 'rgba(255,255,255,0.1)' }
+        },
+        x: {
+          ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-main') },
+          grid: { color: 'rgba(255,255,255,0.1)' }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: true }
+      }
+    }
+  });
 }
 
 
@@ -2716,11 +2799,11 @@ async function handleChatQuery(q){
   // ------------------------------------------------------------
   // Layer and scenario toggles via natural language
   // Recognise requests to switch indicator layer, scenario or view.  We use
-  // fairly broad keyword matching so users can say things like
-  // "show me the solar map" or "activate heat pump scenario" and the
-  // appropriate function will be called.  Targeted policies based on
-  // energy‑label groups are also supported.  Overlay toggles apply
-  // only in LOD 2.2.
+    // fairly broad keyword matching so users can say things like
+    // "show me the solar map" or "activate heat pump scenario" and the
+    // appropriate function will be called.  Targeted policies based on
+    // energy‑label groups have been removed from the UI, so those phrases are
+    // no longer recognised.  Overlay toggles apply only in LOD 2.2.
   {
     const lq = clean;
     // indicator layers
@@ -2745,10 +2828,7 @@ async function handleChatQuery(q){
     if(lq.includes('insulate') || lq.includes('insulation')){ setScenario('insulate'); addChatMessage('bot','Activated the better-insulation scenario.'); return; }
     if(lq.includes('heat pump') || lq.includes('heatpump')){ setScenario('heatPump'); addChatMessage('bot','Activated the heat pump transition scenario.'); return; }
     if(lq.includes('p2p') || lq.includes('energy sharing') || lq.includes('peer to peer')){ setScenario('p2p'); addChatMessage('bot','Activated the local energy sharing scenario.'); return; }
-    // targeted scenarios
-    if((lq.includes('retrofit') || lq.includes('insulate')) && (lq.includes('d') || lq.includes('g') || lq.includes('poor') || lq.includes('low label'))){ setScenario('retroDG'); addChatMessage('bot','Activated the targeted insulation scenario for D–G labels.'); return; }
-    if((lq.includes('heat pump') || lq.includes('heatpump')) && (lq.includes('a') || lq.includes('c'))){ setScenario('heatAC'); addChatMessage('bot','Activated the targeted heat pump scenario for A–C labels.'); return; }
-    if((lq.includes('pv') || lq.includes('solar')) && (lq.includes('e') || lq.includes('g') || lq.includes('poor'))){ setScenario('pvLow'); addChatMessage('bot','Activated the PV priority scenario for E–G labels.'); return; }
+    // targeted scenarios have been removed – ignore any attempts to activate them via chat
     // view toggles
     if((lq.includes('3d') || lq.includes('prototype') || lq.includes('lod 2') || (lq.includes('building') && lq.includes('view')))){
       toggleView('real');
@@ -3775,20 +3855,16 @@ window.setIndicator = function(i) {
 
 window.setScenario = function(s) {
   activeScen = s;
-  // Remove active state from all scenario buttons, including targeted ones
-  ['scenBase','scenPV','scenIns','scenHP','scenP2P','scenRetroDG','scenHeatAC','scenPVLow'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
-  // Map scenario identifiers to button IDs. New targeted scenarios
-  // are defined here.  If an unknown scenario is supplied nothing
-  // will be activated but activeScen will still update.
+  // Remove active state from all scenario buttons.  Targeted scenarios have been
+  // removed from the UI so there is no need to include them in this list.
+  ['scenBase','scenPV','scenIns','scenHP','scenP2P'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
+  // Map scenario identifiers to button IDs.  Only the five core scenarios are supported.
   const map = {
     baseline:'scenBase',
     addPV:'scenPV',
     insulate:'scenIns',
     heatPump:'scenHP',
-    p2p:'scenP2P',
-    retroDG:'scenRetroDG',
-    heatAC:'scenHeatAC',
-    pvLow:'scenPVLow'
+    p2p:'scenP2P'
   };
   const btnId = map[s];
   const btnEl = btnId ? document.getElementById(btnId) : null;
@@ -3991,7 +4067,9 @@ function getVal(e, ind, scen) {
 
   if (ind === 'Balance') {
     const monthGasKwh = (currGasM3 * 9.77) * heatCurve[currentMonth];
-    const monthElKwh = currElKwh * 0.083;
+    // Divide annual electricity usage by 12 to obtain a monthly value.  Using 1/12
+    // instead of a rounded 0.083 constant improves accuracy for monthly breakdowns.
+    const monthElKwh = currElKwh / 12;
     const monthGen = pvGen * solarCurve[currentMonth];
     return monthGen - (monthGasKwh + monthElKwh);
   }
@@ -4048,90 +4126,67 @@ function calculateTradeoffs(e) {
  * @param {number} k - Number of clusters to compute. Default is 3.
  */
 function computeEnergyClusters(k = 3) {
+  // If there are no entities, skip clustering
   if(!myEntities || myEntities.length === 0) return;
-  // prepare an array of values and references for clustering
+  /**
+   * Prepare an array of values and entity references for segmentation.  We attempt
+   * to derive a reasonable energy consumption figure for each building using the
+   * following precedence:
+   *   1. Explicit total annual energy (AbsEnergy) when available.
+   *   2. A combination of measured gas and electricity usage (AbsGas + AbsEl).
+   *   3. If both are missing, estimate annual consumption by multiplying the
+   *      baseline energy use intensity (EUI_BASE, in kWh/m²) by the building's
+   *      floor area.  This fallback ensures we have variation across buildings
+   *      even when absolute consumption figures are absent in the data.  Any
+   *      non‑finite values are treated as zero.
+   */
   const pts = myEntities.map(e => {
     const b = e._b || {};
-    // Use total annual energy consumption (kWh) as clustering feature.
-    // Prefer AbsEnergy (kWh) if available; fall back to gas*9.77 + electricity.
     let val = 0;
-    if(Number.isFinite(b.AbsEnergy)) {
+    if(Number.isFinite(b.AbsEnergy) && b.AbsEnergy > 0) {
       val = b.AbsEnergy;
     } else {
       const gas = Number.isFinite(b.AbsGas) ? b.AbsGas : 0;
       const elec = Number.isFinite(b.AbsEl) ? b.AbsEl : 0;
-      val = (gas * 9.77) + elec;
+      if(gas > 0 || elec > 0) {
+        // convert gas to kWh using a factor of 9.77, sum with electricity
+        val = (gas * 9.77) + elec;
+      } else {
+        // approximate consumption from EUI (kWh/m²) and area
+        const eui = Number.isFinite(b.EUI_BASE) ? b.EUI_BASE : 0;
+        const area = Number.isFinite(b.Area) ? b.Area : 0;
+        val = eui * area;
+      }
     }
-    // ensure finite number
-    if(!Number.isFinite(val)) val = 0;
+    if(!Number.isFinite(val) || val < 0) val = 0;
     return { entity: e, val: val };
   });
   const n = pts.length;
-  const kActual = Math.max(1, Math.min(k, n));
-  // determine range of values
-  let minV = Infinity;
-  let maxV = -Infinity;
+  if(n === 0) return;
+  // Sort the values to derive quantile thresholds.  We use quantiles rather than k‑means
+  // because k‑means can converge to a single cluster when the data distribution is
+  // narrow or missing.  Dividing the sorted values into three equal‑sized groups
+  // ensures that the Low, Medium and High segments better reflect variation across
+  // the neighbourhood, even with sparse data.
+  const sortedVals = pts.map(p => p.val).sort((a,b) => a-b);
+  // Compute indices for 1/3 and 2/3 quantiles.  Clamp indices to the array bounds.
+  const idx1 = Math.floor((n - 1) / 3);
+  const idx2 = Math.floor((2 * (n - 1)) / 3);
+  const threshold1 = sortedVals[idx1] ?? 0;
+  const threshold2 = sortedVals[idx2] ?? threshold1;
+  // Assign a rank and descriptive label to each entity based on the thresholds.
   for(const p of pts){
-    if(p.val < minV) minV = p.val;
-    if(p.val > maxV) maxV = p.val;
-  }
-  if(minV === Infinity || maxV === -Infinity) return;
-  // initialise centroids equally spaced between min and max
-  let centroids = [];
-  for(let i = 0; i < kActual; i++){
-    centroids.push(minV + ((i + 1) / (kActual + 1)) * (maxV - minV));
-  }
-  let assignments = new Array(n).fill(0);
-  let changed = true;
-  // iterate to refine assignments and centroids
-  for(let iter = 0; iter < 20 && changed; iter++){
-    changed = false;
-    // assignment step
-    for(let i = 0; i < n; i++){
-      const v = pts[i].val;
-      let bestIdx = 0;
-      let bestDist = Math.abs(v - centroids[0]);
-      for(let j = 1; j < kActual; j++){
-        const d = Math.abs(v - centroids[j]);
-        if(d < bestDist){
-          bestDist = d;
-          bestIdx = j;
-        }
-      }
-      if(assignments[i] !== bestIdx){
-        assignments[i] = bestIdx;
-        changed = true;
-      }
+    let rank = 0;
+    if(p.val <= threshold1) {
+      rank = 0;
+    } else if(p.val <= threshold2) {
+      rank = 1;
+    } else {
+      rank = 2;
     }
-    // update centroids
-    for(let j = 0; j < kActual; j++){
-      let sum = 0;
-      let count = 0;
-      for(let i = 0; i < n; i++){
-        if(assignments[i] === j){
-          sum += pts[i].val;
-          count++;
-        }
-      }
-      if(count > 0){
-        centroids[j] = sum / count;
-      }
-    }
-  }
-  // derive ranks from centroid values (low to high)
-  const centWithIdx = centroids.map((c, idx) => ({ idx: idx, c: c }));
-  centWithIdx.sort((a, b) => a.c - b.c);
-  const rankMap = {};
-  centWithIdx.forEach((obj, rank) => {
-    rankMap[obj.idx] = rank;
-  });
-  // assign cluster, rank and label to each entity
-  for(let i = 0; i < n; i++){
-    const clusterIdx = assignments[i];
-    const rank = rankMap[clusterIdx];
-    const label = rank === 0 ? "Low" : (rank === 1 ? "Medium" : (rank === 2 ? "High" : `Cluster ${rank}`));
-    const b = pts[i].entity._b || {};
-    b.Cluster = clusterIdx;
+    const label = rank === 0 ? "Low" : (rank === 1 ? "Medium" : "High");
+    const b = p.entity._b || {};
+    b.Cluster = rank;      // in this quantile scheme the cluster index matches the rank
     b.ClusterRank = rank;
     b.ClusterLabel = label;
   }
@@ -4176,7 +4231,8 @@ window.updateVis = function() {
       e.polygon.material = new Cesium.ColorMaterialProperty(c);
       // Compute consumption and generation for aggregated stats
       const mGas = getVal(e, 'AbsGas', activeScen) * 9.77 * heatCurve[currentMonth];
-      const mEl  = getVal(e, 'AbsEl', activeScen) * 0.083;
+      // Electricity consumption per month uses a precise 1/12 factor instead of 0.083
+      const mEl  = getVal(e, 'AbsEl', activeScen) / 12;
       const mGen = getVal(e, 'Generation', activeScen) * solarCurve[currentMonth];
       monthConsTotal += (mGas + mEl);
       monthGenTotal += mGen;
@@ -4210,7 +4266,8 @@ window.updateVis = function() {
     minV = Math.min(minV, valVisual);
     maxV = Math.max(maxV, valVisual);
     const mGas = getVal(e, 'AbsGas', activeScen) * 9.77 * heatCurve[currentMonth];
-    const mEl  = getVal(e, 'AbsEl', activeScen) * 0.083;
+    // Use 1/12 factor for monthly electricity consumption
+    const mEl  = getVal(e, 'AbsEl', activeScen) / 12;
     const mGen = getVal(e, 'Generation', activeScen) * solarCurve[currentMonth];
     monthConsTotal += (mGas + mEl);
     monthGenTotal += mGen;
@@ -4294,8 +4351,9 @@ function updateChart(e) {
 
   const dataPV = solarCurve.map(pct => annualPV * pct);
 
-  const dataCons = heatCurve.map(hPct => (annualGasM3 * 9.77 * hPct) + (annualElKwh * 0.083));
-  const dataBaseCons = heatCurve.map(hPct => (baseGasM3 * 9.77 * hPct) + (baseElKwh * 0.083));
+  // Multiply annual values by heat curve for gas and divide electricity by 12 for monthly consumption
+  const dataCons = heatCurve.map(hPct => (annualGasM3 * 9.77 * hPct) + (annualElKwh / 12));
+  const dataBaseCons = heatCurve.map(hPct => (baseGasM3 * 9.77 * hPct) + (baseElKwh / 12));
 
   myChart = new Chart(ctx, {
     type: 'line',
