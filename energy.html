@@ -1060,14 +1060,19 @@
 <script>// -----------------------------
 // R2 helper (safe in all cases)
 // -----------------------------
-// ===== R2 CONFIG (self-contained) =====
-const R2_BASE = "https://pub-c7a9f574067e4d9a90f1ef4557eb1434.r2.dev";
-const R2_PREFIX = "";
-function dataUrl(name){
-  const base = (R2_BASE || "").replace(/\/$/, "");
-  const prefix = (R2_PREFIX || "").replace(/^\/+|\/+$/g, "");
+// ===== R2 CONFIG =====
+// Pull the Cloudflare R2 settings from the global DT_CONFIG injected via config.js
+// When no R2_BASE is provided, fall back to local relative paths.  This mirrors
+// the behaviour in other digital twin pages (e.g. ecology) and allows the same
+// HTML to run locally or via Cloudflare without changes.
+const R2_BASE = (window.DT_CONFIG?.R2_BASE || "").replace(/\/$/, "");
+const R2_PREFIX = (window.DT_CONFIG?.R2_PREFIX || "").replace(/^\/+|\/+$/g, "");
+function dataUrl(name) {
+  const base = R2_BASE;
+  const prefix = R2_PREFIX;
   const clean = String(name || "").replace(/^\/+/, "");
-  if (!base) return clean; // fallback to local
+  // If no base is configured, just return the raw name for local usage
+  if (!base) return clean;
   return prefix ? `${base}/${prefix}/${clean}` : `${base}/${clean}`;
 }
 
