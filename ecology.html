@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#0f172a">
 <title>Twekkelerveld Ecology Digital Twin</title>
 
+<!-- Cloudflare/R2 config (optional). If missing, the app falls back to local files. -->
+<script src="config.js"></script>
+
 <!-- CesiumJS -->
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
 <link href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css" rel="stylesheet"/>
@@ -998,7 +1001,6 @@
   #layerInfoBody, #layerInfoBody * { color: rgba(248,250,252,0.90); }
 
 </style>
-  <script src="./config.js"></script>
 </head>
 <body>
 
@@ -1593,6 +1595,22 @@
    CONFIG
 ================================ */
 
+// ------------------------------------------------------------
+// Cloudflare Pages + R2 support
+// If config.js defines window.DT_CONFIG.R2_BASE, all data assets
+// are loaded from that public R2 bucket. If empty, local relative
+// paths are used (works on localhost / Live Server).
+// ------------------------------------------------------------
+const R2_BASE   = (window.DT_CONFIG?.R2_BASE || "").replace(/\/+$/, "");
+const R2_PREFIX = (window.DT_CONFIG?.R2_PREFIX || "").replace(/^\/+|\/+$/g, "");
+function dataUrl(name){
+  if(!R2_BASE) return name;
+  const parts = [R2_BASE];
+  if(R2_PREFIX) parts.push(R2_PREFIX);
+  parts.push(String(name || "").replace(/^\/+/, ""));
+  return parts.join("/");
+}
+
 // Cesium ION token
 Cesium.Ion.defaultAccessToken =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1NmE1ZGMwYy0xNTQxLTRmMzgtYWM3NS0wYWUzMjk3MjNmYTAiLCJpZCI6MzYwODkxLCJpYXQiOjE3NjM0ODU3MTF9.D_qofjwKf6t1mnUO06Hkz-t7xr2UrPHklhG3a5Lfz8E";
@@ -1601,18 +1619,6 @@ Cesium.Ion.defaultAccessToken =
 const ION_LOD22_ASSET_ID = 4261194;
 
 // Hidden (backend) building attributes file (LOD1 polygons)
-// ==========================
-// R2 helper (Cloudflare)
-// ==========================
-const R2_BASE = (window.DT_CONFIG?.R2_BASE || "").replace(/\/$/, "");
-function dataUrl(name){
-  // If no R2 base is defined we return the raw name (local relative path).
-  if(!R2_BASE) return name;
-  // Append the raw name to the configured base without percent‑encoding each segment.
-  // Encoding is applied later by consumers (e.g. encodeURI in fetch/imagery providers).
-  return `${R2_BASE}/${name}`;
-}
-
 const LOD1_BUILDINGS_GEOJSON = dataUrl("twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson");
 
 // Files
@@ -1621,6 +1627,7 @@ const TREES_OPEN_GEOJSON      = dataUrl("trees_co2_4326_final.geojson"); // Upda
 // Municipality trees dataset; use correct filename (plural trees_ and point)
 const TREES_MUNI_GEOJSON      = dataUrl("trees_point_municipality.geojson");
 const NDVI_PNG                = dataUrl("NDVI.png");
+// NOTE: R2 is case-sensitive. Your bucket uses UHI.png (all caps), so keep it exact.
 const UHI_PNG                 = dataUrl("UHI.png");
 
 // for age normalization
@@ -1788,7 +1795,6 @@ const dataMaps = {
 
 function loadMapData(id, url) {
   const img = new Image();
-  img.crossOrigin = "anonymous";
   img.src = url;
   img.onload = () => {
     const c = document.getElementById("canvas" + id.toUpperCase());
@@ -5589,6 +5595,9 @@ async function updateWeather(){
     // Fetch combined current weather, daily extremes and humidity
     const wResp = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,snowfall_sum&hourly=relative_humidity_2m&forecast_hours=1&timezone=Europe/Amsterdam`);
     const wData = await wResp.json();
+    // Save the latest weather response so we can compute UHI statistics when showing details.  This
+    // ensures that the digital twin analysis has access to the daily min/max temperatures.
+    window.latestWeather = wData;
     const tempEl = document.getElementById('weatherTemp');
     const eventEl = document.getElementById('weatherEvent');
     const barEl = document.getElementById('weatherBarFill');
@@ -5676,7 +5685,58 @@ function showWeatherDetails(){
   html += `<div class="pop-row"><span class="pop-label">Temperature</span><span class="pop-val">${temp}</span></div>`;
   html += `<div class="pop-row"><span class="pop-label">Humidity</span><span class="pop-val">${humidity}</span></div>`;
   html += `<div class="pop-row"><span class="pop-label">AQI</span><span class="pop-val">${aqi}</span></div>`;
+  // Provide a note about air quality underneath the AQI value.
   html += `<div style="font-size:10px; margin-top:6px; color:rgba(226,232,240,0.75);">${aqiDesc ? aqiDesc + '. ' : ''}Lower values indicate better air quality. Planting more trees and reducing emissions can improve local air quality.</div>`;
+
+  // --------------------------------------------------------------------
+  // UHI analysis and digital twin scenario
+  // The urban heat island (UHI) effect describes how urban areas are warmer than
+  // surrounding rural regions. We approximate the current UHI intensity by
+  // comparing the current temperature to the average of today's minimum and
+  // maximum forecast temperatures. Research summarised by the US EPA shows that
+  // urban areas are typically 0.6–3.9 °C warmer than outlying areas【27550909506927†L90-L105】.
+  // Additional greenery can help cool cities. Studies find that a 1 % increase
+  // in urban tree canopy may lower local air temperatures by around 0.04–0.57 °C【969637698235284†L145-L148】.
+  // Large–scale green roofs can also reduce ambient temperatures by roughly
+  // 0.3–3 °C, with an average reduction of about 1.34 °C【412812815950243†L70-L73】.
+  let uhiMessage = '';
+  try {
+    if (window.latestWeather && window.latestWeather.current_weather && typeof window.latestWeather.current_weather.temperature === 'number') {
+      const currentT = window.latestWeather.current_weather.temperature;
+      const daily = window.latestWeather.daily;
+      let baseline = null;
+      // Use the first day's min and max as a simple proxy for rural baseline
+      if (daily && Array.isArray(daily.temperature_2m_min) && daily.temperature_2m_min.length > 0) {
+        baseline = daily.temperature_2m_min[0];
+      }
+      if (daily && Array.isArray(daily.temperature_2m_max) && daily.temperature_2m_max.length > 0 && baseline !== null) {
+        baseline = (baseline + daily.temperature_2m_max[0]) / 2;
+      }
+      if (baseline !== null) {
+        const uhi = currentT - baseline;
+        let level = 'Moderate';
+        if (uhi < 2) level = 'Low';
+        else if (uhi >= 4) level = 'High';
+        // Compose the explanatory message
+        uhiMessage += `Urban heat island intensity: approximately ${uhi.toFixed(1)} °C (${level}).`;
+      }
+      // Suggest a simple digital twin scenario: increasing tree canopy and green roofs
+      const canopyPct = 5; // assume a 5 % increase in tree canopy
+      const canopyReduction = canopyPct * 0.2; // mid-range reduction per 1 % canopy
+      const greenRoofPct = 10; // assume 10 % roof area converted to green roofs
+      const greenReduction = 1.34; // average cooling from large-scale green roofs
+      const totalReduction = canopyReduction + greenReduction;
+      uhiMessage += ` Adding ${canopyPct}% more tree canopy could lower air temperatures by roughly ${canopyReduction.toFixed(1)} °C. `;
+      uhiMessage += `Installing green roofs on about ${greenRoofPct}% of rooftops may cool the area by another ~${greenReduction.toFixed(2)} °C. Together, these measures might reduce local temperatures by around ${totalReduction.toFixed(1)} °C and lessen heat stress.`;
+    }
+  } catch (e) {
+    console.warn('UHI analysis failed', e);
+  }
+  if (uhiMessage) {
+    // Append the UHI message as its own paragraph.  Concatenate the string to
+    // avoid nested template literal interpolation issues.
+    html += '<div style="margin-top:10px; font-size:10px; line-height:1.4; color:rgba(226,232,240,0.75);">' + uhiMessage + '</div>';
+  }
   content.innerHTML = html;
   modal.style.display = 'block';
 }
