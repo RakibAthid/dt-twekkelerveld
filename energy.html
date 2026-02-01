@@ -2018,34 +2018,67 @@ async function loadLocalRasters(){
 // =============================
 // 7) LOD2.2 MODEL
 // =============================
+// Cesium ION asset used when no Cloudflare/R2 bucket is configured.  When R2_BASE
+// is defined in config.js, the application loads a GLB directly from your
+// bucket instead of requesting the model from Cesium ion.  See DT_CONFIG in
+// config.js for details.
 const LOD2_ASSET_ID = 4261194;
+// Name of the GLTF/GLB file in your R2 bucket containing the LOD 2.2 models.
+const LOD2_GLTF_FILE = "twekkelerveld_lod22.glb";
 
 (async function loadLOD22(){
   try {
-    lod2Tileset = await Cesium.Cesium3DTileset.fromIonAssetId(LOD2_ASSET_ID, {
-      maximumScreenSpaceError: 16,
-      dynamicScreenSpaceError: true
-    });
+    // If an R2 base URL has been defined (see config.js) then load the GLB
+    // directly from that bucket.  Otherwise fall back to loading the LOD 2.2
+    // tileset from Cesium ion.
+    if(typeof R2_BASE !== "undefined" && R2_BASE){
+      // Approximate centre of the neighbourhood.  The glTF model uses
+      // world coordinates so orient it correctly on the globe.  If your
+      // exported GLB already encodes an RTC (Relative To Centre) this matrix
+      // will have no effect.
+      const lon = 6.8553;
+      const lat = 52.2306;
+      const height = 0;
+      const center = Cesium.Cartesian3.fromDegrees(lon, lat, height);
+      const modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(center);
+      lod2Tileset = await Cesium.Model.fromGltfAsync({
+        url: dataUrl(LOD2_GLTF_FILE),
+        modelMatrix: modelMatrix,
+        scale: 1.0
+      });
+      viewer.scene.primitives.add(lod2Tileset);
+      // Start hidden – the toggle controls in the UI will show/hide this model.
+      lod2Tileset.show = false;
+      // Match the original neutral colour used for the tileset.  Without a
+      // Cesium3DTileStyle we set the colour directly on the model.
+      if(lod2Tileset.color) {
+        lod2Tileset.color = Cesium.Color.fromCssColorString('#ffffff').withAlpha(0.95);
+      }
+      viewer.scene.requestRender();
+    } else {
+      // Default behaviour: use the Cesium ion tileset.  This retains the
+      // per‑feature metadata required for energy styling.
+      lod2Tileset = await Cesium.Cesium3DTileset.fromIonAssetId(LOD2_ASSET_ID, {
+        maximumScreenSpaceError: 16,
+        dynamicScreenSpaceError: true
+      });
+      viewer.scene.primitives.add(lod2Tileset);
+      lod2Tileset.show = false;
 
-    viewer.scene.primitives.add(lod2Tileset);
-    lod2Tileset.show = false;
-
-  
-    lod2Tileset.style = new Cesium.Cesium3DTileStyle({
-  
-      color: "rgba(255,255,255,0.95)"
-    });
-
-  
-    try {
-      lod2Tileset.colorBlendMode = Cesium.Cesium3DTileColorBlendMode.MIX;
-      lod2Tileset.colorBlendAmount = 0.75;
-    } catch(e) {
-      
+      // Neutral base style until energy styling is applied.
+      lod2Tileset.style = new Cesium.Cesium3DTileStyle({
+        color: "rgba(255,255,255,0.95)"
+      });
+      try {
+        lod2Tileset.colorBlendMode = Cesium.Cesium3DTileColorBlendMode.MIX;
+        lod2Tileset.colorBlendAmount = 0.75;
+      } catch(e) {
+        // Ignore blend errors on older versions of Cesium
+      }
+      // Apply per‑feature energy styling when using the tileset.
+      setupLod2EnergyStyling();
+      viewer.scene.requestRender();
     }
-
-    setupLod2EnergyStyling();
-    viewer.scene.requestRender();
   } catch(e) {
     console.error("LOD 2.2 load failed:", e);
   }
