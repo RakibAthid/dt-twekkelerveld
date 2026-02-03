@@ -263,12 +263,87 @@
       display: block;
     }
     .hotspot {
-      /* Hide the original map dots. Hotspot interactions are now provided via
-         the explicit list below the description. */
-      display: none;
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #fff;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
     }
     .hotspot:hover {
-      transform: none;
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    /* Additional custom styles added to support new UI elements */
+    .badge-info {
+      margin-top: 12px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.4);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      font-size: 14px;
+      max-width: 600px;
+      text-align: center;
+    }
+    .current-conditions {
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .current-conditions h3 {
+      margin: 0 0 12px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .neighbourhood-hotspots {
+      margin-top: 16px;
+    }
+    .neighbourhood-hotspots h4 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .neighbourhood-hotspots ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .neighbourhood-hotspots li button {
+      background: rgba(30,41,59,0.8);
+      border: 1px solid rgba(148,163,184,0.3);
+      color: #e2e8f0;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      text-align: left;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    .neighbourhood-hotspots li button:hover {
+      background: var(--accent);
+      color: #0f172a;
+    }
+    .predefined-scenarios {
+      margin-top: 30px;
+    }
+    .predefined-scenarios h3 {
+      margin: 0 0 12px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      text-align: center;
     }
     .why-info {
       flex: 1;
@@ -429,46 +504,6 @@
       font-weight: 600;
       color: #fff;
     }
-    /* Expandable content for the digital twin replicate card */
-    .digital-twin-info {
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid rgba(148,163,184,0.3);
-    }
-    .digital-twin-actions {
-      margin-top: 10px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .digital-twin-actions .pill-btn {
-      font-size: 12px;
-      padding: 8px 16px;
-    }
-    #digital-twin-info-btn {
-      cursor: pointer;
-      margin-left: 8px;
-      color: var(--accent);
-    }
-    /* Timeline-linked policy sections */
-    .policy-sections {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .policy-section {
-      margin-top: 20px;
-      padding: 16px;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-    .policy-section h3 {
-      margin: 0 0 8px;
-      color: #fff;
-    }
 
     .case-studies {
       display: grid;
@@ -522,24 +557,29 @@
       height: 6px;
       border-radius: 3px;
     }
-
-    /* Replicate button inside case cards */
-    .case-card .replicate-btn {
-      margin-top: 6px;
-      align-self: flex-start;
-      background: var(--accent);
-      color: #0f172a;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-    }
     .outcome-cool { background: #60a5fa; }
     .outcome-energy { background: #38bdf8; }
     .outcome-co2 { background: #4ade80; }
     .outcome-euro { background: #fbbf24; }
+
+    /* Button to replicate a case study strategy and directly load its preset */
+    .case-card .replicate-btn {
+      margin-top: 8px;
+      display: inline-block;
+      background: rgba(30, 41, 59, 0.7);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .case-card .replicate-btn:hover {
+      background: var(--accent);
+      color: #000;
+    }
 
     .timeline-section {
       margin-top: 30px;
@@ -651,7 +691,7 @@
       gap: 10px;
     }
 
-    /* Narrower modal variant used for timeline policy popups */
+    /* Narrower modal for timeline policy popups */
     .modal-content.policy-modal {
       max-width: 500px;
     }
@@ -745,88 +785,6 @@
     .toast.show {
       opacity: 1;
       pointer-events: auto;
-    }
-
-    /* Additional custom styles added to support new UI elements */
-    .badge-info {
-      margin-top: 12px;
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(148,163,184,0.4);
-      border-radius: 8px;
-      padding: 12px 16px;
-      color: var(--text-muted);
-      font-size: 14px;
-      max-width: 600px;
-      /* align info text and close button horizontally */
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-      text-align: inherit;
-    }
-    .badge-info-close {
-      cursor: pointer;
-      color: var(--text-muted);
-    }
-    .badge-info-close:hover {
-      color: var(--accent);
-    }
-    .current-conditions {
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(148,163,184,0.3);
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 20px;
-      text-align: center;
-    }
-    .current-conditions h3 {
-      margin: 0 0 12px 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: #fff;
-    }
-    .neighbourhood-hotspots {
-      margin-top: 16px;
-    }
-    .neighbourhood-hotspots h4 {
-      margin: 0 0 8px 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: #fff;
-    }
-    .neighbourhood-hotspots ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .neighbourhood-hotspots li button {
-      background: rgba(30,41,59,0.8);
-      border: 1px solid rgba(148,163,184,0.3);
-      color: #e2e8f0;
-      padding: 8px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      text-align: left;
-      width: 100%;
-      transition: all 0.2s;
-    }
-    .neighbourhood-hotspots li button:hover {
-      background: var(--accent);
-      color: #0f172a;
-    }
-    .predefined-scenarios {
-      margin-top: 30px;
-    }
-    .predefined-scenarios h3 {
-      margin: 0 0 12px 0;
-      font-size: 18px;
-      font-weight: 600;
-      color: #fff;
-      text-align: center;
     }
 
     /* =========================================
@@ -1148,7 +1106,7 @@
               </div>
             </div>
           </div>
-          <!-- Story mode stepper removed based on user feedback -->
+          <!-- Story stepper removed based on user feedback -->
           <!-- Resume ribbon (hidden until scenario run) -->
           <div id="resume-ribbon" class="resume-ribbon" style="display:none;">
             <span id="resume-text">Last scenario summary</span>
@@ -1188,7 +1146,10 @@
           <div class="why-section">
             <div class="why-map">
               <img src="Study Area.png" alt="Twekkelerveld Map">
-              <!-- Removed hotspot dots; selection occurs via the list below -->
+              <!-- Hotspot dots removed based on user feedback; clickable list items below trigger the same events. -->
+              <!-- <div class="hotspot" style="top: 32%; left: 42%;" data-spot="housing" title="Housing"></div> -->
+              <!-- <div class="hotspot" style="top: 60%; left: 25%;" data-spot="industry" title="Industry edge"></div> -->
+              <!-- <div class="hotspot" style="top: 45%; left: 75%;" data-spot="green" title="Green corridors"></div> -->
             </div>
             <div class="why-info">
               <h3 data-i18n="why-heading">Why Twekkelerveld?</h3>
@@ -1222,14 +1183,13 @@
           <div class="cases-call">
             <button id="open-cases-btn" class="open-cases-btn" onclick="document.getElementById('modal-overlay').classList.add('active')">
               <i class="fa-solid fa-book-open"></i>
-              <span data-i18n="cases-call-btn">Explore other case studies</span>
+              <span data-i18n="cases-call-btn">Explore global case studies</span>
             </button>
             <p class="cases-note" data-i18n="cases-call-note">Learn from international examples on cooling, energy, retrofits and community solar.</p>
           </div>
           <!-- Timeline -->
           <div class="timeline-section">
             <div class="timeline-item" data-link="#policy-now">
-              <!-- Use data-i18n on the timeline "Now" label for translation -->
               <h5 data-i18n="timeline-now">Now</h5>
               <span data-i18n="timeline-now-desc">Hotter summers, rising bills.</span>
             </div>
@@ -1271,26 +1231,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Policy info sections referenced by the timeline -->
-          <div class="policy-sections">
-            <div id="policy-now" class="policy-section">
-              <h3>Now</h3>
-              <p>Hotter summers and rising energy bills require immediate action. This digital twin helps you test solutions to make Twekkelerveld cooler and more resilient.</p>
-            </div>
-            <div id="policy-2027" class="policy-section">
-              <h3>2027</h3>
-              <p>By 2027, grid constraints and retrofit targets will shape how we invest in PV, building insulation and tree planting. Explore scenario impacts now.</p>
-            </div>
-            <div id="policy-2030" class="policy-section">
-              <h3>2030</h3>
-              <p>EU climate and energy directives set 2030 deadlines for emissions reduction and energy efficiency. Use the twin to test if your interventions meet these goals.</p>
-            </div>
-            <div id="policy-2050" class="policy-section">
-              <h3>2050</h3>
-              <p>By mid-century, climate baseline shifts could double heat stress. Evaluate extreme scenarios combining heat waves, energy use and adaptation measures.</p>
-            </div>
-          </div>
         </div>
         <!-- Side drawer for hotspots -->
         <div id="drawer" class="drawer">
@@ -1302,7 +1242,9 @@
           <button class="simulate-btn" id="drawer-simulate-btn">Simulate this hotspot</button>
           <button class="open-tab-btn" id="drawer-open-btn">Open tab</button>
         </div>
-        <!-- Modal for global case studies. Hidden by default; becomes visible when user clicks the call‑to‑action button. -->
+          <!-- Removed timeline policy descriptions to streamline the interface. -->
+
+          <!-- Modal for global case studies. Hidden by default; becomes visible when user clicks the call‑to‑action button. -->
         <div id="modal-overlay" class="modal-overlay">
           <div class="modal-content cases-modal">
             <!-- Close button for the modal -->
@@ -1323,7 +1265,6 @@
                   <div class="outcome-segment outcome-euro" style="flex:1"></div>
                 </div>
                 <div class="delta-chips"></div>
-                <!-- Button allowing users to replicate this strategy directly in the simulation -->
                 <button class="replicate-btn" data-case="rotterdam" data-i18n="replicate-btn">Replicate this strategy</button>
               </div>
               <div class="case-card" data-case="freiburg">
@@ -1449,7 +1390,7 @@
               <button class="btn-reset" id="IR_btnReset"><i class="fa-solid fa-rotate-left"></i> Reset</button>
               <button class="btn-reset" id="IR_btnPdf"><i class="fa-solid fa-file-arrow-down"></i> Download scenario PDF</button>
               <button class="btn-reset" id="IR_btnFullscreen"><i class="fa-solid fa-up-right-and-down-left-from-center"></i> Full screen</button>
-              <!-- Pin buttons removed for simplified scenario comparison -->
+              <!-- Pin buttons removed: comparison scenarios are no longer supported -->
               <button class="btn-reset" id="IR_btnCopy"><i class="fa-solid fa-link"></i> Copy link</button>
               <button class="btn-reset" id="IR_btnSave"><i class="fa-solid fa-download"></i> Save JSON</button>
               <button class="btn-reset" id="IR_btnLoad"><i class="fa-solid fa-upload"></i> Load JSON</button>
@@ -1603,7 +1544,7 @@
     </div>
   </main>
 
-  <!-- Scenario detail overlays removed -->
+  <!-- Removed scenario detail overlays as comparison pins are no longer supported -->
 
   <script>
     // --- Tab Switching Logic ---
@@ -1939,37 +1880,13 @@
       attachChartClick(IR_chartEnergy, 'energy');
       attachChartClick(IR_chartRadar, 'radar');
 
-      // Scenario detail overlays for pinned scenarios
-      const overlayA = document.getElementById('scenarioAOverlay');
-      const overlayB = document.getElementById('scenarioBOverlay');
-      function updateScenarioOverlay(type, s) {
-        const overlay = type === 'A' ? overlayA : overlayB;
-        if (!overlay) return;
-        overlay.style.display = 'block';
-        // Position overlays at different vertical offsets for A and B to avoid overlap
-        if (type === 'A') {
-          overlay.style.top = '60px';
-        } else {
-          overlay.style.top = '140px';
-        }
-        overlay.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><strong>Scenario ${type}</strong><span class="close-scenario" style="cursor:pointer;font-weight:bold;">×</span></div>` +
-          `<div style="margin-top:6px;font-size:11px;line-height:1.4;">` +
-          `Trees: ${s.treesAdded.toLocaleString()} · PV: ${s.pvExtraPct}% · Retrofit: ${s.retroPct}% · Green roof: ${s.greenRoofPct}%<br>` +
-          `NDVI: ${s.ndviScenario.toFixed(2)}, UHI: ${s.uhiScenario.toFixed(1)}°C<br>` +
-          `Energy: ${(s.energyScenario_kwh/1000).toFixed(0)} MWh, PV: ${(s.pvScenario_kwh/1000).toFixed(0)} MWh<br>` +
-          `CO₂: ${(s.co2Scenario_kg/1000).toFixed(1)} t, Cost: €${Math.round(s.totalCost).toLocaleString()}` +
-          `</div>`;
-        const closeEl = overlay.querySelector('.close-scenario');
-        if (closeEl) {
-          closeEl.addEventListener('click', () => overlay.style.display = 'none');
-        }
-      }
+      /* Scenario detail overlays removed along with scenario comparison pins */
 
-      // Scenario updater: update the "Scenario" dataset (index 1) based on the current sliders.
+      // Update charts for current scenario versus baseline; scenario comparison A/B removed
       function updateComparison() {
         // Compute the current scenario using slider values.
         const s = IR_computeScenario();
-        // Update NDVI bar chart: baseline dataset stays baseline at first position and zero at second; scenario dataset shows scenario at second position.
+        // Update NDVI bar chart: baseline stays in first position and zero at second; scenario is zero at first and current at second.
         IR_chartNdvi.data.datasets[0].data = [IR_BASE.ndvi_mean, 0];
         IR_chartNdvi.data.datasets[1].data = [0, s.ndviScenario];
         // Update UHI bar chart similarly.
@@ -2079,21 +1996,17 @@
         labelHeat.textContent = s.heatLevel;
         labelGreenRoof.textContent = s.greenRoofPct;
         
-        // Update NDVI chart: baseline dataset shows baseline only at first position and zero at second; scenario dataset reflects current sliders.
-        IR_chartNdvi.data.datasets[0].data = [IR_BASE.ndvi_mean, 0];
-        IR_chartNdvi.data.datasets[1].data = [0, s.ndviScenario];
+        // Keep baseline datasets constant; update scenario datasets with current values.
+        IR_chartNdvi.data.datasets[0].data = [IR_BASE.ndvi_mean, IR_BASE.ndvi_mean];
+        IR_chartNdvi.data.datasets[1].data = [IR_BASE.ndvi_mean, s.ndviScenario];
         IR_chartNdvi.update("none");
-        // Update UHI chart similarly.
-        IR_chartUhi.data.datasets[0].data = [IR_BASE.uhi_mean, 0];
-        IR_chartUhi.data.datasets[1].data = [0, s.uhiScenario];
+        IR_chartUhi.data.datasets[0].data = [IR_BASE.uhi_mean, IR_BASE.uhi_mean];
+        IR_chartUhi.data.datasets[1].data = [IR_BASE.uhi_mean, s.uhiScenario];
         IR_chartUhi.update("none");
-        // Update energy chart: baseline vs scenario.
         IR_chartEnergy.data.datasets[0].data = [IR_BASE.energy_kwh/1000, IR_BASE.pv_kwh/1000, IR_BASE_netGrid_kwh/1000];
         IR_chartEnergy.data.datasets[1].data = [s.energyScenario_kwh/1000, s.pvScenario_kwh/1000, s.netGridScenario_kwh/1000];
         IR_chartEnergy.update("none");
-        // Update radar chart for scenario; baseline remains default.
-        IR_chartRadar.data.datasets[1].data = [s.greenScore, s.coolScore, s.energyScore, s.co2Score];
-        IR_chartRadar.update("none");
+        IR_chartRadar.data.datasets[1].data = [s.greenScore, s.coolScore, s.energyScore, s.co2Score]; IR_chartRadar.update("none");
 
         const greenPct = (s.ndviScenario / IR_BASE.ndvi_mean - 1) * 100;
         const energyPct = (1 - s.energyScenario_kwh / IR_BASE.energy_kwh) * 100;
@@ -2216,7 +2129,7 @@
         });
       }
 
-      // Scenario comparison pinning removed; only one scenario is supported now.
+      // Scenario comparison pinning removed
 
       // Copy scenario as link
       if (btnCopy) {
@@ -2552,6 +2465,15 @@
         });
       });
 
+      // Timeline modal close handler: hide the modal when the close button is clicked
+      const tlModal = document.getElementById('timeline-modal');
+      const tlCloseBtn = document.getElementById('timeline-close-btn');
+      if (tlModal && tlCloseBtn) {
+        tlCloseBtn.addEventListener('click', function() {
+          tlModal.classList.remove('active');
+        });
+      }
+
       // Preset buttons
       document.querySelectorAll('.preset-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -2746,15 +2668,6 @@
           modalOverlay.classList.remove('active');
         });
       }
-
-      // Timeline modal close button
-      const timelineModal = document.getElementById('timeline-modal');
-      const timelineCloseBtn = document.getElementById('timeline-close-btn');
-      if (timelineModal && timelineCloseBtn) {
-        timelineCloseBtn.addEventListener('click', function() {
-          timelineModal.classList.remove('active');
-        });
-      }
     });
 
     // Toast helper
@@ -2860,12 +2773,12 @@
         'open-tab-btn': 'Open tab',
         'open-ecology-tab': 'Open Ecology tab',
         'open-energy-tab': 'Open Energy tab',
-        'replicate-btn': 'Replicate this strategy',
         'replicate-title': 'Current Digital Twin Situation',
         'replicate-baseline': 'Baseline UHI intensity: approx {baseline}°C.',
         'replicate-canopy': 'Adding {pct}% more tree canopy could lower air temperatures by roughly {red}°C.',
         'replicate-green': 'Installing green roofs on about {pct}% of rooftops may cool the area by another ~{red}°C.',
-        'replicate-total': 'Together, these measures might reduce local temperatures by around {total}°C and lessen heat stress. Visit the Combined Scenario Analysis tab to test the scenario.'
+        'replicate-total': 'Together, these measures might reduce local temperatures by around {total}°C and lessen heat stress. Visit the Combined Scenario Analysis tab to test the scenario.',
+        'replicate-btn': 'Replicate this strategy'
       },
       nl: {
         'nav-overview': 'Overzicht',
@@ -2909,12 +2822,12 @@
         'open-tab-btn': 'Tab openen',
         'open-ecology-tab': 'Open ecologietab',
         'open-energy-tab': 'Open energietab',
-        'replicate-btn': 'Repliceer deze strategie',
         'replicate-title': 'Huidige digitale twin-situatie',
         'replicate-baseline': 'Basis UHI-intensiteit: ongeveer {baseline}°C.',
         'replicate-canopy': 'Het toevoegen van {pct}% meer boomkruin kan de luchttemperatuur met circa {red}°C verlagen.',
         'replicate-green': 'Het installeren van groene daken op ongeveer {pct}% van de daken kan het gebied met nog eens ~{red}°C koelen.',
-        'replicate-total': 'Samen kunnen deze maatregelen de lokale temperatuur met rond {total}°C verlagen en hittestress verminderen. Bezoek het tabblad Gecombineerde scenarioanalyse om het scenario te testen.'
+        'replicate-total': 'Samen kunnen deze maatregelen de lokale temperatuur met rond {total}°C verlagen en hittestress verminderen. Bezoek het tabblad Gecombineerde scenarioanalyse om het scenario te testen.',
+        'replicate-btn': 'Repliceer deze strategie'
       },
       de: {
         'nav-overview': 'Überblick',
@@ -2958,12 +2871,12 @@
         'open-tab-btn': 'Tab öffnen',
         'open-ecology-tab': 'Ökologie-Tab öffnen',
         'open-energy-tab': 'Energie-Tab öffnen',
-        'replicate-btn': 'Diese Strategie replizieren',
         'replicate-title': 'Aktuelle Digitale-Zwilling-Situation',
         'replicate-baseline': 'UHI-Basisintensität: ungefähr {baseline}°C.',
         'replicate-canopy': 'Die Erhöhung der Baumkronenfläche um {pct}% könnte die Lufttemperatur um etwa {red}°C senken.',
         'replicate-green': 'Begrünte Dächer auf etwa {pct}% der Dächer könnten das Gebiet um weitere ~{red}°C abkühlen.',
-        'replicate-total': 'Zusammen könnten diese Maßnahmen die lokale Temperatur um rund {total}°C senken und Hitzestress verringern. Besuchen Sie die Registerkarte Kombinierte Szenarioanalyse, um das Szenario zu testen.'
+        'replicate-total': 'Zusammen könnten diese Maßnahmen die lokale Temperatur um rund {total}°C senken und Hitzestress verringern. Besuchen Sie die Registerkarte Kombinierte Szenarioanalyse, um das Szenario zu testen.',
+        'replicate-btn': 'Diese Strategie replizieren'
       }
     };
     // Current language is persisted in local storage; default to English.
@@ -3128,10 +3041,7 @@
           });
         }
       }
-
-      // --- Custom interactive elements ---
-      // Provide explanatory pop‑ups for the micro badges. Clicking on a badge
-      // reveals a short description of the concept.
+      // Provide explanatory pop‑ups for micro badges and make other elements interactive
       const badgeInfoMap = {
         'badge-heat-risk': 'Heat risk refers to the danger posed by high urban temperatures in the neighbourhood, affecting health and comfort.',
         'badge-energy-poverty': 'Energy poverty describes households struggling to afford sufficient energy to meet their basic needs.',
@@ -3159,38 +3069,97 @@
           badgeInfoEl.style.display = 'flex';
         });
       });
-      // Make timeline items clickable. Policy timeline items open a modal popup; other internal links scroll smoothly; external links open new tabs.
+      // Make timeline items clickable. Policy links open a modal; internal anchors scroll; external links open in new tab.
       document.querySelectorAll('.timeline-item[data-link]').forEach(item => {
         const link = item.getAttribute('data-link');
-        if (!link) return;
-        item.style.cursor = 'pointer';
-        item.addEventListener('click', () => {
-          // If the link refers to a policy section, show it in a modal overlay instead of scrolling
-          if (link.startsWith('#policy-')) {
-            const policyEl = document.querySelector(link);
-            const modal = document.getElementById('timeline-modal');
-            const content = document.getElementById('timeline-modal-content');
-            if (policyEl && modal && content) {
-              content.innerHTML = policyEl.innerHTML;
-              modal.classList.add('active');
-            }
-            return;
-          }
-          // Internal anchors start with '#'
-          if (link.startsWith('#')) {
-            const target = document.querySelector(link);
-            if (target && target.scrollIntoView) {
-              target.scrollIntoView({ behavior: 'smooth' });
+        if (link) {
+          item.style.cursor = 'pointer';
+          item.addEventListener('click', () => {
+            // Policy anchors (#policy-*) open in modal
+            if (link.startsWith('#policy-')) {
+              const target = document.querySelector(link);
+              const modal = document.getElementById('timeline-modal');
+              const content = document.getElementById('timeline-modal-content');
+              if (target && modal && content) {
+                content.innerHTML = target.innerHTML;
+                modal.classList.add('active');
+              }
               return;
             }
+            // Other internal anchors start with '#': smooth scroll
+            if (link.startsWith('#')) {
+              const targetEl = document.querySelector(link);
+              if (targetEl && targetEl.scrollIntoView) {
+                targetEl.scrollIntoView({ behavior: 'smooth' });
+                return;
+              }
+            }
+            // External links open in a new tab
+            if (link.startsWith('http')) {
+              window.open(link, '_blank');
+            }
+          });
+        }
+      });
+      // Hotspot list buttons: if a hidden hotspot exists we simulate its click; otherwise we populate the panel directly
+      document.querySelectorAll('.hotspot-link').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const key = this.getAttribute('data-spot');
+          const hidden = document.querySelector('.hotspot[data-spot="' + key + '"]');
+          if (hidden) {
+            hidden.click();
+            return;
           }
-          // Fallback: open external links in new tab
-          if (link.startsWith('http')) {
-            window.open(link, '_blank');
+          // Fallback: directly open the hotspot panel using global hotspot data
+          const data = window.hotspotData && window.hotspotData[key];
+          if (!data) return;
+          const panel = document.getElementById('hotspot-panel');
+          const panelTitle = document.getElementById('hotspot-panel-title');
+          const panelImg = document.getElementById('hotspot-panel-image');
+          const panelDesc = document.getElementById('hotspot-panel-desc');
+          const panelPreview = document.getElementById('hotspot-panel-preview');
+          const panelSimBtn = document.getElementById('hotspot-panel-simulate-btn');
+          const panelOpenBtn = document.getElementById('hotspot-panel-open-btn');
+          if (panel && panelTitle && panelDesc && panelImg && panelSimBtn && panelOpenBtn) {
+            panelTitle.textContent = data.title;
+            panelDesc.textContent = data.desc;
+            panelImg.src = data.img;
+            // Compute preview if preset defined
+            if (data.preset) {
+              let previewSet = false;
+              try {
+                if (typeof computeScenario === 'function' && window.IR_BASE_GLOBAL) {
+                  const sVal = computeScenario(data.preset);
+                  if (sVal) {
+                    const uhi = window.IR_BASE_GLOBAL.uhi_mean - sVal.uhiScenario;
+                    const co2pct = (1 - sVal.co2Scenario_kg / window.IR_BASE_GLOBAL.co2_kg) * 100;
+                    panelPreview.innerHTML = `If we add ${data.preset.trees} trees & ${data.preset.green}% green roofs → UHI ${uhi >= 0 ? '–' : '+'}${Math.abs(uhi).toFixed(1)}°C, CO₂ ${co2pct >= 0 ? '–' : '+'}${Math.abs(Math.round(co2pct))}%`;
+                    previewSet = true;
+                  }
+                }
+              } catch(err) {
+                /* ignore errors */
+              }
+              if (!previewSet) {
+                panelPreview.textContent = '';
+              }
+              panelSimBtn.dataset.preset = JSON.stringify(data.preset);
+            } else {
+              panelPreview.textContent = '';
+              panelSimBtn.dataset.preset = '';
+            }
+            // Set dataset for open tab and update text
+            panelOpenBtn.dataset.tab = data.tab;
+            if (data.tab === 'panel-ecology') panelOpenBtn.textContent = t('open-ecology-tab');
+            else if (data.tab === 'panel-energy') panelOpenBtn.textContent = t('open-energy-tab');
+            else panelOpenBtn.textContent = t('open-tab-btn');
+            // Update simulate button text with translation
+            panelSimBtn.textContent = t('simulate-btn');
+            // Show panel
+            panel.style.display = 'flex';
           }
         });
       });
-
       // Digital twin info button toggles the expanded content.
       const dtBtn = document.getElementById('digital-twin-info-btn');
       const dtInfo = document.getElementById('digital-twin-info');
@@ -3212,38 +3181,6 @@
           if (tab && typeof window.switchTab === 'function') {
             window.switchTab(tab);
           }
-        });
-      });
-      // Hotspot list buttons: if a hidden hotspot exists we simulate its click; otherwise we populate the drawer directly
-      document.querySelectorAll('.hotspot-link').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const key = this.getAttribute('data-spot');
-          const hidden = document.querySelector('.hotspot[data-spot="' + key + '"]');
-          if (hidden) {
-            hidden.click();
-            return;
-          }
-          // Fallback: directly open the drawer with hotspot info
-          const data = window.hotspotData && window.hotspotData[key];
-          if (!data) return;
-          drawerTitle.textContent = data.title;
-          drawerDesc.textContent = data.desc;
-          drawerImg.src = data.img;
-          // Localised label for the open tab button
-          drawerOpenBtn.textContent = data.tab === "panel-ecology" ? t('open-ecology-tab') : t('open-energy-tab');
-          drawerOpenBtn.dataset.tab = data.tab;
-          // Update preview and simulate dataset
-          if (data.preset) {
-            const s = computeScenario(data.preset);
-            const uhi = window.IR_BASE_GLOBAL.uhi_mean - s.uhiScenario;
-            const co2pct = (1 - s.co2Scenario_kg / window.IR_BASE_GLOBAL.co2_kg) * 100;
-            drawerPreview.innerHTML = `If we add ${data.preset.trees} trees & ${data.preset.green}% green roofs → UHI ${uhi >= 0 ? '–' : '+'}${Math.abs(uhi).toFixed(1)}°C, CO₂ ${co2pct >= 0 ? '–' : '+'}${Math.abs(Math.round(co2pct))}%`;
-            drawerSimBtn.dataset.preset = JSON.stringify(data.preset);
-          } else {
-            drawerPreview.textContent = '';
-            drawerSimBtn.dataset.preset = '';
-          }
-          drawer.classList.add('open');
         });
       });
       // Make how‑to steps clickable: switch to the specified tab when clicked.
