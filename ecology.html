@@ -928,6 +928,24 @@
   #assistantClose:hover {
     color: var(--primary);
   }
+
+  /* Weather info icon to explain data sources and units */
+  .weather-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    font-size: 12px;
+    color: rgba(226,232,240,0.8);
+    cursor: help;
+  }
+
+  /* Small explanation text under charts */
+  .chart-explanation {
+    font-size: 10px;
+    color: rgba(226,232,240,0.75);
+    margin-top: 4px;
+  }
   /* Floating toggle button for the assistant (collapsible like a messenger icon) */
   .assistant-toggle {
     position: fixed;
@@ -1020,6 +1038,11 @@
       <i class="fas fa-info-circle"></i> Ecological Overview
     </button>
 
+    <!-- Reset view button to return to the study area when users get lost -->
+    <button class="btn-overview" onclick="resetToStudyArea()" title="Zoom to study area">
+      <i class="fa-solid fa-crosshairs"></i> Reset View
+    </button>
+
     <!-- Weather widget shows current temperature and countdown to the next snowfall or heat event -->
     <div id="weatherWidget" class="weather-widget" onclick="showWeatherDetails()" style="cursor:pointer;">
       <span id="weatherTemp">--°C</span>
@@ -1028,6 +1051,10 @@
       </div>
       <span id="weatherEvent" style="font-size:10px; opacity:0.8;">Loading…</span>
     </div>
+
+    <!-- Info icon explaining where numbers come from and what they mean -->
+    <i class="fa-solid fa-circle-info weather-info-icon" id="weatherInfoIcon"
+       title="Data source: Open‑Meteo weather and air quality API.\nAQI (European Air Quality Index) is calculated based on concentrations of up to five pollutants — PM₁₀, PM₂.₅, NO₂, O₃ and SO₂ — and reflects the pollutant with the poorest concentration【560918866497329†L71-L82】.\nUnits: temperature in °C, humidity in %, AQI is a dimensionless index."></i>
   </div>
 
   <div class="panel" id="leftPanel">
@@ -1120,9 +1147,11 @@
       </div>
 
       <h3>Performance Trade-offs</h3>
-      <div style="height:150px; position:relative;">
-        <canvas id="tradeoffChart"></canvas>
-      </div>
+        <div style="height:150px; position:relative;">
+          <canvas id="tradeoffChart"></canvas>
+          <!-- Explanation beneath the radar chart clarifying normalisation -->
+          <div class="chart-explanation">Scores are normalised between 0 and 100. Higher values indicate greater positive impact.</div>
+        </div>
       <button class="small-btn" onclick="downloadCharts()">
         <i class="fas fa-download"></i> Download Chart
       </button>
@@ -1404,6 +1433,10 @@
       <input type="range" min="0" max="1" step="1" value="1" id="shadowToggle" oninput="toggleShadowsFromSlider(this.value)">
       <span class="slider-val" id="lblShadows">ON</span>
     </div>
+      <!-- Hint below the sliders explaining how the shadow tool works -->
+      <div class="hint-pill" style="margin-top:6px;">
+        <i class="fa-solid fa-lightbulb"></i> Turn on shadows and adjust the shadow time slider to see shaded areas. This feature provides visual guidance only and is not a validated analysis.
+      </div>
   </div>
 
   <!--
@@ -1423,6 +1456,10 @@
     <div id="assistantHeader">
       <span class="assistant-title"><i class="fa-solid fa-robot"></i> AI Assistant</span>
       <button id="assistantClose">×</button>
+    </div>
+    <!-- Disclaimer clarifying the AI’s scope and limitations -->
+    <div id="assistantDisclaimer" style="padding:6px 12px; font-size:10px; color: rgba(226,232,240,0.72); border-bottom: 1px solid rgba(255,255,255,0.08);">
+      This assistant provides explanations and suggestions only. It does not generate geometry, validate policy decisions, or guarantee investment outcomes.
     </div>
     <div id="assistantMessages"></div>
     <div id="assistantChips"></div>
@@ -2004,35 +2041,72 @@ Cesium.GeoJsonDataSource.load(GREENSPACES_GEOJSON, {
       if(d < bestD && d <= maxLinkDist){ bestD = d; bestJ = j; }
     }
     if(bestJ !== -1){
-      const positions = [centroids[i], centroids[bestJ]];
-      corridorPolylines.push(positions);
-      // Compute length and well‑being score based on connectivity
-      const lengthMeters = bestD;
-      const score = Math.max(0, (1 - (lengthMeters / maxLinkDist)) * 100);
+        const positions = [centroids[i], centroids[bestJ]];
+        corridorPolylines.push(positions);
+        // Compute length and a holistic well‑being score.  Besides connectivity
+        // (shorter corridors are better), we also consider vegetation (NDVI) and
+        // cooling (UHI).  Each factor is normalised to 0–1 and weighted
+        // (NDVI 40%, UHI 40%, connectivity 20%).
+        const lengthMeters = bestD;
+        // Get geographic coordinates of the endpoints
+        const cartoA = Cesium.Cartographic.fromCartesian(centroids[i]);
+        const cartoB = Cesium.Cartographic.fromCartesian(centroids[bestJ]);
+        const latA = Cesium.Math.toDegrees(cartoA.latitude);
+        const lonA = Cesium.Math.toDegrees(cartoA.longitude);
+        const latB = Cesium.Math.toDegrees(cartoB.latitude);
+        const lonB = Cesium.Math.toDegrees(cartoB.longitude);
+        // Probe raster values at both ends
+        const pdA = getPixelData(latA, lonA);
+        const pdB = getPixelData(latB, lonB);
+        const ndviA = parseFloat(pdA.ndvi);
+        const ndviB = parseFloat(pdB.ndvi);
+        const avgNdvi = (ndviA + ndviB) / 2;
+        const uhiA = pdA.uhiVal;
+        const uhiB = pdB.uhiVal;
+        const avgUhi = (uhiA + uhiB) / 2;
+        // Normalise NDVI between 0 and 1 (higher NDVI is better)
+        let ndviScore;
+        if(dataMaps.ndvi && dataMaps.ndvi.max !== undefined && dataMaps.ndvi.min !== undefined){
+          ndviScore = (avgNdvi - dataMaps.ndvi.min) / (dataMaps.ndvi.max - dataMaps.ndvi.min);
+        } else {
+          ndviScore = 0;
+        }
+        ndviScore = Math.max(0, Math.min(1, ndviScore));
+        // Normalise UHI: cooler temperatures get higher scores
+        let uhiScore;
+        if(dataMaps.uhi && dataMaps.uhi.max !== undefined && dataMaps.uhi.min !== undefined){
+          uhiScore = (dataMaps.uhi.max - avgUhi) / (dataMaps.uhi.max - dataMaps.uhi.min);
+        } else {
+          uhiScore = 0;
+        }
+        uhiScore = Math.max(0, Math.min(1, uhiScore));
+        // Normalise connectivity (shorter distance is better)
+        let lengthScore = 1 - (lengthMeters / maxLinkDist);
+        lengthScore = Math.max(0, Math.min(1, lengthScore));
+        // Weighted combination
+        const score = (ndviScore * 0.4 + uhiScore * 0.4 + lengthScore * 0.2) * 100;
 
-      const ent = viewer.entities.add({
-        polyline: {
-          positions,
-          // Increase line width for better visibility
-          width: 6,
-          // Use a softer green colour and adjust arrow repeat for a more approachable look
-          material: new PolylineFlowMaterialProperty({
-            // light green (#86efac) conveys a friendlier feel than the previous dark green
-            color: Cesium.Color.fromCssColorString('#86efac').withAlpha(0.95),
-            // Slow down the arrow animation slightly
-            duration: 2.8,
-            // Increase repeat to create smaller, more subtle arrows along the corridor
-            repeat: 12.0
-          }),
-          clampToGround: true
-        },
-        show: false
-      });
-      // Tag entity type and store length/score properties for popups
-      ent._type = "corridor";
-      ent._lengthMeters = lengthMeters;
-      ent._wellBeingScore = score;
-      corridorEntities.push(ent);
+        const ent = viewer.entities.add({
+          polyline: {
+            positions,
+            width: 6,
+            material: new PolylineFlowMaterialProperty({
+              color: Cesium.Color.fromCssColorString('#86efac').withAlpha(0.95),
+              duration: 2.8,
+              repeat: 12.0
+            }),
+            clampToGround: true
+          },
+          show: false
+        });
+        // Tag entity type and store length/score properties for popups, along with
+        // average NDVI and UHI values for use in popups.
+        ent._type = "corridor";
+        ent._lengthMeters = lengthMeters;
+        ent._wellBeingScore = score;
+        ent._ndviAvg = avgNdvi;
+        ent._uhiAvg = avgUhi;
+        corridorEntities.push(ent);
     }
   }
 
@@ -2465,8 +2539,9 @@ const LAYER_INFO = {
   corridors: {
     title: "Well‑being Corridors (Moving Arrows)",
     html: `
-      <p><strong>Description:</strong> Well‑being corridors are lines connecting parks and other green spaces that facilitate movement for wildlife, pollinators and people. Connected habitats improve gene flow and genetic diversity, and studies have shown that plant species richness increases in connected gardens and corridors reduce plant extinction rates while boosting colonisation.</p>
-      <p>These corridors also provide walkable routes for residents, supporting recreation and mental health. Each corridor has a well‑being score based on its length and connectivity; shorter links yield higher scores because they allow easier wildlife movement and shorter walking distances for humans.</p>
+        <p><strong>Description:</strong> Well‑being corridors are lines connecting parks and other green spaces that facilitate movement for wildlife, pollinators and people. Connected habitats improve gene flow and genetic diversity; studies show that plant species richness increases when gardens are linked, and corridors reduce extinction rates while boosting colonisation.</p>
+        <p>These corridors also provide walkable routes for residents, supporting recreation and mental health. Each corridor is assigned a well‑being score that combines three factors: (1) vegetation health (NDVI), (2) cooling intensity (UHI), and (3) connectivity. NDVI and UHI values are sampled at both ends of the corridor and normalised between their observed minima and maxima. The score is calculated as 40% NDVI + 40% cooling (inverted UHI) + 20% connectivity (shorter segments score higher). Thus, greener, cooler and better‑connected corridors receive higher scores.</p>
+        <p>The length shown in the popup refers to the straight‑line distance between the two connected green spaces.</p>
     `
   },
   growthProjection: {
@@ -2479,8 +2554,8 @@ const LAYER_INFO = {
   heatmap: {
     title: "Heatmap (UHI)",
     html: `
-      <p><strong>Description:</strong> Raster overlay representing the urban heat island (UHI) intensity based on surface temperature proxies.</p>
-      <p>The values are measured in °C and interpolated per pixel from a georeferenced PNG (${UHI_PNG}). When toggled on, cooler and warmer areas are visualised across the city.</p>
+        <p><strong>Description:</strong> Raster overlay representing the urban heat island (UHI) intensity. It is derived from land surface temperature (LST) imagery captured on 7 Aug 2022 by the Sentinel‑2 satellite. The values approximate surface temperature and do not represent air temperature.</p>
+        <p>Each pixel contains a °C value interpolated from the LST raster (<code>${UHI_PNG}</code>). This heatmap illustrates relative temperature across the city, with cooler areas appearing green and hotter areas trending toward browns. The selected date represents a worst‑case baseline day, so use this layer as a qualitative guide rather than precise, current conditions.</p>
     `
   }
 };
@@ -2504,6 +2579,21 @@ function openOverview(){ document.getElementById("overviewModal").style.display 
 function closeOverview(){ document.getElementById("overviewModal").style.display = "none"; }
 function openMCDA(){ document.getElementById('mcdaModal').style.display = 'flex'; }
 function closeMCDA(){ document.getElementById('mcdaModal').style.display = 'none'; }
+
+// Reset the camera to the study area boundary.  When users zoom far away or lose
+// their position, this helper flies the camera back to the predefined
+// bounding rectangle over Twekkelerveld.  The destination rectangle is
+// derived from the global bounds object and uses a short animation.
+function resetToStudyArea(){
+  try{
+    viewer.camera.flyTo({
+      destination: Cesium.Rectangle.fromDegrees(bounds.west, bounds.south, bounds.east, bounds.north),
+      duration: 2.0
+    });
+  }catch(e){
+    console.warn('Reset view failed', e);
+  }
+}
 
 // Removed toggleRightPanel logic as user requested static panels
 
@@ -2669,30 +2759,58 @@ function updateAllGauges(netCo2, netWater, netUhi, netCost){
     if(el) el.innerText = display;
   }
 }
-try {
-  const ctx = document.getElementById("tradeoffChart").getContext("2d");
-  tradeoffChart = new Chart(ctx, {
-    type: "radar",
-    data: {
-      labels: ["Cost", "CO₂", "Cooling", "Biodiversity"],
-      datasets: [{
-        label: "Scenario Impact",
-        data: [0, 0, 0, 0],
-        backgroundColor: "rgba(45, 212, 191, 0.2)",
-        borderColor: "#2dd4bf",
-        pointBackgroundColor: "#fff"
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: { r: { grid: { color: "rgba(255,255,255,0.1)" }, ticks: { display: false } } },
-      plugins: { legend: { display: false } }
-    }
-  });
-} catch(e) {
-  console.warn("Chart init failed", e);
-}
+  try {
+    const ctx = document.getElementById("tradeoffChart").getContext("2d");
+    tradeoffChart = new Chart(ctx, {
+      type: "radar",
+      data: {
+        // Use descriptive labels with units so users understand what each axis measures
+        labels: ["Cost (€)", "CO₂ (t)", "Cooling (°C)", "Biodiversity (index)"],
+        datasets: [{
+          label: "Scenario Impact (%)",
+          data: [0, 0, 0, 0],
+          backgroundColor: "rgba(45, 212, 191, 0.2)",
+          borderColor: "#2dd4bf",
+          borderWidth: 2,
+          pointBackgroundColor: "#fff"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            min: 0,
+            max: 100,
+            ticks: {
+              stepSize: 20,
+              color: "rgba(255,255,255,0.7)"
+            },
+            grid: {
+              color: "rgba(255,255,255,0.15)"
+            },
+            pointLabels: {
+              color: "rgba(255,255,255,0.85)",
+              font: { size: 10 }
+            }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx){
+                // Show values as percentage out of 100
+                return ctx.formattedValue + " / 100";
+              }
+            }
+          }
+        }
+      }
+    });
+  } catch(e) {
+    console.warn("Chart init failed", e);
+  }
 
 /* ==============================
    MODES
@@ -4099,30 +4217,36 @@ function showCorridorPopup(screenPos, corridorEntity){
   try{
     if(window.assistantUpdateChips) window.assistantUpdateChips('corridor');
   }catch(e){}
-  // Position and show the popup
-  popup.style.left = (screenPos.x + 15) + "px";
-  popup.style.top  = (screenPos.y + 15) + "px";
-  popup.style.display = "block";
-  isPinned = true;
-  // Hide growth panel when clicking corridors
-  updateGrowthInfo(null);
-  // Read stored properties
-  const length = corridorEntity && corridorEntity._lengthMeters ? corridorEntity._lengthMeters : 0;
-  const score  = corridorEntity && corridorEntity._wellBeingScore ? corridorEntity._wellBeingScore : 0;
-  document.getElementById("popType").innerText = "Well‑being Corridor";
-  // Craft an explanatory sentence based on the well‑being score.  Shorter, well‑connected corridors score higher and support both wildlife and human movement.
-  let expl;
-  if(score >= 70){
-    expl = "High score: this corridor is short and well‑connected, making it easy for wildlife and pedestrians to move and enhancing well‑being.";
-  } else if(score >= 40){
-    expl = "Moderate score: consider improving connectivity or reducing its length by adding green links to boost ecological and human benefits.";
-  } else {
-    expl = "Low score: this corridor is long or poorly connected. Creating new green spaces or linking existing ones can improve accessibility and ecological flow.";
-  }
-  document.getElementById("popContent").innerHTML =
-    row("Length", Math.round(length).toLocaleString() + " m") +
-    row("Well‑being score", Math.round(score).toLocaleString() + " / 100") +
-    `<div style="font-size:10px; margin-top:6px; color:rgba(226,232,240,0.80);">${expl}</div>`;
+    // Position and show the popup
+    popup.style.left = (screenPos.x + 15) + "px";
+    popup.style.top  = (screenPos.y + 15) + "px";
+    popup.style.display = "block";
+    isPinned = true;
+    // Hide growth panel when clicking corridors
+    updateGrowthInfo(null);
+    // Read stored properties for the popup.  We include average NDVI and UHI values if they exist.
+    const length = corridorEntity && corridorEntity._lengthMeters ? corridorEntity._lengthMeters : 0;
+    const score  = corridorEntity && corridorEntity._wellBeingScore ? corridorEntity._wellBeingScore : 0;
+    const ndviAvg = corridorEntity && corridorEntity._ndviAvg !== undefined ? corridorEntity._ndviAvg : null;
+    const uhiAvg  = corridorEntity && corridorEntity._uhiAvg !== undefined ? corridorEntity._uhiAvg : null;
+    document.getElementById("popType").innerText = "Well‑being Corridor";
+    // Craft an explanatory sentence based on the multi‑criteria score.  High scores come from green (high NDVI), cool (low UHI) and short corridors.
+    let expl;
+    if(score >= 70){
+      expl = "High score: this corridor is short, green and cool, supporting wildlife movement and comfortable walking conditions.";
+    } else if(score >= 40){
+      expl = "Moderate score: improve greenery or add shade to reduce temperature, or create additional connections to shorten the route.";
+    } else {
+      expl = "Low score: this corridor is long, lacks vegetation or is heat‑stressed. Planting trees and reducing surface temperatures can improve well‑being.";
+    }
+    // Build the popup content: show segment length and average NDVI/UHI where available
+    let html = "";
+    html += row("Segment length", Math.round(length).toLocaleString() + " m");
+    if(ndviAvg !== null){ html += row("NDVI (avg)", ndviAvg.toFixed(2)); }
+    if(uhiAvg !== null){ html += row("UHI (avg)", uhiAvg.toFixed(1) + "°C"); }
+    html += row("Well‑being score", Math.round(score).toLocaleString() + " / 100");
+    html += `<div style="font-size:10px; margin-top:6px; color:rgba(226,232,240,0.80);">${expl}<br/>Score formula: 40% NDVI + 40% cooling (UHI) + 20% connectivity.</div>`;
+    document.getElementById("popContent").innerHTML = html;
 }
 
 /* ==============================
@@ -4758,11 +4882,11 @@ function clearBudgetPlanner(){
       related: ['ecosystem services','species richness','habitats'],
       suggestions: ['How to improve biodiversity?','Effect of well‑being corridors on biodiversity','Biodiversity in urban environments','What are biodiversity benefits?']
     },
-    'green corridor': {
-      definition: 'Well‑being corridors (sometimes called green corridors) are continuous strips of natural vegetation connecting isolated green spaces. They enable wildlife movement, ecological connectivity and provide walkable routes for people, helping to preserve biodiversity and improve human well-being.',
-      related: ['ecological connectivity','wildlife movement','habitat fragmentation','well-being'],
-      suggestions: ['Benefits of well‑being corridors?','How to design corridors','Impact of corridors on species and people','How do corridors enhance biodiversity benefit?']
-    },
+      'green corridor': {
+        definition: 'Well‑being corridors (sometimes called green corridors) are continuous strips of natural vegetation connecting isolated green spaces. They enable wildlife movement, ecological connectivity and provide walkable routes for people. In this digital twin, each corridor receives a well‑being score that combines vegetation health (NDVI), cooling intensity (UHI) and connectivity; greener, cooler and shorter corridors score higher.',
+        related: ['ecological connectivity','wildlife movement','habitat fragmentation','well-being'],
+        suggestions: ['Benefits of well‑being corridors?','How to design corridors','Impact of corridors on species and people','How do corridors enhance biodiversity benefit?']
+      },
     'scenario polygon': {
       definition: 'A scenario polygon is a user‑drawn shape representing planned vegetation interventions such as grass, shrubs, trees or mixed planting. Each type affects NDVI, cooling, stormwater infiltration and biodiversity.',
       related: ['urban planning','vegetation types','ecology scenarios'],
@@ -5750,5 +5874,10 @@ window.addEventListener('load', () => {
   setInterval(updateWeather, 3600 * 1000);
 });
 </script>
+
+<!-- Small on‑screen hint summarising the camera controls. This helps users understand how to pan, zoom and rotate. -->
+<div id="controlsHint" class="hint-pill" style="position: fixed; bottom: 80px; left: 20px; z-index: 600;">
+  Left‑drag: pan | Scroll: zoom | Right‑drag: rotate
+</div>
 </body>
 </html>
