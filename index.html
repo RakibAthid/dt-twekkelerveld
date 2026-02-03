@@ -1058,6 +1058,37 @@
       max-height: 200px;
       overflow-y: auto;
     }
+    /* Flashcard styling for timeline policy modal */
+    .policy-modal .flashcard {
+      display: block;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      color: var(--text-main);
+      text-decoration: none;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .policy-modal .flashcard h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .policy-modal .flashcard p {
+      margin: 0 0 6px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .policy-modal .flashcard em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    .policy-modal .flashcard:hover {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.15);
+    }
   </style>
 </head>
 <body>
@@ -1204,6 +1235,40 @@
             <div class="timeline-item" data-link="#policy-2050">
               <h5>2050</h5>
               <span data-i18n="timeline-2050-desc">Climate baseline shift.</span>
+            </div>
+          </div>
+          <!-- Hidden policy flashcards that populate the timeline modal.
+               Each card contains a brief description and links to an external policy document.
+               They remain hidden on the page but are loaded into the modal when the corresponding
+               timeline item is clicked. -->
+          <div class="policy-flashcards" style="display:none;">
+            <div id="policy-now">
+              <a href="https://climate.ec.europa.eu/eu-action/climate-strategies-targets_en" target="_blank" class="flashcard">
+                <h3>Now</h3>
+                <p>Hotter summers and rising bills are already impacting daily life. Current policies focus on adaptation and affordability.</p>
+                <p><em>Click this card to open the relevant policy document.</em></p>
+              </a>
+            </div>
+            <div id="policy-2027">
+              <a href="https://energy.ec.europa.eu/topics/renewable-energy/renewable-energy-directive_en" target="_blank" class="flashcard">
+                <h3>2027</h3>
+                <p>Grid pressure and building retrofit targets become critical by 2027. Policies outline steps for infrastructure upgrades and efficiency.</p>
+                <p><em>Click this card to open the relevant policy document.</em></p>
+              </a>
+            </div>
+            <div id="policy-2030">
+              <a href="https://climate.ec.europa.eu/eu-action/climate-strategies-targets/2030-climate-targets_en" target="_blank" class="flashcard">
+                <h3>2030</h3>
+                <p>EU policy deadlines and climate targets for 2030 set ambitious milestones for emissions reduction and renewable energy.</p>
+                <p><em>Click this card to open the relevant policy document.</em></p>
+              </a>
+            </div>
+            <div id="policy-2050">
+              <a href="https://climate.ec.europa.eu/eu-action/climate-strategies-targets/2050-long-term-strategy_en" target="_blank" class="flashcard">
+                <h3>2050</h3>
+                <p>Long‑term climate baselines shift dramatically by 2050. Strategies focus on achieving net‑zero emissions and resilience.</p>
+                <p><em>Click this card to open the relevant policy document.</em></p>
+              </a>
             </div>
           </div>
           <!-- Predefined scenarios -->
