@@ -1054,7 +1054,8 @@
 
     <!-- Info icon explaining where numbers come from and what they mean -->
     <i class="fa-solid fa-circle-info weather-info-icon" id="weatherInfoIcon"
-       title="Data source: Open‑Meteo weather and air quality API.\nAQI (European Air Quality Index) is calculated based on concentrations of up to five pollutants — PM₁₀, PM₂.₅, NO₂, O₃ and SO₂ — and reflects the pollutant with the poorest concentration【560918866497329†L71-L82】.\nUnits: temperature in °C, humidity in %, AQI is a dimensionless index."></i>
+       onclick="showWeatherDetails()"
+       title="Data source: Open‑Meteo weather and air quality API.\nAQI (European Air Quality Index) is calculated based on concentrations of up to five pollutants — PM₁₀, PM₂.₅, NO₂, O₃ and SO₂ — and reflects the pollutant with the poorest concentration.\nUnits: temperature in °C, humidity in %, AQI is a dimensionless index."></i>
   </div>
 
   <div class="panel" id="leftPanel">
@@ -1586,7 +1587,7 @@
 </div>
 
 <!-- Weather details pop-up (appears when clicking the weather bar) -->
-<div id="weatherModal" style="position: absolute; top: 85px; right: 20px; width:260px; background: var(--panel-bg); border: 1px solid var(--border); border-radius: 14px; padding: 14px; z-index: 500; display: none; box-shadow: 0 10px 28px rgba(0,0,0,0.45); backdrop-filter: blur(12px);">
+<div id="weatherModal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width:320px; background: var(--panel-bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px; font-size:14px; z-index: 500; display: none; box-shadow: 0 10px 28px rgba(0,0,0,0.45); backdrop-filter: blur(12px);">
   <div style="display:flex; justify-content:space-between; align-items:center;">
     <span style="font-size:14px; font-weight:800; color: var(--text-main);">Weather Details</span>
     <button onclick="closeWeatherModal()" style="background:none; border:none; color: rgba(226,232,240,0.65); font-size:18px; cursor:pointer; line-height:1;">×</button>
@@ -2654,7 +2655,7 @@ let gaugeBio = null;
 function createGauge(canvasId, color, caption){
   const ctx = document.getElementById(canvasId).getContext('2d');
   return new Chart(ctx, {
-    type: 'doughnut',
+    type: 'pie',
     data: {
       labels: ['Value', 'Remainder'],
       datasets: [{
@@ -2668,9 +2669,7 @@ function createGauge(canvasId, color, caption){
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      rotation: -Math.PI,
-      circumference: Math.PI,
-      cutout: '70%',
+      cutout: '60%',
       animation: {
         animateRotate: true,
         animateScale: false
@@ -2762,49 +2761,33 @@ function updateAllGauges(netCo2, netWater, netUhi, netCost){
   try {
     const ctx = document.getElementById("tradeoffChart").getContext("2d");
     tradeoffChart = new Chart(ctx, {
-      type: "radar",
+      type: "bar",
       data: {
         // Use descriptive labels with units so users understand what each axis measures
         labels: ["Cost (€)", "CO₂ (t)", "Cooling (°C)", "Biodiversity (index)"],
         datasets: [{
-          label: "Scenario Impact (%)",
+          label: "Scenario Impact",
           data: [0, 0, 0, 0],
-          backgroundColor: "rgba(45, 212, 191, 0.2)",
-          borderColor: "#2dd4bf",
-          borderWidth: 2,
-          pointBackgroundColor: "#fff"
+          backgroundColor: ["#fb7185", "#2dd4bf", "#60a5fa", "#c084fc"]
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          r: {
-            min: 0,
+          y: {
+            beginAtZero: true,
             max: 100,
-            ticks: {
-              stepSize: 20,
-              color: "rgba(255,255,255,0.7)"
-            },
-            grid: {
-              color: "rgba(255,255,255,0.15)"
-            },
-            pointLabels: {
-              color: "rgba(255,255,255,0.85)",
-              font: { size: 10 }
-            }
+            grid: { color: "rgba(255,255,255,0.15)" },
+            ticks: { color: "rgba(255,255,255,0.7)" }
+          },
+          x: {
+            grid: { color: "rgba(255,255,255,0.15)" },
+            ticks: { color: "rgba(255,255,255,0.85)" }
           }
         },
         plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: function(ctx){
-                // Show values as percentage out of 100
-                return ctx.formattedValue + " / 100";
-              }
-            }
-          }
+          legend: { display: false }
         }
       }
     });
@@ -4063,9 +4046,31 @@ function isTileFeature(p){
 ================================ */
 let _lod22ClickSeq = 0;
 
+// Attempt to extract a plausible construction year from a BAG identifier.
+// Some BAG identifiers may encode the year of construction as a 4‑digit
+// sequence (e.g. 1974 or 2008).  This helper searches for the first
+// four‑digit sequence beginning with 18, 19 or 20 and returns it if
+// it falls within a reasonable range (1800–2050).  Otherwise it returns
+// an empty string.
+function guessYearFromBagId(bag){
+  if(!bag) return "";
+  const str = String(bag);
+  const match = str.match(/(18|19|20)\d{2}/);
+  if(match){
+    const year = parseInt(match[0], 10);
+    if(year >= 1800 && year <= 2050) return year.toString();
+  }
+  return "";
+}
+
 function buildHouseInfoFromBackend(lod1){
   const bag = lod1 ? (lod1._bag || "—") : "—";
-  const by  = lod1 ? (lod1._bouwjaar || "—") : "—";
+  let by  = lod1 ? (lod1._bouwjaar || "") : "";
+  // If the construction year is missing or empty, attempt to derive it from the BAG id.
+  if(!by || by === "—"){
+    const guess = guessYearFromBagId(bag);
+    by = guess ? guess : "—";
+  }
   const ar  = lod1 && Number.isFinite(Number(lod1._areaM2)) ? formatArea(Number(lod1._areaM2)) : "—";
   return row("BAG ID", bag) + row("Construction year", by) + row("Area", ar);
 }
