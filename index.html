@@ -263,12 +263,17 @@
       display: block;
     }
     .hotspot {
-      /* Hide the original map dots. Hotspot interactions are now provided via
-         the explicit list below the description. */
-      display: none;
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #fff;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
     }
     .hotspot:hover {
-      transform: none;
+      transform: translate(-50%, -50%) scale(1.2);
     }
     .why-info {
       flex: 1;
@@ -429,46 +434,6 @@
       font-weight: 600;
       color: #fff;
     }
-    /* Expandable content for the digital twin replicate card */
-    .digital-twin-info {
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid rgba(148,163,184,0.3);
-    }
-    .digital-twin-actions {
-      margin-top: 10px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .digital-twin-actions .pill-btn {
-      font-size: 12px;
-      padding: 8px 16px;
-    }
-    #digital-twin-info-btn {
-      cursor: pointer;
-      margin-left: 8px;
-      color: var(--accent);
-    }
-    /* Timeline-linked policy sections */
-    .policy-sections {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .policy-section {
-      margin-top: 20px;
-      padding: 16px;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-    .policy-section h3 {
-      margin: 0 0 8px;
-      color: #fff;
-    }
 
     .case-studies {
       display: grid;
@@ -521,20 +486,6 @@
       flex: 1;
       height: 6px;
       border-radius: 3px;
-    }
-
-    /* Replicate button inside case cards */
-    .case-card .replicate-btn {
-      margin-top: 6px;
-      align-self: flex-start;
-      background: var(--accent);
-      color: #0f172a;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
     }
     .outcome-cool { background: #60a5fa; }
     .outcome-energy { background: #38bdf8; }
@@ -651,11 +602,6 @@
       gap: 10px;
     }
 
-    /* Narrower modal variant used for timeline policy popups */
-    .modal-content.policy-modal {
-      max-width: 500px;
-    }
-
     /*
      * Button and layout styles for the case studies call‑to‑action and modal
      */
@@ -745,88 +691,6 @@
     .toast.show {
       opacity: 1;
       pointer-events: auto;
-    }
-
-    /* Additional custom styles added to support new UI elements */
-    .badge-info {
-      margin-top: 12px;
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(148,163,184,0.4);
-      border-radius: 8px;
-      padding: 12px 16px;
-      color: var(--text-muted);
-      font-size: 14px;
-      max-width: 600px;
-      /* align info text and close button horizontally */
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-      text-align: inherit;
-    }
-    .badge-info-close {
-      cursor: pointer;
-      color: var(--text-muted);
-    }
-    .badge-info-close:hover {
-      color: var(--accent);
-    }
-    .current-conditions {
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(148,163,184,0.3);
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 20px;
-      text-align: center;
-    }
-    .current-conditions h3 {
-      margin: 0 0 12px 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: #fff;
-    }
-    .neighbourhood-hotspots {
-      margin-top: 16px;
-    }
-    .neighbourhood-hotspots h4 {
-      margin: 0 0 8px 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: #fff;
-    }
-    .neighbourhood-hotspots ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .neighbourhood-hotspots li button {
-      background: rgba(30,41,59,0.8);
-      border: 1px solid rgba(148,163,184,0.3);
-      color: #e2e8f0;
-      padding: 8px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      text-align: left;
-      width: 100%;
-      transition: all 0.2s;
-    }
-    .neighbourhood-hotspots li button:hover {
-      background: var(--accent);
-      color: #0f172a;
-    }
-    .predefined-scenarios {
-      margin-top: 30px;
-    }
-    .predefined-scenarios h3 {
-      margin: 0 0 12px 0;
-      font-size: 18px;
-      font-weight: 600;
-      color: #fff;
-      text-align: center;
     }
 
     /* =========================================
@@ -1113,7 +977,7 @@
       <button class="nav-btn active" onclick="switchTab('panel-overview', this)" data-i18n="nav-overview">Overview</button>
       <button class="nav-btn" onclick="switchTab('panel-ecology', this)" data-i18n="nav-ecology">Ecology</button>
       <button class="nav-btn" onclick="switchTab('panel-energy', this)" data-i18n="nav-energy">Energy</button>
-      <button class="nav-btn" onclick="switchTab('panel-interrelation', this)" data-i18n="nav-simulation">Combined Scenario Analysis</button>
+      <button class="nav-btn" onclick="switchTab('panel-interrelation', this)" data-i18n="nav-simulation">Simulation</button>
     </div>
     <!-- Language selector -->
     <div class="lang-select-container">
@@ -1141,23 +1005,21 @@
                 <div class="micro-badge"><i class="fa-solid fa-bolt-lightning"></i> <span data-i18n="badge-energy-poverty">Energy poverty</span></div>
                 <div class="micro-badge"><i class="fa-solid fa-screwdriver-wrench"></i> <span data-i18n="badge-retrofit-complexity">Retrofit complexity</span></div>
               </div>
-              <!-- Information box for badge descriptions; initially hidden. Populated on click. Includes a close button. -->
-              <div id="badge-info" class="badge-info" style="display:none;">
-                <span id="badge-info-text"></span>
-                <span id="badge-info-close" class="badge-info-close"><i class="fa-solid fa-xmark"></i></span>
-              </div>
             </div>
           </div>
-          <!-- Story mode stepper removed based on user feedback -->
+          <!-- Story mode stepper -->
+          <div class="story-stepper">
+            <div class="step" data-step="1" data-i18n="step-find-hotspots">Find hotspots</div>
+            <div class="step" data-step="2" data-i18n="step-pick-strategy">Pick a strategy</div>
+            <div class="step" data-step="3" data-i18n="step-simulate">Simulate</div>
+          </div>
           <!-- Resume ribbon (hidden until scenario run) -->
           <div id="resume-ribbon" class="resume-ribbon" style="display:none;">
             <span id="resume-text">Last scenario summary</span>
             <button id="resume-btn">Resume scenario</button>
           </div>
-          <!-- Baseline metrics strip wrapped in a Current Condition card -->
-          <div class="current-conditions">
-            <h3>Current Twekkelerveld Condition</h3>
-            <div class="metrics-strip">
+          <!-- Baseline metrics strip -->
+          <div class="metrics-strip">
             <div class="metric-tile" data-preset="cool" data-tab="panel-interrelation">
             <div class="metric-label" data-i18n="metric-uhi">UHI peak (°C)</div>
               <div class="metric-value" data-target="9">0</div>
@@ -1182,13 +1044,14 @@
             <div class="metric-label" data-i18n="metric-vulnerable">Vulnerable HH (%)</div>
               <div class="metric-value" data-target="30">0</div>
             </div>
-            </div>
           </div>
           <!-- Why Twekkelerveld? section -->
           <div class="why-section">
             <div class="why-map">
               <img src="Study Area.png" alt="Twekkelerveld Map">
-              <!-- Removed hotspot dots; selection occurs via the list below -->
+              <div class="hotspot" style="top: 32%; left: 42%;" data-spot="housing" title="Housing"></div>
+              <div class="hotspot" style="top: 60%; left: 25%;" data-spot="industry" title="Industry edge"></div>
+              <div class="hotspot" style="top: 45%; left: 75%;" data-spot="green" title="Green corridors"></div>
             </div>
             <div class="why-info">
               <h3 data-i18n="why-heading">Why Twekkelerveld?</h3>
@@ -1197,7 +1060,7 @@
                 <li data-i18n="why-bullet-2">Heat + energy affordability collide here.</li>
                 <li data-i18n="why-bullet-3">Perfect scale: neighbourhood interventions actually measurable.</li>
               </ul>
-              <!-- Explicit list of neighbourhood hotspots replaces the ambiguous dots on the map -->
+              <!-- Added explicit list of neighbourhood hotspots to improve accessibility on hosted environments. -->
               <div class="neighbourhood-hotspots">
                 <h4>Neighbourhood Hotspots</h4>
                 <ul>
@@ -1222,74 +1085,55 @@
           <div class="cases-call">
             <button id="open-cases-btn" class="open-cases-btn" onclick="document.getElementById('modal-overlay').classList.add('active')">
               <i class="fa-solid fa-book-open"></i>
-              <span data-i18n="cases-call-btn">Explore other case studies</span>
+              <span data-i18n="cases-call-btn">Explore global case studies</span>
             </button>
             <p class="cases-note" data-i18n="cases-call-note">Learn from international examples on cooling, energy, retrofits and community solar.</p>
           </div>
           <!-- Timeline -->
           <div class="timeline-section">
-            <div class="timeline-item" data-link="#policy-now">
-              <!-- Use data-i18n on the timeline "Now" label for translation -->
-              <h5 data-i18n="timeline-now">Now</h5>
+            <div class="timeline-item">
+            <!-- Use data-i18n on the timeline "Now" label for translation -->
+            <h5 data-i18n="timeline-now">Now</h5>
               <span data-i18n="timeline-now-desc">Hotter summers, rising bills.</span>
             </div>
-            <div class="timeline-item" data-link="#policy-2027">
+            <div class="timeline-item">
               <h5>2027</h5>
               <span data-i18n="timeline-2027-desc">Grid pressure + retrofit targets.</span>
             </div>
-            <div class="timeline-item" data-link="#policy-2030">
+            <div class="timeline-item">
               <h5>2030</h5>
               <span data-i18n="timeline-2030-desc">Policy deadlines (EU targets).</span>
             </div>
-            <div class="timeline-item" data-link="#policy-2050">
+            <div class="timeline-item">
               <h5>2050</h5>
               <span data-i18n="timeline-2050-desc">Climate baseline shift.</span>
             </div>
           </div>
-          <!-- Predefined scenarios -->
-          <div class="predefined-scenarios">
-            <h3>Predefined Scenarios</h3>
-            <div class="presets-section">
-              <div class="preset-btn" data-preset="cool" data-i18n="preset-cool">Urban heat reduction</div>
-              <div class="preset-btn" data-preset="bills" data-i18n="preset-bills">Reduce energy bills</div>
-              <div class="preset-btn" data-preset="stress" data-i18n="preset-stress">2050 heat stress test</div>
+          <!-- Presets -->
+          <div class="presets-section">
+            <div class="preset-btn" data-preset="cool" data-i18n="preset-cool">Cool the streets</div>
+            <div class="preset-btn" data-preset="bills" data-i18n="preset-bills">Slash bills fast</div>
+            <div class="preset-btn" data-preset="stress" data-i18n="preset-stress">Stress test 2050 heat</div>
+          </div>
+          <!-- How to use -->
+          <div class="howto-section">
+            <div class="howto-step">
+              <i class="fa-solid fa-tree"></i>
+              <span data-i18n="howto-step-ecology">Explore Ecology map</span>
+            </div>
+            <div class="howto-step">
+              <i class="fa-solid fa-bolt"></i>
+              <span data-i18n="howto-step-energy">Explore Energy map</span>
+            </div>
+            <div class="howto-step">
+              <i class="fa-solid fa-flask"></i>
+              <span data-i18n="howto-step-sim">Combine in Simulation and export PDF</span>
             </div>
           </div>
-          <!-- How to use section removed based on user feedback -->
-          <!-- Current digital twin situation card with expandable info -->
+          <!-- Digital twin replicate demonstration -->
           <div id="digital-twin-replicate" class="digital-twin-replicate">
-            <h4>
-              <span data-i18n="replicate-title">Current Digital Twin Situation</span>
-              <i id="digital-twin-info-btn" class="fa-solid fa-circle-info"></i>
-            </h4>
-            <div id="digital-twin-info" class="digital-twin-info" style="display:none;">
-              <p id="digital-twin-replicate-message"></p>
-              <div class="digital-twin-actions">
-                <button class="pill-btn" data-tab="panel-ecology"><i class="fa-solid fa-tree"></i> Explore Ecology map</button>
-                <button class="pill-btn" data-tab="panel-energy"><i class="fa-solid fa-bolt"></i> Explore Energy map</button>
-                <button class="pill-btn" data-tab="panel-interrelation"><i class="fa-solid fa-flask"></i> Combine in Simulation</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Policy info sections referenced by the timeline -->
-          <div class="policy-sections">
-            <div id="policy-now" class="policy-section">
-              <h3>Now</h3>
-              <p>Hotter summers and rising energy bills require immediate action. This digital twin helps you test solutions to make Twekkelerveld cooler and more resilient.</p>
-            </div>
-            <div id="policy-2027" class="policy-section">
-              <h3>2027</h3>
-              <p>By 2027, grid constraints and retrofit targets will shape how we invest in PV, building insulation and tree planting. Explore scenario impacts now.</p>
-            </div>
-            <div id="policy-2030" class="policy-section">
-              <h3>2030</h3>
-              <p>EU climate and energy directives set 2030 deadlines for emissions reduction and energy efficiency. Use the twin to test if your interventions meet these goals.</p>
-            </div>
-            <div id="policy-2050" class="policy-section">
-              <h3>2050</h3>
-              <p>By mid-century, climate baseline shifts could double heat stress. Evaluate extreme scenarios combining heat waves, energy use and adaptation measures.</p>
-            </div>
+            <h4 data-i18n="replicate-title">Digital twin scenario</h4>
+            <p id="digital-twin-replicate-message"></p>
           </div>
         </div>
         <!-- Side drawer for hotspots -->
@@ -1323,8 +1167,6 @@
                   <div class="outcome-segment outcome-euro" style="flex:1"></div>
                 </div>
                 <div class="delta-chips"></div>
-                <!-- Button allowing users to replicate this strategy directly in the simulation -->
-                <button class="replicate-btn" data-case="rotterdam" data-i18n="replicate-btn">Replicate this strategy</button>
               </div>
               <div class="case-card" data-case="freiburg">
                 <h4>Freiburg — Solar Settlement</h4>
@@ -1339,7 +1181,6 @@
                   <div class="outcome-segment outcome-euro" style="flex:1"></div>
                 </div>
                 <div class="delta-chips"></div>
-                <button class="replicate-btn" data-case="freiburg" data-i18n="replicate-btn">Replicate this strategy</button>
               </div>
               <div class="case-card" data-case="vienna">
                 <h4>Vienna — Smart City Baumgarten</h4>
@@ -1354,7 +1195,6 @@
                   <div class="outcome-segment outcome-euro" style="flex:3"></div>
                 </div>
                 <div class="delta-chips"></div>
-                <button class="replicate-btn" data-case="vienna" data-i18n="replicate-btn">Replicate this strategy</button>
               </div>
               <div class="case-card" data-case="singapore">
                 <h4>Singapore — vertical greening</h4>
@@ -1369,7 +1209,6 @@
                   <div class="outcome-segment outcome-euro" style="flex:2"></div>
                 </div>
                 <div class="delta-chips"></div>
-                <button class="replicate-btn" data-case="singapore" data-i18n="replicate-btn">Replicate this strategy</button>
               </div>
               <div class="case-card" data-case="barcelona">
                 <h4>Barcelona — climate shelter schools</h4>
@@ -1384,7 +1223,6 @@
                   <div class="outcome-segment outcome-euro" style="flex:2"></div>
                 </div>
                 <div class="delta-chips"></div>
-                <button class="replicate-btn" data-case="barcelona" data-i18n="replicate-btn">Replicate this strategy</button>
               </div>
               <div class="case-card" data-case="paris">
                 <h4>Paris — community solar cooperative</h4>
@@ -1399,17 +1237,8 @@
                   <div class="outcome-segment outcome-euro" style="flex:2"></div>
                 </div>
                 <div class="delta-chips"></div>
-                <button class="replicate-btn" data-case="paris" data-i18n="replicate-btn">Replicate this strategy</button>
               </div>
             </div>
-          </div>
-        </div>
-        <!-- Additional modal for timeline policy popups -->
-        <div id="timeline-modal" class="modal-overlay">
-          <div class="modal-content policy-modal">
-            <!-- Close button for the timeline modal -->
-            <div class="close-btn" id="timeline-close-btn"><i class="fa-solid fa-xmark"></i></div>
-            <div id="timeline-modal-content"></div>
           </div>
         </div>
       </section>
@@ -1439,7 +1268,7 @@
           <div class="top-row">
             <div>
               <div class="top-title">
-                <i class="fa-solid fa-diagram-project"></i> Combined Scenario Analysis
+                <i class="fa-solid fa-diagram-project"></i> Interrelation & Scenario Simulation
               </div>
               <div class="top-sub">
                 Simulate trees, PV, retrofits and heatwaves to see impacts on ecology, energy, CO₂ and investments.
@@ -1449,7 +1278,9 @@
               <button class="btn-reset" id="IR_btnReset"><i class="fa-solid fa-rotate-left"></i> Reset</button>
               <button class="btn-reset" id="IR_btnPdf"><i class="fa-solid fa-file-arrow-down"></i> Download scenario PDF</button>
               <button class="btn-reset" id="IR_btnFullscreen"><i class="fa-solid fa-up-right-and-down-left-from-center"></i> Full screen</button>
-              <!-- Pin buttons removed for simplified scenario comparison -->
+              <!-- Pin buttons now include a tooltip to clarify purpose -->
+              <button class="btn-reset" id="IR_btnPinA" title="Save the current configuration as Scenario A for comparison"><i class="fa-solid fa-thumbtack"></i> Pin A</button>
+              <button class="btn-reset" id="IR_btnPinB" title="Save the current configuration as Scenario B for comparison"><i class="fa-solid fa-thumbtack"></i> Pin B</button>
               <button class="btn-reset" id="IR_btnCopy"><i class="fa-solid fa-link"></i> Copy link</button>
               <button class="btn-reset" id="IR_btnSave"><i class="fa-solid fa-download"></i> Save JSON</button>
               <button class="btn-reset" id="IR_btnLoad"><i class="fa-solid fa-upload"></i> Load JSON</button>
@@ -1603,7 +1434,9 @@
     </div>
   </main>
 
-  <!-- Scenario detail overlays removed -->
+  <!-- Scenario detail overlays for pinned comparisons -->
+  <div id="scenarioAOverlay" class="detail-overlay"></div>
+  <div id="scenarioBOverlay" class="detail-overlay"></div>
 
   <script>
     // --- Tab Switching Logic ---
@@ -1809,22 +1642,16 @@
 
       Chart.defaults.font.family = "Inter, system-ui, sans-serif";
       Chart.defaults.color = "#9ca3af";
-      // Improve chart appearance: set default font size, legend position and style
-      Chart.defaults.font.size = 10;
-      Chart.defaults.plugins.legend.position = 'bottom';
-      Chart.defaults.plugins.legend.labels.usePointStyle = true;
-      Chart.defaults.plugins.legend.labels.boxWidth = 10;
-      // Smooth radar lines
-      Chart.defaults.elements.line.tension = 0.3;
 
       const IR_chartNdvi = new Chart(ctxNdvi, {
         type: "bar",
         data: {
           labels: ["Baseline", "Scenario"],
           datasets: [
-            // Show a single baseline bar and a single scenario bar by using zero for the other position
-            { label: "Baseline", data: [IR_BASE.ndvi_mean, 0], backgroundColor: "rgba(148,163,184,0.6)", borderRadius: 6, maxBarThickness: 30 },
-            { label: "Scenario", data: [0, IR_BASE.ndvi_mean], backgroundColor: "rgba(34,197,94,0.8)", borderRadius: 6, maxBarThickness: 30 }
+            { label: "Baseline", data: [IR_BASE.ndvi_mean, IR_BASE.ndvi_mean], backgroundColor: "rgba(148,163,184,0.5)", borderRadius: 6, maxBarThickness: 30 },
+            { label: "Scenario", data: [IR_BASE.ndvi_mean, IR_BASE.ndvi_mean], backgroundColor: "rgba(52,211,153,0.8)", borderRadius: 6, maxBarThickness: 30 },
+            { label: "Scenario A", data: [IR_BASE.ndvi_mean, IR_BASE.ndvi_mean], backgroundColor: "rgba(234,88,12,0.7)", borderRadius: 6, maxBarThickness: 30 },
+            { label: "Scenario B", data: [IR_BASE.ndvi_mean, IR_BASE.ndvi_mean], backgroundColor: "rgba(139,92,246,0.7)", borderRadius: 6, maxBarThickness: 30 }
           ]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { font: { size: 8 } } } }, scales: { y: { suggestedMin: 0, suggestedMax: 0.45, ticks: { stepSize: 0.1 } } } }
@@ -1835,9 +1662,10 @@
         data: {
           labels: ["Baseline", "Scenario"],
           datasets: [
-            // Show baseline value only for the Baseline label and zero for Scenario; scenario dataset vice versa
-            { label: "Baseline", data: [IR_BASE.uhi_mean, 0], backgroundColor: "rgba(148,163,184,0.6)", borderRadius: 6, maxBarThickness: 30 },
-            { label: "Scenario", data: [0, IR_BASE.uhi_mean], backgroundColor: "rgba(239,68,68,0.85)", borderRadius: 6, maxBarThickness: 30 }
+            { label: "Baseline", data: [IR_BASE.uhi_mean, IR_BASE.uhi_mean], backgroundColor: "rgba(148,163,184,0.5)", borderRadius: 6, maxBarThickness: 30 },
+            { label: "Scenario", data: [IR_BASE.uhi_mean, IR_BASE.uhi_mean], backgroundColor: "rgba(248,113,113,0.8)", borderRadius: 6, maxBarThickness: 30 },
+            { label: "Scenario A", data: [IR_BASE.uhi_mean, IR_BASE.uhi_mean], backgroundColor: "rgba(234,88,12,0.7)", borderRadius: 6, maxBarThickness: 30 },
+            { label: "Scenario B", data: [IR_BASE.uhi_mean, IR_BASE.uhi_mean], backgroundColor: "rgba(139,92,246,0.7)", borderRadius: 6, maxBarThickness: 30 }
           ]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { font: { size: 8 } } } }, scales: { y: { suggestedMin: 0, suggestedMax: 18, ticks: { stepSize: 3 } } } }
@@ -1848,8 +1676,10 @@
         data: {
           labels: ["Demand", "PV / Generation", "Net grid"],
           datasets: [
-            { label: "Baseline", data: [IR_BASE.energy_kwh / 1000, IR_BASE.pv_kwh / 1000, IR_BASE_netGrid_kwh / 1000], backgroundColor: "rgba(148,163,184,0.6)", borderRadius: 6, maxBarThickness: 26 },
-            { label: "Scenario", data: [IR_BASE.energy_kwh / 1000, IR_BASE.pv_kwh / 1000, IR_BASE_netGrid_kwh / 1000], backgroundColor: "rgba(59,130,246,0.85)", borderRadius: 6, maxBarThickness: 26 }
+            { label: "Baseline", data: [IR_BASE.energy_kwh / 1000, IR_BASE.pv_kwh / 1000, IR_BASE_netGrid_kwh / 1000], backgroundColor: "rgba(148,163,184,0.5)", borderRadius: 6, maxBarThickness: 26 },
+            { label: "Scenario", data: [IR_BASE.energy_kwh / 1000, IR_BASE.pv_kwh / 1000, IR_BASE_netGrid_kwh / 1000], backgroundColor: "rgba(59,130,246,0.8)", borderRadius: 6, maxBarThickness: 26 },
+            { label: "Scenario A", data: [IR_BASE.energy_kwh / 1000, IR_BASE.pv_kwh / 1000, IR_BASE_netGrid_kwh / 1000], backgroundColor: "rgba(234,88,12,0.7)", borderRadius: 6, maxBarThickness: 26 },
+            { label: "Scenario B", data: [IR_BASE.energy_kwh / 1000, IR_BASE.pv_kwh / 1000, IR_BASE_netGrid_kwh / 1000], backgroundColor: "rgba(139,92,246,0.7)", borderRadius: 6, maxBarThickness: 26 }
           ]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { boxWidth: 12, boxHeight: 12, font: { size: 8 } } } }, scales: { x: { stacked: false }, y: { stacked: false, ticks: { callback: v => v.toLocaleString() } } } }
@@ -1860,8 +1690,10 @@
         data: {
           labels: ["Greenness", "Cooling", "Energy", "CO₂"],
           datasets: [
-            { label: "Baseline", data: [40, 40, 40, 40], borderColor: "rgba(148,163,184,1)", backgroundColor: "rgba(148,163,184,0.15)", borderWidth: 1, pointRadius: 3 },
-            { label: "Scenario", data: [40, 40, 40, 40], borderColor: "rgba(34,197,94,1)", backgroundColor: "rgba(34,197,94,0.3)", borderWidth: 1.5, pointRadius: 3 }
+            { label: "Baseline", data: [40, 40, 40, 40], borderColor: "rgba(148,163,184,1)", backgroundColor: "rgba(148,163,184,0.1)", borderWidth: 1, pointRadius: 2 },
+            { label: "Scenario", data: [40, 40, 40, 40], borderColor: "rgba(52,211,153,1)", backgroundColor: "rgba(52,211,153,0.3)", borderWidth: 1, pointRadius: 2 },
+            { label: "Scenario A", data: [40, 40, 40, 40], borderColor: "rgba(234,88,12,1)", backgroundColor: "rgba(234,88,12,0.3)", borderWidth: 1, pointRadius: 2 },
+            { label: "Scenario B", data: [40, 40, 40, 40], borderColor: "rgba(139,92,246,1)", backgroundColor: "rgba(139,92,246,0.3)", borderWidth: 1, pointRadius: 2 }
           ]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { font: { size: 8 } } } }, scales: { r: { suggestedMin: 0, suggestedMax: 100, ticks: { display: false }, grid: { color: "rgba(148,163,184,0.3)" }, angleLines: { color: "rgba(148,163,184,0.3)" } } } }
@@ -1895,50 +1727,6 @@
         }
       });
 
-      // Attach click handlers to the charts to display details when clicked
-      function attachChartClick(chart, type) {
-        chart.options.onClick = function() {
-          const s = (typeof IR_computeScenario === 'function') ? IR_computeScenario() : null;
-          let message = '';
-          if (type === 'ndvi') {
-            const base = IR_BASE.ndvi_mean;
-            const scen = s ? s.ndviScenario : base;
-            const diff = scen - base;
-            message = `NDVI baseline ${base.toFixed(2)}, scenario ${scen.toFixed(2)} (∆ ${(diff>=0?'+':'')}${diff.toFixed(2)})`;
-          } else if (type === 'uhi') {
-            const base = IR_BASE.uhi_mean;
-            const scen = s ? s.uhiScenario : base;
-            const diff = base - scen;
-            message = `UHI baseline ${base.toFixed(1)}°C, scenario ${scen.toFixed(1)}°C (cooling ${(diff>=0?'+':'')}${diff.toFixed(1)}°C)`;
-          } else if (type === 'energy') {
-            if (s) {
-              const baseDemand = IR_BASE.energy_kwh/1000;
-              const scenDemand = s.energyScenario_kwh/1000;
-              const basePV = IR_BASE.pv_kwh/1000;
-              const scenPV = s.pvScenario_kwh/1000;
-              const baseNet = (IR_BASE.energy_kwh - IR_BASE.pv_kwh)/1000;
-              const scenNet = s.netGridScenario_kwh/1000;
-              message = `Energy demand baseline ${baseDemand.toFixed(0)} MWh vs scenario ${scenDemand.toFixed(0)} MWh. PV baseline ${basePV.toFixed(0)} MWh vs scenario ${scenPV.toFixed(0)} MWh. Net grid baseline ${baseNet.toFixed(0)} MWh vs scenario ${scenNet.toFixed(0)} MWh.`;
-            }
-          } else if (type === 'radar') {
-            if (s) {
-              const green = s.greenScore;
-              const cool = s.coolScore;
-              const energy = s.energyScore;
-              const co2 = s.co2Score;
-              message = `Scenario scores – Greenness: ${green.toFixed(0)}, Cooling: ${cool.toFixed(0)}, Energy: ${energy.toFixed(0)}, CO₂: ${co2.toFixed(0)}.`;
-            }
-          }
-          if (message) {
-            showToast(message);
-          }
-        };
-      }
-      attachChartClick(IR_chartNdvi, 'ndvi');
-      attachChartClick(IR_chartUhi, 'uhi');
-      attachChartClick(IR_chartEnergy, 'energy');
-      attachChartClick(IR_chartRadar, 'radar');
-
       // Scenario detail overlays for pinned scenarios
       const overlayA = document.getElementById('scenarioAOverlay');
       const overlayB = document.getElementById('scenarioBOverlay');
@@ -1965,30 +1753,34 @@
         }
       }
 
-      // Scenario updater: update the "Scenario" dataset (index 1) based on the current sliders.
+      // Scenario comparison placeholders and updater
+      let scenarioA = null;
+      let scenarioB = null;
       function updateComparison() {
-        // Compute the current scenario using slider values.
-        const s = IR_computeScenario();
-        // Update NDVI bar chart: baseline dataset stays baseline at first position and zero at second; scenario dataset shows scenario at second position.
-        IR_chartNdvi.data.datasets[0].data = [IR_BASE.ndvi_mean, 0];
-        IR_chartNdvi.data.datasets[1].data = [0, s.ndviScenario];
-        // Update UHI bar chart similarly.
-        IR_chartUhi.data.datasets[0].data = [IR_BASE.uhi_mean, 0];
-        IR_chartUhi.data.datasets[1].data = [0, s.uhiScenario];
-        // Update Energy bar chart: demand, PV and net grid for current scenario.
-        IR_chartEnergy.data.datasets[1].data = [
-          s.energyScenario_kwh / 1000,
-          s.pvScenario_kwh / 1000,
-          s.netGridScenario_kwh / 1000
-        ];
-        // Update radar chart: green, cool, energy and CO₂ scores for the scenario.
-        IR_chartRadar.data.datasets[1].data = [
-          s.greenScore,
-          s.coolScore,
-          s.energyScore,
-          s.co2Score
-        ];
-        // Refresh charts without animation.
+        // Update chart datasets for Scenario A
+        if (scenarioA) {
+          IR_chartNdvi.data.datasets[2].data = [IR_BASE.ndvi_mean, scenarioA.ndviScenario];
+          IR_chartUhi.data.datasets[2].data = [IR_BASE.uhi_mean, scenarioA.uhiScenario];
+          IR_chartEnergy.data.datasets[2].data = [scenarioA.energyScenario_kwh / 1000, scenarioA.pvScenario_kwh / 1000, scenarioA.netGridScenario_kwh / 1000];
+          IR_chartRadar.data.datasets[2].data = [scenarioA.greenScore, scenarioA.coolScore, scenarioA.energyScore, scenarioA.co2Score];
+        } else {
+          IR_chartNdvi.data.datasets[2].data = [IR_BASE.ndvi_mean, IR_BASE.ndvi_mean];
+          IR_chartUhi.data.datasets[2].data = [IR_BASE.uhi_mean, IR_BASE.uhi_mean];
+          IR_chartEnergy.data.datasets[2].data = [IR_BASE.energy_kwh / 1000, IR_BASE.pv_kwh / 1000, IR_BASE_netGrid_kwh / 1000];
+          IR_chartRadar.data.datasets[2].data = [40, 40, 40, 40];
+        }
+        // Update chart datasets for Scenario B
+        if (scenarioB) {
+          IR_chartNdvi.data.datasets[3].data = [IR_BASE.ndvi_mean, scenarioB.ndviScenario];
+          IR_chartUhi.data.datasets[3].data = [IR_BASE.uhi_mean, scenarioB.uhiScenario];
+          IR_chartEnergy.data.datasets[3].data = [scenarioB.energyScenario_kwh / 1000, scenarioB.pvScenario_kwh / 1000, scenarioB.netGridScenario_kwh / 1000];
+          IR_chartRadar.data.datasets[3].data = [scenarioB.greenScore, scenarioB.coolScore, scenarioB.energyScore, scenarioB.co2Score];
+        } else {
+          IR_chartNdvi.data.datasets[3].data = [IR_BASE.ndvi_mean, IR_BASE.ndvi_mean];
+          IR_chartUhi.data.datasets[3].data = [IR_BASE.uhi_mean, IR_BASE.uhi_mean];
+          IR_chartEnergy.data.datasets[3].data = [IR_BASE.energy_kwh / 1000, IR_BASE.pv_kwh / 1000, IR_BASE_netGrid_kwh / 1000];
+          IR_chartRadar.data.datasets[3].data = [40, 40, 40, 40];
+        }
         IR_chartNdvi.update("none");
         IR_chartUhi.update("none");
         IR_chartEnergy.update("none");
@@ -2079,21 +1871,12 @@
         labelHeat.textContent = s.heatLevel;
         labelGreenRoof.textContent = s.greenRoofPct;
         
-        // Update NDVI chart: baseline dataset shows baseline only at first position and zero at second; scenario dataset reflects current sliders.
-        IR_chartNdvi.data.datasets[0].data = [IR_BASE.ndvi_mean, 0];
-        IR_chartNdvi.data.datasets[1].data = [0, s.ndviScenario];
-        IR_chartNdvi.update("none");
-        // Update UHI chart similarly.
-        IR_chartUhi.data.datasets[0].data = [IR_BASE.uhi_mean, 0];
-        IR_chartUhi.data.datasets[1].data = [0, s.uhiScenario];
-        IR_chartUhi.update("none");
-        // Update energy chart: baseline vs scenario.
+        IR_chartNdvi.data.datasets[0].data = [IR_BASE.ndvi_mean, s.ndviScenario]; IR_chartNdvi.update("none");
+        IR_chartUhi.data.datasets[0].data = [IR_BASE.uhi_mean, s.uhiScenario]; IR_chartUhi.update("none");
         IR_chartEnergy.data.datasets[0].data = [IR_BASE.energy_kwh/1000, IR_BASE.pv_kwh/1000, IR_BASE_netGrid_kwh/1000];
         IR_chartEnergy.data.datasets[1].data = [s.energyScenario_kwh/1000, s.pvScenario_kwh/1000, s.netGridScenario_kwh/1000];
         IR_chartEnergy.update("none");
-        // Update radar chart for scenario; baseline remains default.
-        IR_chartRadar.data.datasets[1].data = [s.greenScore, s.coolScore, s.energyScore, s.co2Score];
-        IR_chartRadar.update("none");
+        IR_chartRadar.data.datasets[1].data = [s.greenScore, s.coolScore, s.energyScore, s.co2Score]; IR_chartRadar.update("none");
 
         const greenPct = (s.ndviScenario / IR_BASE.ndvi_mean - 1) * 100;
         const energyPct = (1 - s.energyScenario_kwh / IR_BASE.energy_kwh) * 100;
@@ -2216,7 +1999,25 @@
         });
       }
 
-      // Scenario comparison pinning removed; only one scenario is supported now.
+      // Scenario comparison pinning
+      if (btnPinA) {
+        btnPinA.addEventListener('click', () => {
+          scenarioA = IR_computeScenario();
+          updateComparison();
+          // Show details overlay for Scenario A
+          updateScenarioOverlay('A', scenarioA);
+          showToast('Pinned current as Scenario A');
+        });
+      }
+      if (btnPinB) {
+        btnPinB.addEventListener('click', () => {
+          scenarioB = IR_computeScenario();
+          updateComparison();
+          // Show details overlay for Scenario B
+          updateScenarioOverlay('B', scenarioB);
+          showToast('Pinned current as Scenario B');
+        });
+      }
 
       // Copy scenario as link
       if (btnCopy) {
@@ -2537,21 +2338,6 @@
         });
       });
 
-      // Replicate buttons: load the corresponding case preset and open simulation
-      document.querySelectorAll('.replicate-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-          // Prevent the parent case-card click from firing
-          e.stopPropagation();
-          const caseKey = this.getAttribute('data-case');
-          if (caseKey && window.caseData && window.caseData[caseKey] && window.caseData[caseKey].preset) {
-            loadPreset(caseKey);
-            // Hide the case studies modal
-            const modal = document.getElementById('modal-overlay');
-            if (modal) modal.classList.remove('active');
-          }
-        });
-      });
-
       // Preset buttons
       document.querySelectorAll('.preset-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -2746,15 +2532,6 @@
           modalOverlay.classList.remove('active');
         });
       }
-
-      // Timeline modal close button
-      const timelineModal = document.getElementById('timeline-modal');
-      const timelineCloseBtn = document.getElementById('timeline-close-btn');
-      if (timelineModal && timelineCloseBtn) {
-        timelineCloseBtn.addEventListener('click', function() {
-          timelineModal.classList.remove('active');
-        });
-      }
     });
 
     // Toast helper
@@ -2822,7 +2599,7 @@
         'nav-overview': 'Overview',
         'nav-ecology': 'Ecology',
         'nav-energy': 'Energy',
-        'nav-simulation': 'Combined Scenario Analysis',
+        'nav-simulation': 'Simulation',
         'hero-title': 'Design a Cooler, Greener and Energy Efficient Neighbourhood',
         'hero-subtitle': 'A neighbourhood-scale digital twin to test interventions before spending millions',
         'badge-heat-risk': 'Heat risk',
@@ -2842,16 +2619,16 @@
         'why-bullet-1': 'Mixed building stock → retrofit tradeoffs are real.',
         'why-bullet-2': 'Heat + energy affordability collide here.',
         'why-bullet-3': 'Perfect scale: neighbourhood interventions actually measurable.',
-        'cases-call-btn': 'Explore other case studies',
+        'cases-call-btn': 'Explore global case studies',
         'cases-call-note': 'Learn from international examples on cooling, energy, retrofits and community solar.',
         'timeline-now-desc': 'Hotter summers, rising bills.',
         'timeline-now': 'Now',
         'timeline-2027-desc': 'Grid pressure + retrofit targets.',
         'timeline-2030-desc': 'Policy deadlines (EU targets).',
         'timeline-2050-desc': 'Climate baseline shift.',
-        'preset-cool': 'Urban heat reduction',
-        'preset-bills': 'Reduce energy bills',
-        'preset-stress': '2050 heat stress test',
+        'preset-cool': 'Cool the streets',
+        'preset-bills': 'Slash bills fast',
+        'preset-stress': 'Stress test 2050 heat',
         'howto-step-ecology': 'Explore Ecology map',
         'howto-step-energy': 'Explore Energy map',
         'howto-step-sim': 'Combine in Simulation and export PDF',
@@ -2860,18 +2637,17 @@
         'open-tab-btn': 'Open tab',
         'open-ecology-tab': 'Open Ecology tab',
         'open-energy-tab': 'Open Energy tab',
-        'replicate-btn': 'Replicate this strategy',
-        'replicate-title': 'Current Digital Twin Situation',
+        'replicate-title': 'Digital twin scenario',
         'replicate-baseline': 'Baseline UHI intensity: approx {baseline}°C.',
         'replicate-canopy': 'Adding {pct}% more tree canopy could lower air temperatures by roughly {red}°C.',
         'replicate-green': 'Installing green roofs on about {pct}% of rooftops may cool the area by another ~{red}°C.',
-        'replicate-total': 'Together, these measures might reduce local temperatures by around {total}°C and lessen heat stress. Visit the Combined Scenario Analysis tab to test the scenario.'
+        'replicate-total': 'Together, these measures might reduce local temperatures by around {total}°C and lessen heat stress. Visit the Simulation tab to test the scenario.'
       },
       nl: {
         'nav-overview': 'Overzicht',
         'nav-ecology': 'Ecologie',
         'nav-energy': 'Energie',
-        'nav-simulation': 'Gecombineerde scenarioanalyse',
+        'nav-simulation': 'Simulatie',
         'hero-title': 'Ontwerp een koelere, groenere en energiezuinige buurt',
         'hero-subtitle': 'Een digitale tweeling op buurtniveau om interventies te testen voordat er miljoenen worden uitgegeven',
         'badge-heat-risk': 'Hitterisico',
@@ -2891,16 +2667,16 @@
         'why-bullet-1': 'Gemengde gebouwenvoorraad → renovatieafwegingen zijn reëel.',
         'why-bullet-2': 'Hitte en energie betaalbaarheid botsen hier.',
         'why-bullet-3': 'Perfecte schaal: wijkinterventies daadwerkelijk meetbaar.',
-        'cases-call-btn': 'Verken andere casestudies',
+        'cases-call-btn': 'Verken wereldwijde casestudies',
         'cases-call-note': 'Leer van internationale voorbeelden op het gebied van koeling, energie, renovaties en zonne-energie van de gemeenschap.',
         'timeline-now-desc': 'Heettere zomers, stijgende rekeningen.',
         'timeline-now': 'Nu',
         'timeline-2027-desc': 'Netdruk & renovatiedoelen.',
         'timeline-2030-desc': 'Beleidsdeadlines (EU-doelen).',
         'timeline-2050-desc': 'Verandering van het klimaatbasisniveau.',
-        'preset-cool': 'Warmtereductie',
-        'preset-bills': 'Verminder energierekeningen',
-        'preset-stress': 'Hittestresstest 2050',
+        'preset-cool': 'Verkoel de straten',
+        'preset-bills': 'Verlaag rekeningen snel',
+        'preset-stress': 'Stresstest hitte 2050',
         'howto-step-ecology': 'Verken de ecologiekaart',
         'howto-step-energy': 'Verken de energiekaart',
         'howto-step-sim': 'Combineer in simulatie en exporteer PDF',
@@ -2909,18 +2685,17 @@
         'open-tab-btn': 'Tab openen',
         'open-ecology-tab': 'Open ecologietab',
         'open-energy-tab': 'Open energietab',
-        'replicate-btn': 'Repliceer deze strategie',
-        'replicate-title': 'Huidige digitale twin-situatie',
+        'replicate-title': 'Digitale twin-scenario',
         'replicate-baseline': 'Basis UHI-intensiteit: ongeveer {baseline}°C.',
         'replicate-canopy': 'Het toevoegen van {pct}% meer boomkruin kan de luchttemperatuur met circa {red}°C verlagen.',
         'replicate-green': 'Het installeren van groene daken op ongeveer {pct}% van de daken kan het gebied met nog eens ~{red}°C koelen.',
-        'replicate-total': 'Samen kunnen deze maatregelen de lokale temperatuur met rond {total}°C verlagen en hittestress verminderen. Bezoek het tabblad Gecombineerde scenarioanalyse om het scenario te testen.'
+        'replicate-total': 'Samen kunnen deze maatregelen de lokale temperatuur met rond {total}°C verlagen en hittestress verminderen. Bezoek het tabblad Simulatie om het scenario te testen.'
       },
       de: {
         'nav-overview': 'Überblick',
         'nav-ecology': 'Ökologie',
         'nav-energy': 'Energie',
-        'nav-simulation': 'Kombinierte Szenarioanalyse',
+        'nav-simulation': 'Simulation',
         'hero-title': 'Gestalte ein kühleres, grüneres und energieeffizientes Viertel',
         'hero-subtitle': 'Ein digitaler Zwilling auf Nachbarschaftsebene, um Maßnahmen zu testen, bevor Millionen ausgegeben werden',
         'badge-heat-risk': 'Hitzegefahr',
@@ -2940,16 +2715,16 @@
         'why-bullet-1': 'Gemischter Gebäudebestand → Sanierungsabwicklungen sind real.',
         'why-bullet-2': 'Hitze und Energiebezahlbarkeit kollidieren hier.',
         'why-bullet-3': 'Perfekte Größe: Maßnahmen im Viertel sind tatsächlich messbar.',
-        'cases-call-btn': 'Andere Fallstudien erkunden',
+        'cases-call-btn': 'Globale Fallstudien erkunden',
         'cases-call-note': 'Lernen Sie von internationalen Beispielen zu Kühlung, Energie, Sanierungen und gemeinschaftlicher Solarenergie.',
         'timeline-now-desc': 'Heißere Sommer, steigende Rechnungen.',
         'timeline-now': 'Jetzt',
         'timeline-2027-desc': 'Netzdruck & Sanierungsziele.',
         'timeline-2030-desc': 'Politische Fristen (EU-Ziele).',
         'timeline-2050-desc': 'Verschiebung der Klimabasislinie.',
-        'preset-cool': 'Hitzereduktion',
-        'preset-bills': 'Energiekosten senken',
-        'preset-stress': 'Hitzestresstest 2050',
+        'preset-cool': 'Kühl die Straßen',
+        'preset-bills': 'Rechnungen schnell senken',
+        'preset-stress': 'Stresstest Hitze 2050',
         'howto-step-ecology': 'Ökologiekarte erkunden',
         'howto-step-energy': 'Energiekarte erkunden',
         'howto-step-sim': 'In Simulation kombinieren und PDF exportieren',
@@ -2958,12 +2733,11 @@
         'open-tab-btn': 'Tab öffnen',
         'open-ecology-tab': 'Ökologie-Tab öffnen',
         'open-energy-tab': 'Energie-Tab öffnen',
-        'replicate-btn': 'Diese Strategie replizieren',
-        'replicate-title': 'Aktuelle Digitale-Zwilling-Situation',
+        'replicate-title': 'Digitales Zwillingsszenario',
         'replicate-baseline': 'UHI-Basisintensität: ungefähr {baseline}°C.',
         'replicate-canopy': 'Die Erhöhung der Baumkronenfläche um {pct}% könnte die Lufttemperatur um etwa {red}°C senken.',
         'replicate-green': 'Begrünte Dächer auf etwa {pct}% der Dächer könnten das Gebiet um weitere ~{red}°C abkühlen.',
-        'replicate-total': 'Zusammen könnten diese Maßnahmen die lokale Temperatur um rund {total}°C senken und Hitzestress verringern. Besuchen Sie die Registerkarte Kombinierte Szenarioanalyse, um das Szenario zu testen.'
+        'replicate-total': 'Zusammen könnten diese Maßnahmen die lokale Temperatur um rund {total}°C senken und Hitzestress verringern. Besuchen Sie die Registerkarte Simulation, um das Szenario zu testen.'
       }
     };
     // Current language is persisted in local storage; default to English.
@@ -3025,10 +2799,6 @@
       // Update simulate buttons
       document.querySelectorAll('.simulate-btn').forEach(btn => {
         btn.textContent = t('simulate-btn');
-      });
-      // Update replicate buttons
-      document.querySelectorAll('.replicate-btn').forEach(btn => {
-        btn.textContent = t('replicate-btn');
       });
       // Update replicate message to reflect the current language
       updateReplicateMessage();
@@ -3102,6 +2872,57 @@
             panel.style.display = 'flex';
           });
         });
+        // Attach click listeners to hotspot list links (if present). These buttons mirror the map hotspots but work reliably on external hosting.
+        document.querySelectorAll('.hotspot-link').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const key = this.getAttribute('data-spot');
+            // If a corresponding map hotspot exists, reuse its click handler
+            const hidden = document.querySelector('.hotspot[data-spot="' + key + '"]');
+            if (hidden) {
+              hidden.click();
+              return;
+            }
+            // Fallback: directly populate the inline panel using global hotspot data
+            const data = window.hotspotData && window.hotspotData[key];
+            if (!data) return;
+            panelTitle.textContent = data.title;
+            panelDesc.textContent = data.desc;
+            panelImg.src = data.img;
+            // Compute preview if preset defined
+            if (data.preset) {
+              let previewSet = false;
+              try {
+                if (typeof computeScenario === 'function' && window.IR_BASE_GLOBAL) {
+                  const sVal = computeScenario(data.preset);
+                  if (sVal) {
+                    const uhi = window.IR_BASE_GLOBAL.uhi_mean - sVal.uhiScenario;
+                    const co2pct = (1 - sVal.co2Scenario_kg / window.IR_BASE_GLOBAL.co2_kg) * 100;
+                    panelPreview.innerHTML = `If we add ${data.preset.trees} trees & ${data.preset.green}% green roofs → UHI ${uhi >= 0 ? '–' : '+'}${Math.abs(uhi).toFixed(1)}°C, CO₂ ${co2pct >= 0 ? '–' : '+'}${Math.abs(Math.round(co2pct))}%`;
+                    previewSet = true;
+                  }
+                }
+              } catch(err) {
+                /* ignore errors */
+              }
+              if (!previewSet) {
+                panelPreview.textContent = '';
+              }
+              panelSimBtn.dataset.preset = JSON.stringify(data.preset);
+            } else {
+              panelPreview.textContent = '';
+              panelSimBtn.dataset.preset = '';
+            }
+            // Set dataset for open tab and update button text
+            panelOpenBtn.dataset.tab = data.tab;
+            if (data.tab === 'panel-ecology') panelOpenBtn.textContent = t('open-ecology-tab');
+            else if (data.tab === 'panel-energy') panelOpenBtn.textContent = t('open-energy-tab');
+            else panelOpenBtn.textContent = t('open-tab-btn');
+            // Update simulate button text via translation helper
+            panelSimBtn.textContent = t('simulate-btn');
+            // Show panel
+            panel.style.display = 'flex';
+          });
+        });
         // Simulate button: load preset and hide panel
         panelSimBtn.addEventListener('click', function() {
           const presetStr = this.dataset.preset;
@@ -3128,134 +2949,6 @@
           });
         }
       }
-
-      // --- Custom interactive elements ---
-      // Provide explanatory pop‑ups for the micro badges. Clicking on a badge
-      // reveals a short description of the concept.
-      const badgeInfoMap = {
-        'badge-heat-risk': 'Heat risk refers to the danger posed by high urban temperatures in the neighbourhood, affecting health and comfort.',
-        'badge-energy-poverty': 'Energy poverty describes households struggling to afford sufficient energy to meet their basic needs.',
-        'badge-retrofit-complexity': 'Retrofit complexity reflects the challenges of upgrading existing buildings due to age, design or heritage factors.'
-      };
-      const badgeInfoEl = document.getElementById('badge-info');
-      const badgeInfoTextEl = document.getElementById('badge-info-text');
-      const badgeInfoCloseEl = document.getElementById('badge-info-close');
-      // Close button hides the info box
-      if (badgeInfoCloseEl && badgeInfoEl) {
-        badgeInfoCloseEl.addEventListener('click', function() {
-          badgeInfoEl.style.display = 'none';
-        });
-      }
-      // Attach click handlers to badges to populate description and show info box
-      document.querySelectorAll('.micro-badge').forEach(badge => {
-        badge.style.cursor = 'pointer';
-        badge.addEventListener('click', function() {
-          const span = this.querySelector('span');
-          if (!span || !badgeInfoEl) return;
-          const key = span.getAttribute('data-i18n');
-          const desc = badgeInfoMap[key] || '';
-          if (badgeInfoTextEl) badgeInfoTextEl.textContent = desc;
-          // Display flex to align text and close icon
-          badgeInfoEl.style.display = 'flex';
-        });
-      });
-      // Make timeline items clickable. Policy timeline items open a modal popup; other internal links scroll smoothly; external links open new tabs.
-      document.querySelectorAll('.timeline-item[data-link]').forEach(item => {
-        const link = item.getAttribute('data-link');
-        if (!link) return;
-        item.style.cursor = 'pointer';
-        item.addEventListener('click', () => {
-          // If the link refers to a policy section, show it in a modal overlay instead of scrolling
-          if (link.startsWith('#policy-')) {
-            const policyEl = document.querySelector(link);
-            const modal = document.getElementById('timeline-modal');
-            const content = document.getElementById('timeline-modal-content');
-            if (policyEl && modal && content) {
-              content.innerHTML = policyEl.innerHTML;
-              modal.classList.add('active');
-            }
-            return;
-          }
-          // Internal anchors start with '#'
-          if (link.startsWith('#')) {
-            const target = document.querySelector(link);
-            if (target && target.scrollIntoView) {
-              target.scrollIntoView({ behavior: 'smooth' });
-              return;
-            }
-          }
-          // Fallback: open external links in new tab
-          if (link.startsWith('http')) {
-            window.open(link, '_blank');
-          }
-        });
-      });
-
-      // Digital twin info button toggles the expanded content.
-      const dtBtn = document.getElementById('digital-twin-info-btn');
-      const dtInfo = document.getElementById('digital-twin-info');
-      if (dtBtn && dtInfo) {
-        dtBtn.addEventListener('click', function() {
-          if (dtInfo.style.display === 'none' || dtInfo.style.display === '') {
-            // Ensure replicate message is up to date before showing
-            if (typeof updateReplicateMessage === 'function') updateReplicateMessage();
-            dtInfo.style.display = 'block';
-          } else {
-            dtInfo.style.display = 'none';
-          }
-        });
-      }
-      // Buttons inside the digital twin actions navigate to the appropriate tab
-      document.querySelectorAll('.digital-twin-actions .pill-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const tab = this.getAttribute('data-tab');
-          if (tab && typeof window.switchTab === 'function') {
-            window.switchTab(tab);
-          }
-        });
-      });
-      // Hotspot list buttons: if a hidden hotspot exists we simulate its click; otherwise we populate the drawer directly
-      document.querySelectorAll('.hotspot-link').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const key = this.getAttribute('data-spot');
-          const hidden = document.querySelector('.hotspot[data-spot="' + key + '"]');
-          if (hidden) {
-            hidden.click();
-            return;
-          }
-          // Fallback: directly open the drawer with hotspot info
-          const data = window.hotspotData && window.hotspotData[key];
-          if (!data) return;
-          drawerTitle.textContent = data.title;
-          drawerDesc.textContent = data.desc;
-          drawerImg.src = data.img;
-          // Localised label for the open tab button
-          drawerOpenBtn.textContent = data.tab === "panel-ecology" ? t('open-ecology-tab') : t('open-energy-tab');
-          drawerOpenBtn.dataset.tab = data.tab;
-          // Update preview and simulate dataset
-          if (data.preset) {
-            const s = computeScenario(data.preset);
-            const uhi = window.IR_BASE_GLOBAL.uhi_mean - s.uhiScenario;
-            const co2pct = (1 - s.co2Scenario_kg / window.IR_BASE_GLOBAL.co2_kg) * 100;
-            drawerPreview.innerHTML = `If we add ${data.preset.trees} trees & ${data.preset.green}% green roofs → UHI ${uhi >= 0 ? '–' : '+'}${Math.abs(uhi).toFixed(1)}°C, CO₂ ${co2pct >= 0 ? '–' : '+'}${Math.abs(Math.round(co2pct))}%`;
-            drawerSimBtn.dataset.preset = JSON.stringify(data.preset);
-          } else {
-            drawerPreview.textContent = '';
-            drawerSimBtn.dataset.preset = '';
-          }
-          drawer.classList.add('open');
-        });
-      });
-      // Make how‑to steps clickable: switch to the specified tab when clicked.
-      document.querySelectorAll('.howto-step[data-tab]').forEach(step => {
-        const tab = step.getAttribute('data-tab');
-        if (tab) {
-          step.style.cursor = 'pointer';
-          step.addEventListener('click', function() {
-            switchTab(tab, null);
-          });
-        }
-      });
     });
     // Expose translator globally so other scripts can access if needed
     window.t = t;
