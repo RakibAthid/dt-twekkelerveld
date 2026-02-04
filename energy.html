@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Twekkelerveld Smart Energy Twin</title>
 
-<!-- Cloudflare/R2 config (optional). If missing, the app falls back to local files. -->
-<script src="config.js"></script>
+<!-- Cloudflare/R2 config removed: all assets are now loaded from relative paths. -->
 
 <!-- CesiumJS -->
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/Cesium.js"></script>
@@ -999,10 +998,11 @@
     </div>
     </div>
 
-  <h4>Seasonal Context <span class="layer-info" title="This chart shows how monthly solar potential and energy use vary over the year. Use the slider below to select a month.">i</span></h4>
-  <div id="contextGraph"><canvas id="seasonCanvas"></canvas></div>
+  <!-- Seasonal context chart hidden in this version -->
+  <h4 style="display:none;">Seasonal Context <span class="layer-info" title="This chart shows how monthly solar potential and energy use vary over the year. Use the slider below to select a month.">i</span></h4>
+  <div id="contextGraph" style="display:none;"><canvas id="seasonCanvas"></canvas></div>
 
-  <div style="margin-bottom:20px;">
+  <div style="margin-bottom:20px; display:none;">
     <div class="flex-between"><span>Month</span> <span id="monthName" style="color:var(--accent-primary)">June 2024</span></div>
     <input id="monthSlider" type="range" min="0" max="11" step="1" value="5" oninput="setMonth(this.value)" />
   </div>
@@ -1011,13 +1011,14 @@
   </div>
 
   <!-- Continue with the shared filter (visible in both LOD 1 and LOD 2) -->
-  <h4>Filter</h4>
-  <div class="flex-between" style="margin-bottom:5px">
+  <!-- Filter UI hidden in this version -->
+  <h4 style="display:none;">Filter</h4>
+  <div class="flex-between" style="margin-bottom:5px; display:none;">
     <span>Hide small values</span> <span id="threshVal" style="color:var(--accent-primary); font-weight:700;">0</span>
   </div>
-  <input type="range" min="0" max="100" value="0" style="width:100%" oninput="updateVis()" id="slider">
-  <div id="legendGradient"></div>
-  <div class="flex-between">
+  <input type="range" min="0" max="100" value="0" style="width:100%; display:none;" oninput="updateVis()" id="slider">
+  <div id="legendGradient" style="display:none;"></div>
+  <div class="flex-between" style="display:none;">
     <span id="legendMin">Low</span> <span id="legendMax">High</span>
   </div>
 </div>
@@ -1081,43 +1082,36 @@
 ------------------------------------------------------------ */
 
 // ------------------------------------------------------------
-// Cloudflare Pages + R2 support
-// If config.js defines window.DT_CONFIG.R2_BASE, all data assets
-// are loaded from that public R2 bucket. If empty, local relative
-// paths are used (works on localhost / Live Server).
+// Data files are now loaded from relative paths.  R2_BASE/PREFIX
+// and the dataUrl() helper are removed in this version.  If you are
+// deploying to an R2 bucket, simply ensure the assets live alongside
+// this HTML file and reference them directly by name.
 // ------------------------------------------------------------
-const R2_BASE   = (window.DT_CONFIG?.R2_BASE || "").replace(/\/+$/, "");
-const R2_PREFIX = (window.DT_CONFIG?.R2_PREFIX || "").replace(/^\/+|\/+$/g, "");
-function dataUrl(name){
-  if(!R2_BASE) return name;
-  const parts = [R2_BASE];
-  if(R2_PREFIX) parts.push(R2_PREFIX);
-  parts.push(String(name || "").replace(/^\/+/, ""));
-  return parts.join("/");
-}
 
 // =============================
 // 0) FILES 
 // =============================
-const LOCAL_SHADOW_PNG = dataUrl("Aggregated Shadow Raster.png");
-const LOCAL_SHADOW_PGW = dataUrl("Aggregated Shadow Raster.pgw");
+// Updated shadow raster filenames to use the new dataset. Changing these names ensures
+// the application loads the updated ground‑plane shadow raster when toggled.
+const LOCAL_SHADOW_PNG = "Aggregated Shadow Raster_updated.png";
+const LOCAL_SHADOW_PGW = "Aggregated Shadow Raster_updated.pgw";
 
-const LOCAL_IRR_PNG    = dataUrl("Roof Irradiance Raster(kWh).png");
-const LOCAL_IRR_PGW    = dataUrl("Roof Irradiance Raster(kWh).pgw");
+const LOCAL_IRR_PNG    = "Roof Irradiance Raster(kWh).png";
+const LOCAL_IRR_PGW    = "Roof Irradiance Raster(kWh).pgw";
 
 
 const IRR_SCALE_JSON   = null;
 
 // ✅ EnergyEst MUST be loaded from your BAG-PAND fixed table (EnergyEst column)
 const CSV_CANDIDATES = [
-  dataUrl("Twekkelerveld_bag_pand_FIXED.csv"),
-  dataUrl("twekkelerveld_bag_pand_FIXED.csv"),
-  dataUrl("Twekkelerveld_bag_pand_Fixed.csv")
+  "Twekkelerveld_bag_pand_FIXED.csv",
+  "twekkelerveld_bag_pand_FIXED.csv",
+  "Twekkelerveld_bag_pand_Fixed.csv"
 ];
 let CSV_FILE_ACTUAL = null;
 
 // LOD 1 footprint file
-const GEOJSON_FILE = dataUrl("twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson");
+const GEOJSON_FILE = "twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson";
 
 // =============================
 // 1) CONFIG
@@ -1233,11 +1227,11 @@ const LABEL_COLOR_MAP = {
 // candidate defines both a URL (relative to this HTML file) and the
 // expected type.
 const LABEL_SOURCES = [
-  { url: dataUrl("energy_labels_meta.json"),         type: "json" },
-  { url: dataUrl("energy_labels_meta"),              type: "json" },
-  { url: dataUrl("energy_labels_twekkelerveld.csv"), type: "csv" },
-  { url: dataUrl("energy_labels_twekkelerveld.xlsx"), type: "xlsx" },
-  { url: dataUrl("energy_labels_twekkelerveld"),     type: "csv" }
+  { url: "energy_labels_meta.json",         type: "json" },
+  { url: "energy_labels_meta",              type: "json" },
+  { url: "energy_labels_twekkelerveld.csv", type: "csv" },
+  { url: "energy_labels_twekkelerveld.xlsx", type: "xlsx" },
+  { url: "energy_labels_twekkelerveld",     type: "csv" }
 ];
 let labelMap = new Map();
 let labelCoverageCount = 0;
@@ -2029,12 +2023,48 @@ class RasterSampler {
 }
 
 async function loadLocalRasters(){
-  try{
+  // Attempt to load both rasters in parallel.  If the shadow raster fails
+  // (for example, because its .pgw file is missing), fall back to a simple
+  // single‑tile overlay that uses the irradiance raster's bounds.  This ensures
+  // the shade overlay remains visible even when georeference data is unavailable.
+  try {
     shadowRaster = new RasterSampler("Shade", LOCAL_SHADOW_PNG, LOCAL_SHADOW_PGW);
     irrRaster    = new RasterSampler("Sunlight", LOCAL_IRR_PNG, LOCAL_IRR_PGW);
     await Promise.all([shadowRaster.load(), irrRaster.load()]);
-  }catch(err){
+  } catch(err) {
     console.error("Raster load failed:", err);
+    // Ensure the irradiance raster is loaded; if it fails, we bail out.
+    try {
+      if (!irrRaster) {
+        irrRaster = new RasterSampler("Sunlight", LOCAL_IRR_PNG, LOCAL_IRR_PGW);
+      }
+      await irrRaster.load();
+    } catch(subErr) {
+      console.error("Irradiance raster load also failed:", subErr);
+      return;
+    }
+    // Create a simple imagery layer using the shadow PNG and the irradiance bounds
+    try {
+      const provider = new Cesium.SingleTileImageryProvider({
+        url: encodeURI(LOCAL_SHADOW_PNG),
+        rectangle: irrRaster.rectangleDegrees
+      });
+      const layer = viewer.imageryLayers.addImageryProvider(provider);
+      layer.alpha = 0.65;
+      layer.show = false;
+      viewer.imageryLayers.raiseToTop(layer);
+      // Replace shadowRaster with a stub so subsequent code can enable/disable the layer
+      shadowRaster = {
+        name: "Shade (fallback)",
+        pngUrl: LOCAL_SHADOW_PNG,
+        pgwUrl: null,
+        ready: true,
+        imageryLayer: layer,
+        sampleFromCartographic: () => null
+      };
+    } catch(fallbackErr) {
+      console.error("Fallback shadow overlay failed:", fallbackErr);
+    }
   }
 }
 
