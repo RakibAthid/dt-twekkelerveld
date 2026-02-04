@@ -1900,26 +1900,66 @@ const dataMaps = {
 };
 
 function loadMapData(id, url) {
-  const img = new Image();
-  // Set crossOrigin to allow pixel data extraction when loading from R2 or other
-  // remote buckets. Without this, the canvas becomes tainted and getImageData
-  // throws a security error, causing NDVI/UHI values to stick at their
-  // defaults. See https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image for details.
-  img.crossOrigin = 'anonymous';
-  img.src = url;
-  img.onload = () => {
-    const c = document.getElementById("canvas" + id.toUpperCase());
-    c.width = img.width;
-    c.height = img.height;
-
-    const ctx = c.getContext("2d", { willReadFrequently: true });
-    ctx.drawImage(img, 0, 0);
-    dataMaps[id].ctx = ctx;
-    dataMaps[id].width = img.width;
-    dataMaps[id].height = img.height;
-    dataMaps[id].loaded = true;
-  };
-  img.onerror = () => console.warn(`Image ${url} failed to load. Probing will use defaults.`);
+  /**
+   * Attempt to load a raster image from a list of candidate URLs.  On some deployments
+   * (e.g. Cloudflare R2) the NDVI or UHI PNG files may be stored with different casing
+   * or the bucket may not send permissive CORS headers.  In those cases using the
+   * original URL causes the image to fail to load or the resulting canvas becomes
+   * "tainted", meaning that pixel data cannot be read and default values are returned.
+   *
+   * To make probing robust, we try several filename variants (lower‑case/upper‑case)
+   * and wrap the load attempt in a recursive helper.  Each image is marked with
+   * crossOrigin='anonymous' prior to setting the src so that, when the bucket
+   * does send appropriate CORS headers, the pixel data remains readable.  When all
+   * variants fail the fallback silently falls back to defaults.
+   */
+  const candidates = [];
+  // always try the passed URL first
+  candidates.push(url);
+  // fallback variants: lower‑case and upper‑case filenames.  Some hosting providers
+  // (notably Cloudflare R2) are case-sensitive and may store assets using a
+  // different naming convention.  Trying multiple variants improves the chances of
+  // successfully loading the raster.
+  if (id === "ndvi") {
+    candidates.push(dataUrl("ndvi.png"));
+    candidates.push(dataUrl("NDVI.PNG"));
+    candidates.push(dataUrl("ndvi.PNG"));
+  }
+  if (id === "uhi") {
+    candidates.push(dataUrl("uhi.png"));
+    candidates.push(dataUrl("UHI.PNG"));
+    candidates.push(dataUrl("uhi.PNG"));
+  }
+  // helper to attempt loading sequentially
+  function attempt(i) {
+    if (i >= candidates.length) {
+      console.warn(`All ${id.toUpperCase()} image variants failed to load. Probing will use defaults.`);
+      return;
+    }
+    const candidate = candidates[i];
+    const img = new Image();
+    // Set crossOrigin to attempt an anonymous CORS request.  If the resource
+    // lacks the proper headers the image will still load but canvas pixel reads
+    // will be blocked.  In that case the next candidate is tried.
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const c = document.getElementById("canvas" + id.toUpperCase());
+      c.width = img.width;
+      c.height = img.height;
+      const ctx = c.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0);
+      dataMaps[id].ctx = ctx;
+      dataMaps[id].width = img.width;
+      dataMaps[id].height = img.height;
+      dataMaps[id].loaded = true;
+    };
+    img.onerror = () => {
+      // try next variant
+      attempt(i + 1);
+    };
+    img.src = candidate;
+  }
+  attempt(0);
 }
 loadMapData("ndvi", NDVI_PNG);
 loadMapData("uhi",  UHI_PNG);
@@ -3203,6 +3243,13 @@ function cancelPolygonDraw(silent=false){
   drawState.pencil.lastPos = null;
   drawState.usedFreehand = false;
 
+  // After cancelling a draw session restore the camera controls.  Without this
+  // explicit reset the default Cesium handler may continue to treat left
+  // drags as rotation (the library’s default), causing the map to spin
+  // rather than pan on some deployments.  This matches the behaviour when
+  // exiting planting or facade modes.
+  resetCameraControls();
+
   if(!silent) showToast("Drawing cancelled");
 
   // Ensure camera controls are restored when exiting draw mode
@@ -3385,6 +3432,12 @@ function finalizeScenarioPolygon(){
   drawState.active = false;
   interactionMode = "idle";
   viewer.canvas.style.cursor = "default";
+
+  // After finalising a scenario polygon reset camera controls to ensure
+  // intuitive panning.  Without this the screen‑space controller may retain
+  // mode‑specific event mappings causing the globe to rotate when attempting
+  // to pan.
+  resetCameraControls();
 
   updateScenarioList();
   updateSim();
