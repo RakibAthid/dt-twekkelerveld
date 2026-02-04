@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Twekkelerveld Smart Energy Twin</title>
 
+<!-- Cloudflare/R2 config (optional). If missing, the app falls back to local files. -->
+<script src="config.js"></script>
+
 <!-- CesiumJS -->
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/Cesium.js"></script>
 <link href="https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/Cesium.js" rel="preload" as="script">
@@ -996,11 +999,10 @@
     </div>
     </div>
 
-  <!-- Seasonal context removed: hide chart and month slider -->
-  <h4 style="display:none;">Seasonal Context <span class="layer-info" title="This chart shows how monthly solar potential and energy use vary over the year. Use the slider below to select a month.">i</span></h4>
-  <div id="contextGraph" style="display:none;"><canvas id="seasonCanvas"></canvas></div>
+  <h4>Seasonal Context <span class="layer-info" title="This chart shows how monthly solar potential and energy use vary over the year. Use the slider below to select a month.">i</span></h4>
+  <div id="contextGraph"><canvas id="seasonCanvas"></canvas></div>
 
-  <div style="margin-bottom:20px; display:none;">
+  <div style="margin-bottom:20px;">
     <div class="flex-between"><span>Month</span> <span id="monthName" style="color:var(--accent-primary)">June 2024</span></div>
     <input id="monthSlider" type="range" min="0" max="11" step="1" value="5" oninput="setMonth(this.value)" />
   </div>
@@ -1008,14 +1010,14 @@
   <!-- End of prototype/LOD2 controls wrapper -->
   </div>
 
-  <!-- Removed filter UI: hide threshold slider and legend -->
-  <h4 style="display:none;">Filter</h4>
-  <div class="flex-between" style="margin-bottom:5px; display:none;">
+  <!-- Continue with the shared filter (visible in both LOD 1 and LOD 2) -->
+  <h4>Filter</h4>
+  <div class="flex-between" style="margin-bottom:5px">
     <span>Hide small values</span> <span id="threshVal" style="color:var(--accent-primary); font-weight:700;">0</span>
   </div>
-  <input type="range" min="0" max="100" value="0" style="width:100%; display:none;" oninput="updateVis()" id="slider">
-  <div id="legendGradient" style="display:none;"></div>
-  <div class="flex-between" style="display:none;">
+  <input type="range" min="0" max="100" value="0" style="width:100%" oninput="updateVis()" id="slider">
+  <div id="legendGradient"></div>
+  <div class="flex-between">
     <span id="legendMin">Low</span> <span id="legendMax">High</span>
   </div>
 </div>
@@ -1078,30 +1080,44 @@
   Run via local server (Live Server).
 ------------------------------------------------------------ */
 
+// ------------------------------------------------------------
+// Cloudflare Pages + R2 support
+// If config.js defines window.DT_CONFIG.R2_BASE, all data assets
+// are loaded from that public R2 bucket. If empty, local relative
+// paths are used (works on localhost / Live Server).
+// ------------------------------------------------------------
+const R2_BASE   = (window.DT_CONFIG?.R2_BASE || "").replace(/\/+$/, "");
+const R2_PREFIX = (window.DT_CONFIG?.R2_PREFIX || "").replace(/^\/+|\/+$/g, "");
+function dataUrl(name){
+  if(!R2_BASE) return name;
+  const parts = [R2_BASE];
+  if(R2_PREFIX) parts.push(R2_PREFIX);
+  parts.push(String(name || "").replace(/^\/+/, ""));
+  return parts.join("/");
+}
+
 // =============================
 // 0) FILES 
 // =============================
-// Updated shadow raster filenames to use the new dataset. Changing these names ensures
-// the application loads the updated ground‑plane shadow raster when toggled.
-const LOCAL_SHADOW_PNG = "Aggregated Shadow Raster_updated.png";
-const LOCAL_SHADOW_PGW = "Aggregated Shadow Raster_updated.pgw";
+const LOCAL_SHADOW_PNG = dataUrl("Aggregated Shadow Raster.png");
+const LOCAL_SHADOW_PGW = dataUrl("Aggregated Shadow Raster.pgw");
 
-const LOCAL_IRR_PNG    = "Roof Irradiance Raster(kWh).png";
-const LOCAL_IRR_PGW    = "Roof Irradiance Raster(kWh).pgw";
+const LOCAL_IRR_PNG    = dataUrl("Roof Irradiance Raster(kWh).png");
+const LOCAL_IRR_PGW    = dataUrl("Roof Irradiance Raster(kWh).pgw");
 
 
 const IRR_SCALE_JSON   = null;
 
 // ✅ EnergyEst MUST be loaded from your BAG-PAND fixed table (EnergyEst column)
 const CSV_CANDIDATES = [
-  "Twekkelerveld_bag_pand_FIXED.csv",
-  "twekkelerveld_bag_pand_FIXED.csv",
-  "Twekkelerveld_bag_pand_Fixed.csv"
+  dataUrl("Twekkelerveld_bag_pand_FIXED.csv"),
+  dataUrl("twekkelerveld_bag_pand_FIXED.csv"),
+  dataUrl("Twekkelerveld_bag_pand_Fixed.csv")
 ];
 let CSV_FILE_ACTUAL = null;
 
 // LOD 1 footprint file
-const GEOJSON_FILE = "twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson";
+const GEOJSON_FILE = dataUrl("twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson");
 
 // =============================
 // 1) CONFIG
@@ -1154,27 +1170,15 @@ viewer.camera.setView({
 
 // Reset camera to the initial study area view when the reset button is clicked.
 function resetCameraView(){
-  // Fly the camera back to the original neighbourhood location.  Use a brief duration
-  // for a smooth transition rather than an instant jump.
-  // Fly the camera back to the study area.  When entity data has loaded, reuse the
-  // bounding extent of those entities for a more accurate reset.  Otherwise fall back
-  // to the original coordinates.
-  if (Array.isArray(myEntities) && myEntities.length > 0) {
-    viewer.flyTo(myEntities, {
-      duration: 1.5,
-      offset: new Cesium.HeadingPitchRange(0, -1.2, 1000)
-    });
-  } else {
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(6.89366, 52.22632, 1000),
-      orientation: {
-        heading: 0.0,
-        pitch: -1.2,
-        roll: 0.0
-      },
-      duration: 1.5
-    });
-  }
+  viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(6.89366, 52.22632, 1000),
+    orientation: {
+      heading: 0.0,
+      pitch: -1.2,
+      roll: 0.0
+    },
+    duration: 1.5
+  });
 }
 
 const BASE_SHADOW_DARKNESS = 0.3;
@@ -1229,11 +1233,11 @@ const LABEL_COLOR_MAP = {
 // candidate defines both a URL (relative to this HTML file) and the
 // expected type.
 const LABEL_SOURCES = [
-  { url: "energy_labels_meta.json",       type: "json" },
-  { url: "energy_labels_meta",            type: "json" },
-  { url: "energy_labels_twekkelerveld.csv", type: "csv" },
-  { url: "energy_labels_twekkelerveld.xlsx", type: "xlsx" },
-  { url: "energy_labels_twekkelerveld",    type: "csv" }
+  { url: dataUrl("energy_labels_meta.json"),         type: "json" },
+  { url: dataUrl("energy_labels_meta"),              type: "json" },
+  { url: dataUrl("energy_labels_twekkelerveld.csv"), type: "csv" },
+  { url: dataUrl("energy_labels_twekkelerveld.xlsx"), type: "xlsx" },
+  { url: dataUrl("energy_labels_twekkelerveld"),     type: "csv" }
 ];
 let labelMap = new Map();
 let labelCoverageCount = 0;
