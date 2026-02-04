@@ -999,10 +999,11 @@
     </div>
     </div>
 
-  <h4>Seasonal Context <span class="layer-info" title="This chart shows how monthly solar potential and energy use vary over the year. Use the slider below to select a month.">i</span></h4>
-  <div id="contextGraph"><canvas id="seasonCanvas"></canvas></div>
+  <!-- Seasonal context removed: hide chart and month slider -->
+  <h4 style="display:none;">Seasonal Context <span class="layer-info" title="This chart shows how monthly solar potential and energy use vary over the year. Use the slider below to select a month.">i</span></h4>
+  <div id="contextGraph" style="display:none;"><canvas id="seasonCanvas"></canvas></div>
 
-  <div style="margin-bottom:20px;">
+  <div style="margin-bottom:20px; display:none;">
     <div class="flex-between"><span>Month</span> <span id="monthName" style="color:var(--accent-primary)">June 2024</span></div>
     <input id="monthSlider" type="range" min="0" max="11" step="1" value="5" oninput="setMonth(this.value)" />
   </div>
@@ -1010,14 +1011,14 @@
   <!-- End of prototype/LOD2 controls wrapper -->
   </div>
 
-  <!-- Continue with the shared filter (visible in both LOD 1 and LOD 2) -->
-  <h4>Filter</h4>
-  <div class="flex-between" style="margin-bottom:5px">
+  <!-- Removed filter UI: hide threshold slider and legend -->
+  <h4 style="display:none;">Filter</h4>
+  <div class="flex-between" style="margin-bottom:5px; display:none;">
     <span>Hide small values</span> <span id="threshVal" style="color:var(--accent-primary); font-weight:700;">0</span>
   </div>
-  <input type="range" min="0" max="100" value="0" style="width:100%" oninput="updateVis()" id="slider">
-  <div id="legendGradient"></div>
-  <div class="flex-between">
+  <input type="range" min="0" max="100" value="0" style="width:100%; display:none;" oninput="updateVis()" id="slider">
+  <div id="legendGradient" style="display:none;"></div>
+  <div class="flex-between" style="display:none;">
     <span id="legendMin">Low</span> <span id="legendMax">High</span>
   </div>
 </div>
@@ -1099,8 +1100,10 @@ function dataUrl(name){
 // =============================
 // 0) FILES 
 // =============================
-const LOCAL_SHADOW_PNG = dataUrl("Aggregated Shadow Raster.png");
-const LOCAL_SHADOW_PGW = dataUrl("Aggregated Shadow Raster.pgw");
+// Updated shadow raster filenames to use the new dataset. Changing these names
+// ensures the application loads the updated ground‑plane shadow raster when toggled.
+const LOCAL_SHADOW_PNG = dataUrl("Aggregated Shadow Raster_updated.png");
+const LOCAL_SHADOW_PGW = dataUrl("Aggregated Shadow Raster_updated.pgw");
 
 const LOCAL_IRR_PNG    = dataUrl("Roof Irradiance Raster(kWh).png");
 const LOCAL_IRR_PGW    = dataUrl("Roof Irradiance Raster(kWh).pgw");
@@ -1170,15 +1173,25 @@ viewer.camera.setView({
 
 // Reset camera to the initial study area view when the reset button is clicked.
 function resetCameraView(){
-  viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(6.89366, 52.22632, 1000),
-    orientation: {
-      heading: 0.0,
-      pitch: -1.2,
-      roll: 0.0
-    },
-    duration: 1.5
-  });
+  // Fly the camera back to the study area.  When entity data has loaded, reuse the
+  // bounding extent of those entities for a more accurate reset.  Otherwise fall back
+  // to the original coordinates.  Use a brief duration for a smooth transition.
+  if (Array.isArray(myEntities) && myEntities.length > 0) {
+    viewer.flyTo(myEntities, {
+      duration: 1.5,
+      offset: new Cesium.HeadingPitchRange(0, -1.2, 1000)
+    });
+  } else {
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(6.89366, 52.22632, 1000),
+      orientation: {
+        heading: 0.0,
+        pitch: -1.2,
+        roll: 0.0
+      },
+      duration: 1.5
+    });
+  }
 }
 
 const BASE_SHADOW_DARKNESS = 0.3;
@@ -2029,12 +2042,48 @@ class RasterSampler {
 }
 
 async function loadLocalRasters(){
-  try{
+  // Attempt to load both rasters in parallel.  If the shadow raster fails
+  // (for example, because its .pgw file is missing), fall back to a simple
+  // single‑tile overlay that uses the irradiance raster's bounds.  This ensures
+  // the shade overlay remains visible even when georeference data is unavailable.
+  try {
     shadowRaster = new RasterSampler("Shade", LOCAL_SHADOW_PNG, LOCAL_SHADOW_PGW);
     irrRaster    = new RasterSampler("Sunlight", LOCAL_IRR_PNG, LOCAL_IRR_PGW);
     await Promise.all([shadowRaster.load(), irrRaster.load()]);
-  }catch(err){
+  } catch(err) {
     console.error("Raster load failed:", err);
+    // Ensure the irradiance raster is loaded; if it fails, we bail out.
+    try {
+      if (!irrRaster) {
+        irrRaster = new RasterSampler("Sunlight", LOCAL_IRR_PNG, LOCAL_IRR_PGW);
+      }
+      await irrRaster.load();
+    } catch(subErr) {
+      console.error("Irradiance raster load also failed:", subErr);
+      return;
+    }
+    // Create a simple imagery layer using the shadow PNG and the irradiance bounds
+    try {
+      const provider = new Cesium.SingleTileImageryProvider({
+        url: encodeURI(LOCAL_SHADOW_PNG),
+        rectangle: irrRaster.rectangleDegrees
+      });
+      const layer = viewer.imageryLayers.addImageryProvider(provider);
+      layer.alpha = 0.65;
+      layer.show = false;
+      viewer.imageryLayers.raiseToTop(layer);
+      // Replace shadowRaster with a stub so subsequent code can enable/disable the layer
+      shadowRaster = {
+        name: "Shade (fallback)",
+        pngUrl: LOCAL_SHADOW_PNG,
+        pgwUrl: null,
+        ready: true,
+        imageryLayer: layer,
+        sampleFromCartographic: () => null
+      };
+    } catch(fallbackErr) {
+      console.error("Fallback shadow overlay failed:", fallbackErr);
+    }
   }
 }
 
