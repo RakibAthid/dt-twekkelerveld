@@ -201,6 +201,27 @@
   }
   .layer-info:hover { border-color: rgba(255,255,255,0.35); background: rgba(59,130,246,0.18); }
 
+  /* Reset button styling – small button next to the title.  Provides a way to return to the study area. */
+  #resetViewBtn {
+    background: var(--glass-bg);
+    color: var(--text-muted);
+    border: 1px solid var(--glass-border);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    transition: all 0.2s;
+  }
+  #resetViewBtn:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border-color: white;
+  }
+
   #rightPanel {
     position: absolute; top: 85px; right: 20px; width: 360px;
     background: var(--glass-bg); padding: 24px; border-radius: 16px;
@@ -714,7 +735,12 @@
   </div>
 </div>
 
-<div id="titleBar" onclick="document.getElementById('overviewModal').style.display='flex'">Twekkelerveld Smart Energy Twin</div>
+<div id="titleBar" onclick="document.getElementById('overviewModal').style.display='flex'">
+  Twekkelerveld Smart Energy Twin
+  <!-- Added reset view button to recenter the map when users get lost -->
+  <button id="resetViewBtn" title="Reset view to study area"
+          onclick="event.stopPropagation(); resetCameraView();">↺</button>
+</div>
 <div id="methodBtn" onclick="document.getElementById('methodologyModal').style.display='flex'">Energy Overview</div>
 <div id="hoverTooltip"></div>
 
@@ -775,8 +801,9 @@
   <div id="rightToggle" class="toggle" title="Collapse sidebar">»</div>
   <h3>Visual Mode</h3>
   <!-- Energy label meta: shows coverage and refresh time -->
-  <div id="labelMeta" style="font-size:11px; color: var(--text-muted); margin-bottom: 10px; line-height:1.4;">
-    Label coverage: <span id="labelCoverageTxt">0 / 0</span><br>
+  <div id="labelMeta" style="font-size:11px; color: var(--text-muted); margin-bottom: 10px; line-height:1.4;"
+       title="Labels missing for some buildings → shown as no‑data">
+    Energy label coverage: <span id="labelCoverageTxt">0 / 0</span><br>
     Last refreshed: <span id="labelRefreshedTxt">—</span>
   </div>
   <div class="section-group">
@@ -902,7 +929,7 @@
     </button>
 
     <button id="lod2L_irr" class="mode-btn" onclick="toggleLod2Layer('irr')">
-      <span>Roof sunlight overlay</span>
+      <span>Solar raster (ground plane)</span>
       <div class="layer-right">
         <div class="indicator-icon" style="background:#22c55e; box-shadow:0 0 10px #22c55e;"></div>
         <div class="layer-info" onclick="openLayerInfo(event,'lod2_irr')" title="What is this?">i</div>
@@ -910,9 +937,9 @@
     </button>
 
     <button id="lod2L_shadow" class="mode-btn" onclick="toggleLod2Layer('shadow')">
-      <span>Roof shade overlay</span>
+      <span>Shade raster (ground plane)</span>
       <div class="layer-right">
-        <div class="indicator-icon" style="background:#f59e0b; box-shadow:0 0 10px #f59e0b;"></div>
+        <div class="indicator-icon" style="background:#a855f7; box-shadow:0 0 10px #a855f7;"></div>
         <div class="layer-info" onclick="openLayerInfo(event,'lod2_shadow')" title="What is this?">i</div>
       </div>
     </button>
@@ -928,27 +955,7 @@
     </div>
     </div>
 
-  <h4>Sunlight scaling</h4>
-  <div class="section-group">
-    <div class="flex-between"><span>Sunlight Min</span> <span style="color:#cbd5e1;">(kWh per m² per year)</span></div>
-    <input id="irrMin" class="tiny-input" type="number" step="1" value="800"
-      oninput="IRR_MIN_REAL = Number(this.value); refreshPrototypePanel();" />
-
-    <div style="height:10px"></div>
-
-    <div class="flex-between"><span>Sunlight Max</span> <span style="color:#cbd5e1;">(kWh per m² per year)</span></div>
-    <input id="irrMax" class="tiny-input" type="number" step="1" value="1200"
-      oninput="IRR_MAX_REAL = Number(this.value); refreshPrototypePanel();" />
-
-    <div class="check-row">
-      <input type="checkbox" id="invertShadow" onchange="prototypeInvertShadow=this.checked; refreshPrototypePanel();" />
-      Invert shade raster (if convention is reversed)
-    </div>
-
-    <div class="hint">
-      PNG pixels are 0–255 indexes. Min/Max convert that index into real roof sunlight values.
-    </div>
-  </div>
+  <!-- Sunlight scaling controls removed based on stakeholder feedback. The irradiance values are now interpreted internally with default scaling. -->
 
   <h4>Solar what-if controls</h4>
   <div class="section-group">
@@ -992,11 +999,11 @@
     </div>
     </div>
 
-  <h4>Seasonal Context</h4>
+  <h4>Seasonal Context <span class="layer-info" title="This chart shows how monthly solar potential and energy use vary over the year. Use the slider below to select a month.">i</span></h4>
   <div id="contextGraph"><canvas id="seasonCanvas"></canvas></div>
 
   <div style="margin-bottom:20px;">
-    <div class="flex-between"><span>Date</span> <span id="monthName" style="color:var(--accent-primary)">June 2024</span></div>
+    <div class="flex-between"><span>Month</span> <span id="monthName" style="color:var(--accent-primary)">June 2024</span></div>
     <input id="monthSlider" type="range" min="0" max="11" step="1" value="5" oninput="setMonth(this.value)" />
   </div>
 
@@ -1054,10 +1061,14 @@
 <div id="chatToggle" title="Ask the AI Assistant">🤖</div>
 <div id="chatPanel">
   <div id="chatHeader">
-    <span>AI Assistant</span>
+    <span>AI Assistant (suggestions only)</span>
     <button onclick="toggleChat(false)">×</button>
   </div>
   <div id="chatContent"></div>
+  <!-- Disclaimer clarifying that the assistant provides suggestions only and does not make decisions -->
+  <div id="chatDisclaimer" style="font-size:10px; color: var(--text-muted); margin: 4px 8px;">
+    Note: this assistant provides suggestions only. Final decisions should be made by you.
+  </div>
   <div id="chatInput">
     <input id="chatText" type="text" placeholder="Ask a question..." />
     <button id="chatSendBtn">Send</button>
@@ -1156,6 +1167,19 @@ viewer.camera.setView({
     roll: 0.0
   }
 });
+
+// Reset camera to the initial study area view when the reset button is clicked.
+function resetCameraView(){
+  viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(6.89366, 52.22632, 1000),
+    orientation: {
+      heading: 0.0,
+      pitch: -1.2,
+      roll: 0.0
+    },
+    duration: 1.5
+  });
+}
 
 const BASE_SHADOW_DARKNESS = 0.3;
 viewer.shadowMap.darkness = BASE_SHADOW_DARKNESS;
@@ -1589,19 +1613,18 @@ const LAYER_INFO = {
     `
   },
   lod2_irr: {
-    sub:"LOD 2.2 • Roof sunlight overlay",
+    sub:"LOD 2.2 • Solar raster (ground plane)",
     html: `
-      <div class="calc-step"><span class="calc-label">Meaning</span><span class="calc-val">Roof sunlight sampled from a georeferenced PNG raster</span></div>
-      <div class="calc-step"><span class="calc-label">Unit</span><span class="calc-val">kWh per m² per year</span></div>
-      <div class="calc-step"><span class="calc-label">Scaling</span><span class="calc-val">Sunlight = Min + (Max − Min) × (pixel / 255)</span></div>
+      <div class="calc-step"><span class="calc-label">Meaning</span><span class="calc-val">Pixel values represent relative sunlight on the roof surface; higher values indicate more sunlight.</span></div>
+      <div class="calc-step"><span class="calc-label">Value range</span><span class="calc-val">0–255 (higher = more sunlight)</span></div>
     `
   },
   lod2_shadow: {
-    sub:"LOD 2.2 • Roof shade overlay",
+    sub:"LOD 2.2 • Shade raster (ground plane)",
     html: `
-      <div class="calc-step"><span class="calc-label">Meaning</span><span class="calc-val">Roof shade fraction sampled from a georeferenced PNG raster</span></div>
-      <div class="calc-step"><span class="calc-label">Conversion</span><span class="calc-val">Shade = pixel / 255 (or 1 − Shade if inverted)</span></div>
-      <div class="calc-step"><span class="calc-label">Solar impact</span><span class="calc-val">ShadeFactor = 1 − Shade × (1 − Mitigation)</span></div>
+      <div class="calc-step"><span class="calc-label">Meaning</span><span class="calc-val">Pixel values represent relative shading on the roof; higher values indicate more shade.</span></div>
+      <div class="calc-step"><span class="calc-label">Value range</span><span class="calc-val">0–255 (higher = more shade)</span></div>
+      <div class="calc-step"><span class="calc-label">Solar impact</span><span class="calc-val">Shade reduction controls how shade affects solar output.</span></div>
     `
   }
 };
@@ -3595,7 +3618,7 @@ function setupInteraction() {
         tip.style.left = (m.endPosition.x + 15) + 'px';
         tip.style.top  = (m.endPosition.y + 15) + 'px';
         tip.innerText =
-          `Prototype view\nSunlight (index 0–255): ${irr ? irr.value : "N/A"}\nShade (index 0–255): ${shd ? shd.value : "N/A"}`;
+          `Sunlight level (0–255, higher means more sunlight): ${irr ? irr.value : "N/A"}\nShade level (0–255, higher means more shade): ${shd ? shd.value : "N/A"}`;
         return;
       }
       tip.style.display = 'none';
@@ -3685,14 +3708,14 @@ function renderInfoGroundRaster(carto){
   document.getElementById('infoId').innerText = "Location sample";
   document.getElementById('infoAddr').innerText = `Lon ${ll.lonStr}, Lat ${ll.latStr}`;
 
-  const container = document.getElementById('dynamicStats');
-  container.innerHTML = `
+    const container = document.getElementById('dynamicStats');
+    container.innerHTML = `
     <div class="stat-row">
-      <span class="stat-label">Sunlight (index 0–255)</span>
+      <span class="stat-label">Sunlight level (0–255)</span>
       <span class="stat-val">${irr ? irr.value : "N/A"}</span>
     </div>
     <div class="stat-row" style="border-bottom:none;">
-      <span class="stat-label">Shade (index 0–255)</span>
+      <span class="stat-label">Shade level (0–255)</span>
       <span class="stat-val">${shd ? shd.value : "N/A"}</span>
     </div>
   `;
