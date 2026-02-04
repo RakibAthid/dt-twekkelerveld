@@ -1746,19 +1746,38 @@ try {
     controller.enableZoom = true;
     controller.enableLook = true;
     // Assign left drag to pan (translate)
-    controller.translateEventTypes = [
-      Cesium.CameraEventType.LEFT_DRAG,
-      Cesium.CameraEventType.PINCH
-    ];
-    // Assign right drag to rotate around the globe
-    controller.rotateEventTypes = [
-      Cesium.CameraEventType.RIGHT_DRAG,
-      Cesium.CameraEventType.TWO_FINGER
-    ];
-    // Assign middle drag to tilt (pitch)
-    controller.tiltEventTypes = [
-      Cesium.CameraEventType.MIDDLE_DRAG
-    ];
+    // Build arrays of supported event types.  Older versions of Cesium may not
+    // define some constants (e.g. TWO_FINGER).  Only include values that are
+    // defined to avoid passing `undefined` into Cesium internals, which causes
+    // errors like "Cannot read properties of undefined (reading 'eventType')".
+    const translateEvents = [];
+    // Left mouse drag should pan (translate)
+    if (Cesium.CameraEventType.LEFT_DRAG !== undefined) {
+      translateEvents.push(Cesium.CameraEventType.LEFT_DRAG);
+    }
+    // Pinch gesture should translate/zoom on touch screens
+    if (Cesium.CameraEventType.PINCH !== undefined) {
+      translateEvents.push(Cesium.CameraEventType.PINCH);
+    }
+    controller.translateEventTypes = translateEvents;
+
+    // Right mouse drag should rotate around the globe
+    const rotateEvents = [];
+    if (Cesium.CameraEventType.RIGHT_DRAG !== undefined) {
+      rotateEvents.push(Cesium.CameraEventType.RIGHT_DRAG);
+    }
+    // Older Cesium versions may not support a separate two finger rotate gesture.
+    if (Cesium.CameraEventType.TWO_FINGER !== undefined) {
+      rotateEvents.push(Cesium.CameraEventType.TWO_FINGER);
+    }
+    controller.rotateEventTypes = rotateEvents;
+
+    // Middle mouse drag tilts the camera
+    const tiltEvents = [];
+    if (Cesium.CameraEventType.MIDDLE_DRAG !== undefined) {
+      tiltEvents.push(Cesium.CameraEventType.MIDDLE_DRAG);
+    }
+    controller.tiltEventTypes = tiltEvents;
   }
 } catch (e) {
   console.warn('Camera controller customisation failed', e);
@@ -1777,17 +1796,31 @@ function resetCameraControls() {
     ctrl.enableTilt = true;
     ctrl.enableZoom = true;
     ctrl.enableLook = true;
-    ctrl.translateEventTypes = [
-      Cesium.CameraEventType.LEFT_DRAG,
-      Cesium.CameraEventType.PINCH
-    ];
-    ctrl.rotateEventTypes = [
-      Cesium.CameraEventType.RIGHT_DRAG,
-      Cesium.CameraEventType.TWO_FINGER
-    ];
-    ctrl.tiltEventTypes = [
-      Cesium.CameraEventType.MIDDLE_DRAG
-    ];
+    // Assemble translation (panning) events only if defined.  Newer Cesium versions may
+    // omit certain constants (e.g. TWO_FINGER), so guard against undefined values
+    const translateEvents2 = [];
+    if (Cesium.CameraEventType.LEFT_DRAG !== undefined) {
+      translateEvents2.push(Cesium.CameraEventType.LEFT_DRAG);
+    }
+    if (Cesium.CameraEventType.PINCH !== undefined) {
+      translateEvents2.push(Cesium.CameraEventType.PINCH);
+    }
+    ctrl.translateEventTypes = translateEvents2;
+
+    const rotateEvents2 = [];
+    if (Cesium.CameraEventType.RIGHT_DRAG !== undefined) {
+      rotateEvents2.push(Cesium.CameraEventType.RIGHT_DRAG);
+    }
+    if (Cesium.CameraEventType.TWO_FINGER !== undefined) {
+      rotateEvents2.push(Cesium.CameraEventType.TWO_FINGER);
+    }
+    ctrl.rotateEventTypes = rotateEvents2;
+
+    const tiltEvents2 = [];
+    if (Cesium.CameraEventType.MIDDLE_DRAG !== undefined) {
+      tiltEvents2.push(Cesium.CameraEventType.MIDDLE_DRAG);
+    }
+    ctrl.tiltEventTypes = tiltEvents2;
   } catch (err) {
     console.warn('resetCameraControls failed', err);
   }
