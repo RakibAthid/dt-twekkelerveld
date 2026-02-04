@@ -1745,15 +1745,20 @@ try {
     controller.enableTilt = true;
     controller.enableZoom = true;
     controller.enableLook = true;
-    // Assign left drag to pan (translate)
     // Build arrays of supported event types.  Older versions of Cesium may not
     // define some constants (e.g. TWO_FINGER).  Only include values that are
     // defined to avoid passing `undefined` into Cesium internals, which causes
     // errors like "Cannot read properties of undefined (reading 'eventType')".
+    //
+    // Restore Cesium's default behaviour: right‑mouse drags pan (translate)
+    // and left‑mouse drags rotate around the globe.  Pinch gestures on touch
+    // screens continue to translate/zoom and two‑finger gestures rotate.  This
+    // makes it possible to move the view horizontally and vertically by
+    // dragging with the right mouse button, matching user expectations.
     const translateEvents = [];
-    // Left mouse drag should pan (translate)
-    if (Cesium.CameraEventType.LEFT_DRAG !== undefined) {
-      translateEvents.push(Cesium.CameraEventType.LEFT_DRAG);
+    // Right mouse drag should pan (translate)
+    if (Cesium.CameraEventType.RIGHT_DRAG !== undefined) {
+      translateEvents.push(Cesium.CameraEventType.RIGHT_DRAG);
     }
     // Pinch gesture should translate/zoom on touch screens
     if (Cesium.CameraEventType.PINCH !== undefined) {
@@ -1761,10 +1766,10 @@ try {
     }
     controller.translateEventTypes = translateEvents;
 
-    // Right mouse drag should rotate around the globe
+    // Left mouse drag should rotate around the globe
     const rotateEvents = [];
-    if (Cesium.CameraEventType.RIGHT_DRAG !== undefined) {
-      rotateEvents.push(Cesium.CameraEventType.RIGHT_DRAG);
+    if (Cesium.CameraEventType.LEFT_DRAG !== undefined) {
+      rotateEvents.push(Cesium.CameraEventType.LEFT_DRAG);
     }
     // Older Cesium versions may not support a separate two finger rotate gesture.
     if (Cesium.CameraEventType.TWO_FINGER !== undefined) {
@@ -1797,10 +1802,11 @@ function resetCameraControls() {
     ctrl.enableZoom = true;
     ctrl.enableLook = true;
     // Assemble translation (panning) events only if defined.  Newer Cesium versions may
-    // omit certain constants (e.g. TWO_FINGER), so guard against undefined values
+    // omit certain constants (e.g. TWO_FINGER), so guard against undefined values.
+    // Restore defaults: panning assigned to the right mouse drag, rotation to left
     const translateEvents2 = [];
-    if (Cesium.CameraEventType.LEFT_DRAG !== undefined) {
-      translateEvents2.push(Cesium.CameraEventType.LEFT_DRAG);
+    if (Cesium.CameraEventType.RIGHT_DRAG !== undefined) {
+      translateEvents2.push(Cesium.CameraEventType.RIGHT_DRAG);
     }
     if (Cesium.CameraEventType.PINCH !== undefined) {
       translateEvents2.push(Cesium.CameraEventType.PINCH);
@@ -1808,8 +1814,8 @@ function resetCameraControls() {
     ctrl.translateEventTypes = translateEvents2;
 
     const rotateEvents2 = [];
-    if (Cesium.CameraEventType.RIGHT_DRAG !== undefined) {
-      rotateEvents2.push(Cesium.CameraEventType.RIGHT_DRAG);
+    if (Cesium.CameraEventType.LEFT_DRAG !== undefined) {
+      rotateEvents2.push(Cesium.CameraEventType.LEFT_DRAG);
     }
     if (Cesium.CameraEventType.TWO_FINGER !== undefined) {
       rotateEvents2.push(Cesium.CameraEventType.TWO_FINGER);
@@ -6052,7 +6058,7 @@ window.addEventListener('load', () => {
 
 <!-- Small on‑screen hint summarising the camera controls. This helps users understand how to pan, zoom and rotate. -->
 <div id="controlsHint" class="hint-pill" style="position: fixed; bottom: 80px; left: 20px; z-index: 600;">
-  Left‑drag: pan | Scroll: zoom | Right‑drag: rotate
+  Left‑drag: rotate | Scroll: zoom | Right‑drag: pan
 </div>
 </body>
 </html>
