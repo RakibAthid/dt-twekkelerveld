@@ -1725,6 +1725,74 @@ viewer.camera.setView({
   destination: Cesium.Rectangle.fromDegrees(bounds.west, bounds.south, bounds.east, bounds.north)
 });
 
+// -----------------------------------------------------------------------------
+// Customise the camera controller to improve map navigation
+//
+// On some deployments (e.g. Cloudflare Pages) users reported that after
+// exiting planting mode the map would spin instead of panning left/right.  The
+// default Cesium behaviour assigns left‑drag to rotate and middle/right
+// buttons to translate (pan).  To make panning intuitive and ensure the
+// controls are restored after interaction modes, we explicitly assign
+// translation (panning) to the left mouse drag and rotation to the right
+// mouse drag.  Tilt remains on the middle mouse drag.  Pinch gestures on
+// touch devices continue to zoom/translate.  If you prefer the default
+// behaviour, comment out the following block.
+try {
+  const controller = viewer.scene.screenSpaceCameraController;
+  if (controller) {
+    controller.enableRotate = true;
+    controller.enableTranslate = true;
+    controller.enableTilt = true;
+    controller.enableZoom = true;
+    controller.enableLook = true;
+    // Assign left drag to pan (translate)
+    controller.translateEventTypes = [
+      Cesium.CameraEventType.LEFT_DRAG,
+      Cesium.CameraEventType.PINCH
+    ];
+    // Assign right drag to rotate around the globe
+    controller.rotateEventTypes = [
+      Cesium.CameraEventType.RIGHT_DRAG,
+      Cesium.CameraEventType.TWO_FINGER
+    ];
+    // Assign middle drag to tilt (pitch)
+    controller.tiltEventTypes = [
+      Cesium.CameraEventType.MIDDLE_DRAG
+    ];
+  }
+} catch (e) {
+  console.warn('Camera controller customisation failed', e);
+}
+
+// Helper to restore camera controls.  Calling this function ensures that
+// pan/rotate/tilt/zoom handlers are set correctly after toggling interaction
+// modes such as planting or drawing.  It applies the same assignments as
+// performed at initialisation.  Invoke this after leaving any custom mode.
+function resetCameraControls() {
+  try {
+    const ctrl = viewer.scene.screenSpaceCameraController;
+    if (!ctrl) return;
+    ctrl.enableRotate = true;
+    ctrl.enableTranslate = true;
+    ctrl.enableTilt = true;
+    ctrl.enableZoom = true;
+    ctrl.enableLook = true;
+    ctrl.translateEventTypes = [
+      Cesium.CameraEventType.LEFT_DRAG,
+      Cesium.CameraEventType.PINCH
+    ];
+    ctrl.rotateEventTypes = [
+      Cesium.CameraEventType.RIGHT_DRAG,
+      Cesium.CameraEventType.TWO_FINGER
+    ];
+    ctrl.tiltEventTypes = [
+      Cesium.CameraEventType.MIDDLE_DRAG
+    ];
+  } catch (err) {
+    console.warn('resetCameraControls failed', err);
+  }
+}
+
 viewer.canvas.addEventListener('contextmenu', (e) => e.preventDefault(), false);
 
 /* ==============================
@@ -1833,6 +1901,11 @@ const dataMaps = {
 
 function loadMapData(id, url) {
   const img = new Image();
+  // Set crossOrigin to allow pixel data extraction when loading from R2 or other
+  // remote buckets. Without this, the canvas becomes tainted and getImageData
+  // throws a security error, causing NDVI/UHI values to stick at their
+  // defaults. See https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image for details.
+  img.crossOrigin = 'anonymous';
   img.src = url;
   img.onload = () => {
     const c = document.getElementById("canvas" + id.toUpperCase());
@@ -2825,6 +2898,8 @@ function togglePlanting(){
     btn.innerHTML = `<i class="fas fa-plus-circle"></i> Plant ${spec.name} (€${spec.cost})`;
     viewer.canvas.style.cursor = "default";
     showToast("Planting mode OFF");
+    // Restore camera controls when exiting planting mode
+    resetCameraControls();
     return;
   }
 
@@ -2837,6 +2912,8 @@ function togglePlanting(){
   viewer.canvas.style.cursor = "crosshair";
   closePopup();
   showToast("Planting mode ON");
+  // During planting mode we still allow panning/rotation; ensure controls remain
+  resetCameraControls();
 }
 
 /* ==============
@@ -2867,6 +2944,8 @@ function toggleFacading(silent=false){
     btn.innerHTML = `<i class="fa-solid fa-square-plus"></i> Apply ${f.name} Facade (click a building)`;
     viewer.canvas.style.cursor = "default";
     if(!silent) showToast("Facade mode OFF");
+    // Restore camera controls when exiting facade mode
+    resetCameraControls();
     return;
   }
 
@@ -2879,6 +2958,8 @@ function toggleFacading(silent=false){
   viewer.canvas.style.cursor = "crosshair";
   closePopup();
   if(!silent) showToast("Facade mode ON");
+  // Ensure camera controls remain consistent in facade mode
+  resetCameraControls();
 }
 
 /* ==============================
@@ -3123,6 +3204,9 @@ function cancelPolygonDraw(silent=false){
   drawState.usedFreehand = false;
 
   if(!silent) showToast("Drawing cancelled");
+
+  // Ensure camera controls are restored when exiting draw mode
+  resetCameraControls();
 }
 
 /* ---- Smooth helpers (Chaikin + simplification) ---- */
