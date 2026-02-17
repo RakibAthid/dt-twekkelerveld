@@ -1251,6 +1251,8 @@
         <option value="researcher">Researcher</option>
       </select>
       <button id="open-settings-btn" class="settings-btn"><i class="fa-solid fa-sliders"></i> Settings</button>
+      <!-- Additional button to configure energy and cost parameters shared across twins -->
+      <button id="open-energy-settings-btn" class="settings-btn"><i class="fa-solid fa-gear"></i> Energy Settings</button>
     </div>
   </header>
 
@@ -1566,7 +1568,8 @@
           <span>Sources: Landsat 9 · BGT · AHN · KNMI</span>
         </div>
         <div class="panel-iframe-wrapper">
-          <iframe src="ecology.html"></iframe>
+          <!-- Assign an explicit ID so scripts can address the ecology frame for messaging -->
+          <iframe id="ecoFrame" src="ecology.html"></iframe>
         </div>
       </section>
 
@@ -1576,7 +1579,8 @@
           <span>Sources: Enexis · Zonnedakje · BAG · CO₂ factors</span>
         </div>
         <div class="panel-iframe-wrapper">
-          <iframe src="energy.html"></iframe>
+          <!-- Assign an explicit ID so scripts can address the energy frame for messaging -->
+          <iframe id="energyFrame" src="energy.html"></iframe>
         </div>
       </section>
 
@@ -2931,6 +2935,153 @@
       switchTab('panel-interrelation');
     };
 
+  </script>
+  <!-- -------------------------------------------------------------------------
+       Global Energy & Economic Settings Modal
+
+       This modal centralises the advanced energy and cost parameters that were
+       previously embedded in the stand‑alone Energy Digital Twin.  When
+       running within this integrated Nexus, users can configure prices,
+       investment costs, CO₂ factors and cost‑benefit parameters in one place.
+       The selected values are persisted in localStorage and broadcast to
+       embedded energy and ecology twins via postMessage.  See the script
+       following the markup for implementation details.
+  -->
+  <div id="energy-settings-overlay" class="settings-modal-overlay">
+    <div class="settings-modal">
+      <h2>Energy &amp; Economic Settings</h2>
+      <form id="energy-settings-form">
+        <h3>Prices (€/unit)</h3>
+        <div class="field"><label for="g_price_elecImport">Electricity import (€/kWh)</label><input type="number" step="0.01" id="g_price_elecImport"></div>
+        <div class="field"><label for="g_price_gas">Gas (€/m³)</label><input type="number" step="0.01" id="g_price_gas"></div>
+        <div class="field"><label for="g_price_feedIn">Feed‑in (€/kWh)</label><input type="number" step="0.01" id="g_price_feedIn"></div>
+        <div class="field"><label for="g_price_p2p">P2P (€/kWh)</label><input type="number" step="0.01" id="g_price_p2p"></div>
+        <h3>Costs</h3>
+        <div class="field"><label for="g_cost_pvPerWp">PV cost (€/Wp)</label><input type="number" step="0.01" id="g_cost_pvPerWp"></div>
+        <div class="field"><label for="g_cost_insulation">Insulation (€/m²)</label><input type="number" step="0.1" id="g_cost_insulation"></div>
+        <div class="field"><label for="g_cost_hybridHp">Hybrid heat pump (€)</label><input type="number" step="100" id="g_cost_hybridHp"></div>
+        <div class="field"><label for="g_cost_allHp">All‑electric heat pump (€)</label><input type="number" step="100" id="g_cost_allHp"></div>
+        <h3>CO₂ factors (kg CO₂ per unit)</h3>
+        <div class="field"><label for="g_co2_elec">Electricity (kgCO₂/kWh)</label><input type="number" step="0.001" id="g_co2_elec"></div>
+        <div class="field"><label for="g_co2_gas">Gas (kgCO₂/m³)</label><input type="number" step="0.001" id="g_co2_gas"></div>
+        <h3>CBA parameters</h3>
+        <div class="field"><label for="g_cba_discount">Discount rate (%)</label><input type="number" step="0.1" id="g_cba_discount"></div>
+        <div class="field"><label for="g_cba_horizon">Horizon (years)</label><input type="number" step="1" id="g_cba_horizon"></div>
+        <h3>Budget cap</h3>
+        <div class="field"><label for="g_budget_cap">Max investment (€)</label><input type="number" step="100" id="g_budget_cap"></div>
+        <details class="field">
+          <summary>Show equations &amp; assumptions</summary>
+          <div style="margin-top:8px; font-size:12px; line-height:1.5; color:var(--text-muted)">
+            <p><strong>Energy cost:</strong> (gas × price<sub>gas</sub>) + (imported electricity × price<sub>elec</sub>) − (exported electricity × feed‑in tariff)</p>
+            <p><strong>CO₂ savings:</strong> (baseline energy − new energy) × emission factor</p>
+            <p><strong>Cost assumptions:</strong> PV cost per Wp (costs.pvPerWp), insulation per m² (costs.insulationSqM), heat pump costs (costs.hybridPump/allElectric)</p>
+            <p><strong>NPV:</strong> ∑<sub>t=1</sub><sup>T</sup> (Annual savings)/(1 + r)<sup>t</sup> − Capex</p>
+            <p><strong>BCR:</strong> Present value of benefits ÷ Capex</p>
+            <p><strong>Defaults:</strong> values drawn from the PARAMS object (units as indicated)</p>
+          </div>
+        </details>
+      </form>
+      <div class="button-row">
+        <button type="button" id="energy-settings-apply" class="save-btn">Apply</button>
+        <button type="button" id="energy-settings-cancel" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // -------------------------------------------------------------------------
+  // Energy settings management for Nexus
+  //
+  // Stores, loads and applies the energy parameters defined above.  When the
+  // modal is opened the current settings are loaded into the form.  When the
+  // user clicks Apply the settings are validated, persisted to localStorage
+  // and broadcast to the energy and ecology iframes via postMessage.  This
+  // keeps the twins in sync with the centralised assumptions.
+  (function(){
+    let energySettings = {
+      prices: { elecImport: 0.30, gas: 1.45, feedIn: 0.05, p2p: 0.15 },
+      costs: { pvPerWp: 1.13, insulationSqM: 50, hybridPump: 6000, allElectric: 14000 },
+      co2: { elec: 0.268, gas: 2.134 },
+      discountRate: 0.04,
+      horizonYears: 20,
+      budgetCap: null
+    };
+    try {
+      const stored = localStorage.getItem('GLOBAL_ENERGY_SETTINGS');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object') {
+          energySettings = Object.assign({}, energySettings, parsed);
+        }
+      }
+    } catch(e) {}
+    function openEnergyModal() {
+      const s = energySettings;
+      document.getElementById('g_price_elecImport').value = s.prices.elecImport ?? '';
+      document.getElementById('g_price_gas').value       = s.prices.gas ?? '';
+      document.getElementById('g_price_feedIn').value    = s.prices.feedIn ?? '';
+      document.getElementById('g_price_p2p').value       = s.prices.p2p ?? '';
+      document.getElementById('g_cost_pvPerWp').value    = s.costs.pvPerWp ?? '';
+      document.getElementById('g_cost_insulation').value = s.costs.insulationSqM ?? '';
+      document.getElementById('g_cost_hybridHp').value    = s.costs.hybridPump ?? '';
+      document.getElementById('g_cost_allHp').value       = s.costs.allElectric ?? '';
+      document.getElementById('g_co2_elec').value        = s.co2.elec ?? '';
+      document.getElementById('g_co2_gas').value         = s.co2.gas ?? '';
+      document.getElementById('g_cba_discount').value    = ((s.discountRate || 0) * 100).toFixed(2);
+      document.getElementById('g_cba_horizon').value     = s.horizonYears ?? '';
+      document.getElementById('g_budget_cap').value      = s.budgetCap ?? '';
+      document.getElementById('energy-settings-overlay').classList.add('active');
+    }
+    function closeEnergyModal() {
+      document.getElementById('energy-settings-overlay').classList.remove('active');
+    }
+    function applyEnergySettings() {
+      const pEI = parseFloat(document.getElementById('g_price_elecImport').value);
+      const pG  = parseFloat(document.getElementById('g_price_gas').value);
+      const pF  = parseFloat(document.getElementById('g_price_feedIn').value);
+      const pP  = parseFloat(document.getElementById('g_price_p2p').value);
+      const cPV = parseFloat(document.getElementById('g_cost_pvPerWp').value);
+      const cI  = parseFloat(document.getElementById('g_cost_insulation').value);
+      const cH  = parseFloat(document.getElementById('g_cost_hybridHp').value);
+      const cA  = parseFloat(document.getElementById('g_cost_allHp').value);
+      const coE = parseFloat(document.getElementById('g_co2_elec').value);
+      const coG = parseFloat(document.getElementById('g_co2_gas').value);
+      const rIn = parseFloat(document.getElementById('g_cba_discount').value);
+      const tIn = parseFloat(document.getElementById('g_cba_horizon').value);
+      const bIn = parseFloat(document.getElementById('g_budget_cap').value);
+      if (Number.isFinite(pEI)) energySettings.prices.elecImport = pEI;
+      if (Number.isFinite(pG))  energySettings.prices.gas = pG;
+      if (Number.isFinite(pF))  energySettings.prices.feedIn = pF;
+      if (Number.isFinite(pP))  energySettings.prices.p2p = pP;
+      if (Number.isFinite(cPV)) energySettings.costs.pvPerWp = cPV;
+      if (Number.isFinite(cI))  energySettings.costs.insulationSqM = cI;
+      if (Number.isFinite(cH))  energySettings.costs.hybridPump = cH;
+      if (Number.isFinite(cA))  energySettings.costs.allElectric = cA;
+      if (Number.isFinite(coE)) energySettings.co2.elec = coE;
+      if (Number.isFinite(coG)) energySettings.co2.gas = coG;
+      if (Number.isFinite(rIn)) energySettings.discountRate = rIn / 100;
+      if (Number.isFinite(tIn)) energySettings.horizonYears = tIn;
+      energySettings.budgetCap = Number.isFinite(bIn) ? bIn : null;
+      try { localStorage.setItem('GLOBAL_ENERGY_SETTINGS', JSON.stringify(energySettings)); } catch(e) {}
+      const energyFrame = document.getElementById('energyFrame');
+      const ecoFrame    = document.getElementById('ecoFrame');
+      if (energyFrame && energyFrame.contentWindow) {
+        energyFrame.contentWindow.postMessage({ type:'SETTINGS_UPDATE', payload: energySettings }, '*');
+      }
+      if (ecoFrame && ecoFrame.contentWindow) {
+        ecoFrame.contentWindow.postMessage({ type:'SETTINGS_UPDATE', payload: energySettings }, '*');
+      }
+      closeEnergyModal();
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const openBtn  = document.getElementById('open-energy-settings-btn');
+      const applyBtn = document.getElementById('energy-settings-apply');
+      const cancelBtn= document.getElementById('energy-settings-cancel');
+      if (openBtn)  openBtn.addEventListener('click', openEnergyModal);
+      if (applyBtn) applyBtn.addEventListener('click', applyEnergySettings);
+      if (cancelBtn) cancelBtn.addEventListener('click', closeEnergyModal);
+    });
+  })();
   </script>
   <!-- Translation helper script: dictionaries and runtime language switcher -->
   <script>
