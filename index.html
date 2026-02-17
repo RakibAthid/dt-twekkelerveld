@@ -1,3 +1,4 @@
+<!-- patched file -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1090,6 +1091,135 @@
       background: rgba(56, 189, 248, 0.15);
     }
   </style>
+  <style>
+    /* Additional styles for role selector and settings modal */
+    .settings-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .settings-controls select {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+    .settings-controls .settings-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--accent);
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .settings-controls .settings-btn:hover {
+      background: rgba(56,189,248,0.15);
+      color: var(--accent);
+    }
+    .settings-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 2000;
+    }
+    .settings-modal-overlay.active {
+      display: flex;
+    }
+    .settings-modal {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 700px;
+      max-height: 80%;
+      overflow-y: auto;
+      color: var(--text-main);
+    }
+    .settings-modal h2 {
+      margin-top: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .settings-modal h3 {
+      margin-top: 16px;
+      margin-bottom: 8px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .settings-modal .field {
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+    .settings-modal label {
+      font-size: 12px;
+      margin-bottom: 4px;
+      color: var(--text-muted);
+    }
+    .settings-modal input[type='number'],
+    .settings-modal select {
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #1e293b;
+      color: var(--text-main);
+      font-size: 14px;
+    }
+    .settings-modal .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .settings-modal button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .settings-modal button.save-btn {
+      background: var(--accent);
+      color: #000;
+    }
+    .settings-modal button.cancel-btn {
+      background: #1e293b;
+      color: var(--text-main);
+    }
+    .settings-modal button.export-btn {
+      background: #3b82f6;
+      color: #fff;
+    }
+    .settings-modal .collapsible-header {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .settings-modal .collapsible-content {
+      display: none;
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .settings-modal .collapsible-header.active + .collapsible-content {
+      display: block;
+    }
+  </style>
 </head>
 <body>
 
@@ -1111,6 +1241,16 @@
         <option value="nl">Nederlands</option>
         <option value="de">Deutsch</option>
       </select>
+    </div>
+    <!-- Role selector and settings button -->
+    <div class="settings-controls">
+      <select id="role-select" aria-label="Select stakeholder role">
+        <option value="planner">Municipal planner</option>
+        <option value="housing">Housing corporation</option>
+        <option value="community">Community group</option>
+        <option value="researcher">Researcher</option>
+      </select>
+      <button id="open-settings-btn" class="settings-btn"><i class="fa-solid fa-sliders"></i> Settings</button>
     </div>
   </header>
 
@@ -3262,6 +3402,275 @@
     // Expose translator globally so other scripts can access if needed
     window.t = t;
     window.setLanguage = setLanguage;
+  </script>
+
+  <!-- Global Assumptions & Settings modal -->
+  <div id="settings-overlay" class="settings-modal-overlay">
+    <div class="settings-modal">
+      <h2>Assumptions &amp; Settings</h2>
+      <form id="settings-form">
+        <div class="field">
+          <label for="role-field">Role / Stakeholder</label>
+          <select name="role" id="role-field">
+            <option value="planner">Municipal planner</option>
+            <option value="housing">Housing corporation</option>
+            <option value="community">Community group</option>
+            <option value="researcher">Researcher</option>
+          </select>
+        </div>
+        <h3>Financial &amp; Scenario Parameters</h3>
+        <div class="field"><label>Discount rate (%)</label><input type="number" step="0.01" name="discount_rate" min="0" /></div>
+        <div class="field"><label>Time horizon (years)</label><input type="number" name="time_horizon" min="1" /></div>
+        <div class="field"><label>Energy price (€/kWh)</label><input type="number" step="0.01" name="energy_price" min="0" /></div>
+        <div class="field"><label>CO₂ price (€/tCO₂)</label><input type="number" step="1" name="co2_price" min="0" /></div>
+        <h3>Unit Costs</h3>
+        <div class="field"><label>Tree cost (€/tree)</label><input type="number" name="cost_tree_eur" min="0" /></div>
+        <div class="field"><label>PV cost (€/percentage)</label><input type="number" name="cost_pv_per_pct_eur" min="0" /></div>
+        <div class="field"><label>Green roof cost (€/percentage)</label><input type="number" name="cost_greenRoof_per_pct_eur" min="0" /></div>
+        <div class="field"><label>Retrofit cost (€/dwelling)</label><input type="number" name="retrofit_cost_per_dwelling_eur" min="0" /></div>
+        <h3>Limits</h3>
+        <div class="field"><label>Max roofs covered (%)</label><input type="number" name="max_roof_pct" min="0" max="100" /></div>
+        <div class="field"><label>Max tree area (m²)</label><input type="number" name="max_tree_area" min="0" /></div>
+        <h3>MCDA Weights</h3>
+        <div class="field"><label>Green weight</label><input type="number" name="w_green" min="0" max="1" step="0.01" /></div>
+        <div class="field"><label>Cool weight</label><input type="number" name="w_cool" min="0" max="1" step="0.01" /></div>
+        <div class="field"><label>Energy weight</label><input type="number" name="w_energy" min="0" max="1" step="0.01" /></div>
+        <div class="field"><label>CO₂ weight</label><input type="number" name="w_co2" min="0" max="1" step="0.01" /></div>
+        <div class="field"><label>Equity weight</label><input type="number" name="w_equity" min="0" max="1" step="0.01" /></div>
+      </form>
+      <div class="section">
+        <h3 class="collapsible-header">Transparency: Equations</h3>
+        <div class="collapsible-content">
+          <p>Scenario metrics are computed using simplified relationships based on published literature. For example, UHI reduction per tree is approximated as 0.1&nbsp;°C per 300 trees and green roof cooling as 1&nbsp;°C per 100% roof coverage. These parameters can be updated in the code.</p>
+        </div>
+      </div>
+      <div class="section">
+        <h3 class="collapsible-header">Transparency: Data sources &amp; ranges</h3>
+        <div class="collapsible-content">
+          <p>Default cost values originate from studies of urban greening and energy retrofits. Allowed input ranges ensure realism (e.g., green roof coverage up to 100%, discount rate between 0–10%).</p>
+        </div>
+      </div>
+      <div class="button-row">
+        <button type="button" id="settings-reset-btn" class="cancel-btn">Reset to defaults</button>
+        <button type="button" data-role-preset="planner" class="cancel-btn">Municipal planner preset</button>
+        <button type="button" data-role-preset="housing" class="cancel-btn">Housing corp preset</button>
+        <button type="button" data-role-preset="community" class="cancel-btn">Community group preset</button>
+        <button type="button" data-role-preset="researcher" class="cancel-btn">Researcher preset</button>
+        <button type="button" id="settings-export-btn" class="export-btn">Export JSON</button>
+        <button type="button" id="settings-save-btn" class="save-btn">Save</button>
+        <button type="button" id="settings-close-btn" class="cancel-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings management script -->
+  <script>
+  (function() {
+    const defaultSettings = {
+      role: 'planner',
+      discount_rate: 0.04,
+      time_horizon: 20,
+      energy_price: 0.25,
+      co2_price: 50,
+      cost_tree_eur: (window.IR_BASE_GLOBAL && typeof window.IR_BASE_GLOBAL.cost_tree_eur === 'number') ? window.IR_BASE_GLOBAL.cost_tree_eur : 350,
+      cost_pv_per_pct_eur: (window.IR_BASE_GLOBAL && typeof window.IR_BASE_GLOBAL.cost_pv_per_pct_eur === 'number') ? window.IR_BASE_GLOBAL.cost_pv_per_pct_eur : 5400,
+      retrofit_cost_per_dwelling_eur: (window.IR_BASE_GLOBAL && typeof window.IR_BASE_GLOBAL.retrofit_cost_per_dwelling_eur === 'number') ? window.IR_BASE_GLOBAL.retrofit_cost_per_dwelling_eur : 12000,
+      cost_greenRoof_per_pct_eur: (window.IR_BASE_GLOBAL && typeof window.IR_BASE_GLOBAL.cost_greenRoof_per_pct_eur === 'number') ? window.IR_BASE_GLOBAL.cost_greenRoof_per_pct_eur : 8000,
+      max_roof_pct: 60,
+      max_tree_area: 10000,
+      w_green: 0.25,
+      w_cool: 0.25,
+      w_energy: 0.25,
+      w_co2: 0.15,
+      w_equity: 0.10
+    };
+    const rolePresets = {
+      'planner': { w_green: 0.30, w_cool: 0.25, w_energy: 0.25, w_co2: 0.15, w_equity: 0.05 },
+      'housing': { w_green: 0.15, w_cool: 0.20, w_energy: 0.35, w_co2: 0.20, w_equity: 0.10 },
+      'community': { w_green: 0.35, w_cool: 0.20, w_energy: 0.15, w_co2: 0.15, w_equity: 0.15 },
+      'researcher': { w_green: 0.20, w_cool: 0.20, w_energy: 0.20, w_co2: 0.20, w_equity: 0.20 }
+    };
+    function getSettings() {
+      let s = {};
+      try {
+        const str = localStorage.getItem('DT_SETTINGS');
+        s = str ? JSON.parse(str) : {};
+      } catch(e) {}
+      return Object.assign({}, defaultSettings, s);
+    }
+    function saveSettings(settings) {
+      localStorage.setItem('DT_SETTINGS', JSON.stringify(settings));
+    }
+    function updateBaselineFromSettings() {
+      const s = getSettings();
+      if (window.IR_BASE_GLOBAL) {
+        Object.keys(s).forEach(k => {
+          if (window.IR_BASE_GLOBAL.hasOwnProperty(k) && typeof s[k] !== 'undefined') {
+            window.IR_BASE_GLOBAL[k] = s[k];
+          }
+        });
+      }
+      if (window.IR_BASE) {
+        Object.keys(s).forEach(k => {
+          if (window.IR_BASE.hasOwnProperty(k) && typeof s[k] !== 'undefined') {
+            window.IR_BASE[k] = s[k];
+          }
+        });
+        if (window.IR_BASE.energy_kwh !== undefined && window.IR_BASE.pv_kwh !== undefined) {
+          window.IR_BASE_netGrid_kwh = window.IR_BASE.energy_kwh - window.IR_BASE.pv_kwh;
+        }
+      }
+    }
+
+    // Update slider hint text based on current settings.
+    // This function ensures descriptive hints for interventions reflect the
+    // active cost assumptions. It should be called after settings are
+    // loaded or saved.
+    function updateSliderHints() {
+      const s = getSettings();
+      // Update tree cost hint
+      try {
+        const treeSlider = document.getElementById('IR_sliderTrees');
+        if (treeSlider && treeSlider.parentElement) {
+          const hint = treeSlider.parentElement.querySelector('.slider-hint');
+          if (hint) {
+            const costStr = s.cost_tree_eur.toLocaleString();
+            hint.textContent = `Trees sequester ~20kg CO₂ per year and cost ~€${costStr} each.`;
+          }
+        }
+        // Update PV cost hint
+        const pvSlider = document.getElementById('IR_sliderPV');
+        if (pvSlider && pvSlider.parentElement) {
+          const hint = pvSlider.parentElement.querySelector('.slider-hint');
+          if (hint) {
+            const costStr = s.cost_pv_per_pct_eur.toLocaleString();
+            hint.textContent = `Relative to current PV potential. Cost ~€${costStr} per +1%.`;
+          }
+        }
+      } catch(e) {}
+    }
+    function openSettingsModal() {
+      const overlay = document.getElementById('settings-overlay');
+      overlay.classList.add('active');
+      populateSettingsForm();
+    }
+    function closeSettingsModal() {
+      const overlay = document.getElementById('settings-overlay');
+      overlay.classList.remove('active');
+    }
+    function populateSettingsForm() {
+      const s = getSettings();
+      const form = document.getElementById('settings-form');
+      if (!form) return;
+      Object.keys(s).forEach(key => {
+        const field = form.querySelector('[name="' + key + '"]');
+        if (field) {
+          field.value = s[key];
+        }
+      });
+    }
+    function collectSettingsForm() {
+      const form = document.getElementById('settings-form');
+      const inputs = form.querySelectorAll('[name]');
+      const out = {};
+      inputs.forEach(inp => {
+        if (inp.type === 'number') {
+          const val = parseFloat(inp.value);
+          out[inp.name] = isNaN(val) ? 0 : val;
+        } else {
+          out[inp.name] = inp.value;
+        }
+      });
+      return Object.assign({}, defaultSettings, out);
+    }
+    function onSaveSettings() {
+      const newSettings = collectSettingsForm();
+      saveSettings(newSettings);
+      updateBaselineFromSettings();
+      updateSliderHints();
+      if (window.IR_updateUI) {
+        try { window.IR_updateUI(); } catch(e) {}
+      }
+      closeSettingsModal();
+      const roleSelect = document.getElementById('role-select');
+      if (roleSelect) roleSelect.value = newSettings.role;
+    }
+    function onResetDefaults() {
+      saveSettings(defaultSettings);
+      updateBaselineFromSettings();
+      updateSliderHints();
+      populateSettingsForm();
+      if (window.IR_updateUI) {
+        try { window.IR_updateUI(); } catch(e) {}
+      }
+    }
+    function onLoadPreset(role) {
+      const s = getSettings();
+      const preset = rolePresets[role];
+      if (preset) {
+        s.role = role;
+        Object.assign(s, preset);
+        saveSettings(s);
+        updateBaselineFromSettings();
+        updateSliderHints();
+        populateSettingsForm();
+        if (window.IR_updateUI) { try { window.IR_updateUI(); } catch(e) {} }
+      }
+    }
+    function onExportSettings() {
+      const s = getSettings();
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(s, null, 2));
+      const dlAnchor = document.createElement('a');
+      dlAnchor.setAttribute('href', dataStr);
+      const dateStr = new Date().toISOString().split('T')[0];
+      dlAnchor.setAttribute('download', 'dt_settings_' + dateStr + '.json');
+      dlAnchor.click();
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      updateBaselineFromSettings();
+      // Ensure slider hints reflect stored settings on page load
+      updateSliderHints();
+      const roleSelect = document.getElementById('role-select');
+      if (roleSelect) {
+        roleSelect.addEventListener('change', function() {
+          const s = getSettings();
+          s.role = this.value;
+          const preset = rolePresets[this.value] || {};
+          Object.assign(s, preset);
+          saveSettings(s);
+          updateBaselineFromSettings();
+          if (window.IR_updateUI) { try { window.IR_updateUI(); } catch(e) {} }
+        });
+        const s = getSettings();
+        roleSelect.value = s.role;
+      }
+      const openBtn = document.getElementById('open-settings-btn');
+      if (openBtn) openBtn.addEventListener('click', openSettingsModal);
+      const closeBtn = document.getElementById('settings-close-btn');
+      if (closeBtn) closeBtn.addEventListener('click', closeSettingsModal);
+      const saveBtn = document.getElementById('settings-save-btn');
+      if (saveBtn) saveBtn.addEventListener('click', onSaveSettings);
+      const resetBtn = document.getElementById('settings-reset-btn');
+      if (resetBtn) resetBtn.addEventListener('click', onResetDefaults);
+      const exportBtn = document.getElementById('settings-export-btn');
+      if (exportBtn) exportBtn.addEventListener('click', onExportSettings);
+      document.querySelectorAll('[data-role-preset]').forEach(btn => {
+        btn.addEventListener('click', function() {
+          onLoadPreset(this.getAttribute('data-role-preset'));
+        });
+      });
+      document.querySelectorAll('.collapsible-header').forEach(header => {
+        header.addEventListener('click', function() {
+          this.classList.toggle('active');
+          const content = this.nextElementSibling;
+          if (content) {
+            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+          }
+        });
+      });
+    });
+    window.DT_updateBaselineFromSettings = updateBaselineFromSettings;
+  })();
   </script>
 </body>
 </html>
