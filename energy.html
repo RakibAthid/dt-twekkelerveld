@@ -611,6 +611,66 @@
   </div>
 </div>
 
+<!-- Advanced Settings Modal -->
+<div id="settingsModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) this.style.display='none'">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:600px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <h1 style="margin:0;"><span style="color:var(--accent-primary)">⚙️</span> Advanced Settings</h1>
+      <button onclick="document.getElementById('settingsModal').style.display='none'"
+        style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">×</button>
+    </div>
+    <div style="overflow-y:auto; max-height:70vh;">
+      <h3 style="margin-top:0;">Prices (€/unit)</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <label style="font-size:11px;">Electricity import €/kWh<br><input id="paramPriceElecImport" type="number" step="0.01" class="tiny-input"></label>
+        <label style="font-size:11px;">Gas € per m³<br><input id="paramPriceGas" type="number" step="0.01" class="tiny-input"></label>
+        <label style="font-size:11px;">Feed‑in €/kWh<br><input id="paramPriceFeedIn" type="number" step="0.01" class="tiny-input"></label>
+        <label style="font-size:11px;">P2P €/kWh<br><input id="paramPriceP2P" type="number" step="0.01" class="tiny-input"></label>
+      </div>
+      <h3>Costs</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <label style="font-size:11px;">PV cost €/Wp<br><input id="paramCostPvPerWp" type="number" step="0.01" class="tiny-input"></label>
+        <label style="font-size:11px;">Insulation €/m²<br><input id="paramCostInsul" type="number" step="0.1" class="tiny-input"></label>
+        <label style="font-size:11px;">Hybrid heat pump €<br><input id="paramCostHybridHp" type="number" step="100" class="tiny-input"></label>
+        <label style="font-size:11px;">All‑electric heat pump €<br><input id="paramCostAllHp" type="number" step="100" class="tiny-input"></label>
+      </div>
+      <h3>CO₂ factors (kg CO₂ per unit)</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <label style="font-size:11px;">Electricity kgCO₂/kWh<br><input id="paramCo2Elec" type="number" step="0.001" class="tiny-input"></label>
+        <label style="font-size:11px;">Gas kgCO₂/m³<br><input id="paramCo2Gas" type="number" step="0.001" class="tiny-input"></label>
+      </div>
+      <h3>CBA parameters</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <label style="font-size:11px;">Discount rate (%)<br><input id="cbaDiscountRate" type="number" step="0.1" class="tiny-input"></label>
+        <label style="font-size:11px;">Horizon (years)<br><input id="cbaHorizon" type="number" step="1" class="tiny-input"></label>
+      </div>
+      <h3>Budget cap</h3>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:11px;">Max investment €<br><input id="budgetCap" type="number" step="100" class="tiny-input"></label>
+      </div>
+      <details style="margin-top:12px; font-size:12px; color:var(--text-main);">
+        <summary style="cursor:pointer; font-size:13px; font-weight:600; color:var(--accent-primary);">Show equations &amp; assumptions</summary>
+        <div style="margin-top:10px; font-size:12px; color:var(--text-main); line-height:1.4;">
+          <ul style="list-style:disc; margin-left:18px;">
+            <li><b>Energy cost:</b> (gas × price<sub>gas</sub>) + (imported electricity × price<sub>elec</sub>) − (exported electricity × feed‑in tariff)</li>
+            <li><b>CO₂ savings:</b> (baseline energy − new energy) × emission factor</li>
+            <li><b>Cost assumptions:</b> PV cost per Wp (costs.pvPerWp), insulation per m² (costs.insulationSqM), heat pump costs (costs.hybridPump/allElectric)</li>
+            <li><b>NPV:</b> ∑<sub>t=1</sub><sup>T</sup> (Annual savings)/(1 + r)<sup>t</sup> − Capex</li>
+            <li><b>BCR:</b> Present value of benefits ÷ Capex</li>
+            <li><b>Defaults:</b> values drawn from the PARAMS object (units as indicated)</li>
+          </ul>
+        </div>
+      </details>
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button class="action-btn" style="flex:1; background:var(--accent-primary); color:white;" onclick="applySettings()">Apply</button>
+        <button class="action-btn" style="flex:1; background:rgba(255,255,255,0.1); color:white;" onclick="document.getElementById('settingsModal').style.display='none'">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="titleBar" onclick="document.getElementById('overviewModal').style.display='flex'">
+
 <!-- ENERGY OVERVIEW -->
 <div id="methodologyModal" class="modal-overlay" onclick="if(event.target===this) this.style.display='none'">
   <div class="modal-content">
@@ -1046,6 +1106,8 @@
     <div class="trade-row"><span>Opex new (annual)</span> <span id="tradeOpexNew" class="trade-good">-</span></div>
     <div class="trade-row"><span>Annual savings</span> <span id="tradeSave" class="trade-good">-</span></div>
     <div class="trade-row"><span>Break-even time</span> <span id="tradePay" style="color:white; font-weight:600;">-</span></div>
+    <div class="trade-row"><span>NPV (discounted)</span> <span id="tradeNPV" class="trade-good">-</span></div>
+    <div class="trade-row"><span>Benefit-cost ratio</span> <span id="tradeBCR" class="trade-good">-</span></div>
     <div id="tradeNote" style="margin-top:8px; font-size:11px; color:#93c5fd; font-style:italic; border-top:1px solid rgba(255,255,255,0.1); padding-top:6px;"></div>
   </div>
 
@@ -1055,6 +1117,8 @@
 
   <div id="downloadRow">
     <button id="btnDownloadPdf" class="action-btn" onclick="generatePDF()">📄 Download PDF Report</button>
+    <button id="btnExportJson" class="action-btn" onclick="exportJSON()">🗄️ Export JSON</button>
+    <button id="btnOpenSettings" class="action-btn" onclick="showSettings()">⚙️ Settings</button>
   </div>
 </div>
 
@@ -2537,6 +2601,124 @@ function applyLod2Overlays(){
   if(shadowRaster && shadowRaster.imageryLayer) shadowRaster.imageryLayer.show = (inLod2 && L2_SHOW_SHADOW_OVERLAY);
 }
 
+// ------------------------------------------------------------
+// Advanced settings & cost‑benefit analysis
+// ------------------------------------------------------------
+// Default economic parameters. These can be updated via the settings modal.
+let discountRate = 0.04;
+let horizonYears = 20;
+let budgetCap = null;
+
+// Display the settings modal and fill in current parameter values
+function showSettings() {
+  const m = document.getElementById('settingsModal');
+  document.getElementById('paramPriceElecImport').value = PARAMS.prices.elecImport ?? '';
+  document.getElementById('paramPriceGas').value = PARAMS.prices.gas ?? '';
+  document.getElementById('paramPriceFeedIn').value = PARAMS.prices.feedIn ?? '';
+  document.getElementById('paramPriceP2P').value = PARAMS.prices.p2p ?? '';
+  document.getElementById('paramCostPvPerWp').value = PARAMS.costs.pvPerWp ?? '';
+  document.getElementById('paramCostInsul').value = PARAMS.costs.insulationSqM ?? '';
+  document.getElementById('paramCostHybridHp').value = PARAMS.costs.hybridPump ?? '';
+  document.getElementById('paramCostAllHp').value = PARAMS.costs.allElectric ?? '';
+  document.getElementById('paramCo2Elec').value = PARAMS.co2.elec ?? '';
+  document.getElementById('paramCo2Gas').value = PARAMS.co2.gas ?? '';
+  document.getElementById('cbaDiscountRate').value = ((discountRate || 0) * 100).toFixed(2);
+  document.getElementById('cbaHorizon').value = horizonYears ?? '';
+  document.getElementById('budgetCap').value = budgetCap ?? '';
+  m.style.display = 'flex';
+}
+
+// Apply settings from the modal back into the PARAMS object and refresh the UI
+function applySettings() {
+  const pEI = parseFloat(document.getElementById('paramPriceElecImport').value);
+  if(Number.isFinite(pEI)) PARAMS.prices.elecImport = pEI;
+  const pG = parseFloat(document.getElementById('paramPriceGas').value);
+  if(Number.isFinite(pG)) PARAMS.prices.gas = pG;
+  const pF = parseFloat(document.getElementById('paramPriceFeedIn').value);
+  if(Number.isFinite(pF)) PARAMS.prices.feedIn = pF;
+  const pP = parseFloat(document.getElementById('paramPriceP2P').value);
+  if(Number.isFinite(pP)) PARAMS.prices.p2p = pP;
+  const cPV = parseFloat(document.getElementById('paramCostPvPerWp').value);
+  if(Number.isFinite(cPV)) PARAMS.costs.pvPerWp = cPV;
+  const cI = parseFloat(document.getElementById('paramCostInsul').value);
+  if(Number.isFinite(cI)) PARAMS.costs.insulationSqM = cI;
+  const cH = parseFloat(document.getElementById('paramCostHybridHp').value);
+  if(Number.isFinite(cH)) PARAMS.costs.hybridPump = cH;
+  const cA = parseFloat(document.getElementById('paramCostAllHp').value);
+  if(Number.isFinite(cA)) PARAMS.costs.allElectric = cA;
+  const coE = parseFloat(document.getElementById('paramCo2Elec').value);
+  if(Number.isFinite(coE)) PARAMS.co2.elec = coE;
+  const coG = parseFloat(document.getElementById('paramCo2Gas').value);
+  if(Number.isFinite(coG)) PARAMS.co2.gas = coG;
+  const rIn = parseFloat(document.getElementById('cbaDiscountRate').value);
+  if(Number.isFinite(rIn)) discountRate = rIn / 100;
+  const tIn = parseFloat(document.getElementById('cbaHorizon').value);
+  if(Number.isFinite(tIn)) horizonYears = tIn;
+  const bIn = parseFloat(document.getElementById('budgetCap').value);
+  budgetCap = Number.isFinite(bIn) ? bIn : null;
+  document.getElementById('settingsModal').style.display = 'none';
+  if(typeof selectedEnt !== 'undefined' && selectedEnt && selectedEnt._b) { renderInfo(selectedEnt); }
+  updateLeftLegend();
+}
+
+// Calculate the NPV and benefit‑cost ratio for a given economic summary
+function computeCBA(eco) {
+  const A = eco.savings || 0;
+  const C = eco.cost || 0;
+  let pvBenefits = 0;
+  if(discountRate > 0 && horizonYears > 0) {
+    pvBenefits = (A / discountRate) * (1 - Math.pow(1 + discountRate, -horizonYears));
+  } else {
+    pvBenefits = A * horizonYears;
+  }
+  const npvVal = pvBenefits - C;
+  const bcrVal = (C > 0) ? (pvBenefits / C) : null;
+  return { npv: npvVal, bcr: bcrVal };
+}
+
+// Export a JSON file containing the current parameters and selected scenario/building context
+function exportJSON() {
+  const out = {};
+  if(typeof selectedEnt !== 'undefined' && selectedEnt && selectedEnt._b) {
+    const b = selectedEnt._b;
+    const eco = calculateTradeoffs(selectedEnt);
+    const cba = computeCBA(eco);
+    out.building = {
+      id: b.ID || null,
+      year: b.Year,
+      area: b.Area,
+      upgrades: {
+        pv: !!b.customPV || activeScen === 'addPV' || activeScen === 'p2p',
+        insulation: !!b.customRetro || activeScen === 'insulate',
+        heatPump: activeScen === 'heatPump'
+      }
+    };
+    out.economics = {
+      cost: eco.cost,
+      savings: eco.savings,
+      payback: eco.payback,
+      npv: cba.npv,
+      bcr: cba.bcr,
+      discountRate: discountRate,
+      horizonYears: horizonYears,
+      budgetCap: budgetCap
+    };
+    out.scenario = activeScen;
+    out.indicator = activeInd;
+  }
+  out.params = JSON.parse(JSON.stringify(PARAMS));
+  const jsonStr = JSON.stringify(out, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'energy_settings.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // =======================================
 //  Energy segment chart (dynamic)
 //
@@ -3978,11 +4160,16 @@ window.generatePDF = function() {
   doc.text(`Opex new: €${Math.round(eco.newTotal).toLocaleString()} /yr`, 15, 95);
   doc.text(`Annual savings: €${Math.round(eco.savings).toLocaleString()} /yr`, 15, 100);
   doc.text(`Break-even time: ${eco.payback} yrs`, 15, 105);
-
-  // Include building chart image lower down
+  // Cost‑benefit results (NPV and benefit‑cost ratio) based on discount rate & horizon
+  const cbaRes = computeCBA(eco);
+  const npvDispPdf = (cbaRes && Number.isFinite(cbaRes.npv)) ? `€${Math.round(cbaRes.npv).toLocaleString()}` : 'N/A';
+  const bcrDispPdf = (cbaRes && cbaRes.bcr !== null) ? cbaRes.bcr.toFixed(2) : 'N/A';
+  doc.text(`NPV: ${npvDispPdf}`, 15, 110);
+  doc.text(`Benefit-cost ratio: ${bcrDispPdf}`, 15, 115);
+  // Include building chart image lower down (shifted down to avoid overlap)
   const canvas = document.getElementById('buildingChart');
   const imgData = canvas.toDataURL("image/png", 1.0);
-  doc.addImage(imgData, 'PNG', 15, 115, 180, 90);
+  doc.addImage(imgData, 'PNG', 15, 120, 180, 90);
 
   // Save the PDF
   doc.save(`EnergyReport_${b.ID}.pdf`);
@@ -4528,15 +4715,39 @@ function renderInfo(e) {
   if(activeScen !== 'baseline' || b.customPV || b.customRetro) {
     tradeBox.style.display = 'block';
     const eco = calculateTradeoffs(e);
+    // Compute discounted NPV and benefit–cost ratio using the global economic parameters
+    const cbaRes = computeCBA(eco);
+    // Choose colour for payback time (red if >15 years or unavailable, green otherwise)
     const pColor = (parseFloat(eco.payback) > 15 || eco.payback === "N/A") ? "#f87171" : "#10b981";
-    // populate capex/opex and savings, include time units
+    // Populate capex/opex values and annual savings
     document.getElementById('tradeCost').innerText = "€" + Math.round(eco.cost).toLocaleString();
     document.getElementById('tradeOpexBase').innerText = "€" + Math.round(eco.baseTotal).toLocaleString() + " /yr";
     document.getElementById('tradeOpexNew').innerText = "€" + Math.round(eco.newTotal).toLocaleString() + " /yr";
     document.getElementById('tradeSave').innerText = "€" + Math.round(eco.savings).toLocaleString() + " /yr";
     document.getElementById('tradePay').innerText = eco.payback + " yrs";
     document.getElementById('tradePay').style.color = pColor;
-    document.getElementById('tradeNote').innerText = eco.note;
+    // Update NPV and benefit‑cost ratio display; show N/A when undefined
+    const npvDisp = (cbaRes && Number.isFinite(cbaRes.npv)) ? "€" + Math.round(cbaRes.npv).toLocaleString() : "N/A";
+    const bcrDisp = (cbaRes && cbaRes.bcr !== null && Number.isFinite(cbaRes.bcr)) ? cbaRes.bcr.toFixed(2) : "N/A";
+    document.getElementById('tradeNPV').innerText = npvDisp;
+    document.getElementById('tradeBCR').innerText = bcrDisp;
+    // Construct note string, appending a budget warning if capex exceeds the budget cap
+    let noteTxt = eco.note || "";
+    const btnPV  = document.getElementById('btnIndivPV');
+    const btnRet = document.getElementById('btnIndivRetro');
+    if(budgetCap !== null && eco.cost > budgetCap) {
+      noteTxt = noteTxt ? noteTxt + " • " : "";
+      noteTxt += "Capex exceeds budget cap";
+      document.getElementById('tradeCost').style.color = "var(--accent-danger)";
+      if(btnPV) { btnPV.style.pointerEvents = 'none'; btnPV.style.opacity = 0.5; }
+      if(btnRet) { btnRet.style.pointerEvents = 'none'; btnRet.style.opacity = 0.5; }
+    } else {
+      // Reset styling when within budget
+      document.getElementById('tradeCost').style.color = "";
+      if(btnPV) { btnPV.style.pointerEvents = ''; btnPV.style.opacity = ''; }
+      if(btnRet) { btnRet.style.pointerEvents = ''; btnRet.style.opacity = ''; }
+    }
+    document.getElementById('tradeNote').innerText = noteTxt;
   } else {
     tradeBox.style.display = 'none';
   }
