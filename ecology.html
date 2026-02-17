@@ -6054,6 +6054,18 @@ window.addEventListener('load', () => {
   updateWeather();
   setInterval(updateWeather, 3600 * 1000);
 });
+
+// -----------------------------------------------------------------------------
+// Messaging bridge to parent page (see ecology.html for details)
+window.addEventListener('message', (event) => {
+  const msg = event.data;
+  if (!msg || typeof msg.type !== 'string') return;
+  if (msg.type === 'SETTINGS_UPDATE') {
+    window.GLOBAL_SETTINGS = msg.payload || {};
+  } else if (msg.type === 'SCENARIO_UPDATE') {
+    // No scenario toggling implemented for ecology at this time
+  }
+});
 </script>
 
 <!-- Small on‑screen hint summarising the camera controls. This helps users understand how to pan, zoom and rotate. -->
