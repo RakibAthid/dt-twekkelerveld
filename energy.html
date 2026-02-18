@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Twekkelerveld Smart Energy Twin</title>
 
+    <!-- Cloudflare/R2 config (optional). If missing, the app falls back to local files. -->
+    <script src="config.js"></script>
+
 <!-- CesiumJS -->
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/Cesium.js"></script>
 <link href="https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/Cesium.js" rel="preload" as="script">
@@ -1326,40 +1329,60 @@
   Run via local server (Live Server).
 ------------------------------------------------------------ */
 
+// ------------------------------------------------------------
+// R2 config helper. Defines a dataUrl helper that prepends any
+// base/prefix provided via DT_CONFIG (injected via config.js). When
+// R2_BASE is empty the helper returns the original filename. This
+// mirrors the behaviour in the local prototype so that asset paths
+// work both locally and on Cloudflare.
+const R2_BASE   = (window.DT_CONFIG?.R2_BASE || "").replace(/\/+$/, "");
+const R2_PREFIX = (window.DT_CONFIG?.R2_PREFIX || "").replace(/^\/+|\/+$/g, "");
+function dataUrl(name){
+  if(!R2_BASE) return name;
+  const parts = [R2_BASE];
+  if(R2_PREFIX) parts.push(R2_PREFIX);
+  parts.push(String(name || "").replace(/^\/+/, ""));
+  return parts.join("/");
+}
+
 // =============================
 // 0) FILES 
 // =============================
-// Shadow raster (ground plane). Filenames can be easy to mismatch (spaces/case/"updated").
-// To make the app robust, we try a small set of candidate filenames.
+// Shadow raster (ground plane). We map candidate filenames through
+// dataUrl() so that R2 prefixes are applied when configured. Filenames can be
+// easy to mismatch (spaces/case/"updated"); using an array of options
+// improves robustness.
 const SHADOW_PNG_CANDIDATES = [
   "Aggregated Shadow Raster_updated.png",
   "Aggregated Shadow Raster updated.png",
   "Aggregated Shadow Raster.png"
-];
+].map(dataUrl);
 const SHADOW_PGW_CANDIDATES = [
   "Aggregated Shadow Raster_updated.pgw",
   "Aggregated Shadow Raster updated.pgw",
   "Aggregated Shadow Raster.pgw"
-];
+].map(dataUrl);
 const LOCAL_SHADOW_PNG = SHADOW_PNG_CANDIDATES[0];
 const LOCAL_SHADOW_PGW = SHADOW_PGW_CANDIDATES[0];
 
-const LOCAL_IRR_PNG    = "Roof Irradiance Raster(kWh).png";
-const LOCAL_IRR_PGW    = "Roof Irradiance Raster(kWh).pgw";
+// Irradiance raster. Use dataUrl() to handle R2 prefixes. These names
+// correspond to the roof irradiance PNG and its world file.
+const LOCAL_IRR_PNG    = dataUrl("Roof Irradiance Raster(kWh).png");
+const LOCAL_IRR_PGW    = dataUrl("Roof Irradiance Raster(kWh).pgw");
 
 
 const IRR_SCALE_JSON   = null;
 
 // ✅ EnergyEst MUST be loaded from your BAG-PAND fixed table (EnergyEst column)
 const CSV_CANDIDATES = [
-  "Twekkelerveld_bag_pand_FIXED.csv",
-  "twekkelerveld_bag_pand_FIXED.csv",
-  "Twekkelerveld_bag_pand_Fixed.csv"
+  dataUrl("Twekkelerveld_bag_pand_FIXED.csv"),
+  dataUrl("twekkelerveld_bag_pand_FIXED.csv"),
+  dataUrl("Twekkelerveld_bag_pand_Fixed.csv")
 ];
 let CSV_FILE_ACTUAL = null;
 
-// LOD 1 footprint file
-const GEOJSON_FILE = "twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson";
+// LOD 1 footprint file (GeoJSON). Use dataUrl() to resolve correct location.
+const GEOJSON_FILE = dataUrl("twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson");
 
 // =============================
 // 1) CONFIG
@@ -4651,9 +4674,24 @@ function calculateTradeoffs(e) {
   if (isRetro) cost += (Number.isFinite(b.Area)?b.Area:0) * PARAMS.costs.insulationSqM * (isPV ? 0.85 : 1);
   if (isHP) cost += (isRetro ? PARAMS.costs.allElectric : PARAMS.costs.hybridPump);
 
-  // Baseline annual energy bill from baseline consumption
-  const baseGas = getVal(e, 'AbsGas', 'baseline');
-  const baseEl  = getVal(e, 'AbsEl', 'baseline');
+  // Baseline annual energy bill from baseline consumption. Use let so we can
+  // override with a fallback when no baseline energy data is available.
+  let baseGas = getVal(e, 'AbsGas', 'baseline');
+  let baseEl  = getVal(e, 'AbsEl', 'baseline');
+  // If both baseline gas and electricity are missing or zero, estimate a
+  // baseline using the building’s energy intensity (EUI) and area. We
+  // assume a 70/30 split between gas (heating) and electricity and convert
+  // gas kWh to m³ using 9.77 kWh per m³. This fallback ensures each
+  // building has a meaningful Opex baseline rather than returning 0.
+  if((!Number.isFinite(baseGas) || baseGas <= 0) && (!Number.isFinite(baseEl) || baseEl <= 0)){
+    const euiBase = Number.isFinite(b.EUI_BASE) ? b.EUI_BASE : 0;
+    const area = Number.isFinite(b.Area) ? b.Area : 0;
+    const totalKwh = euiBase * area;
+    const gasRatio = 0.7;
+    const elecRatio = 0.3;
+    baseEl  = totalKwh * elecRatio;
+    baseGas = (totalKwh * gasRatio) / 9.77;
+  }
   const baseTotal = (baseGas * PARAMS.prices.gas) + (baseEl * PARAMS.prices.elecImport);
 
   const newGas = getVal(e, 'AbsGas', activeScen);
