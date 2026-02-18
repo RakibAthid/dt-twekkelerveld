@@ -157,6 +157,129 @@
     overflow-y: auto;
   }
 
+  /* Settings button and modal styles for ecology */
+  #ecoSettingsBtn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 105;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(14px);
+  }
+  #ecoSettingsBtn:hover {
+    background: rgba(45, 212, 191, 0.85);
+    color: #0b1220;
+    border-color: rgba(45, 212, 191, 0.45);
+  }
+  #eco-settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+  }
+  #eco-settings-overlay.active { display: flex; }
+  #eco-settings-modal {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    width: min(440px, 90%);
+    max-height: 90vh;
+    overflow-y: auto;
+    color: var(--text-main);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.45);
+    backdrop-filter: blur(16px);
+  }
+  #eco-settings-modal h2 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  #eco-settings-modal h3 {
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--primary);
+  }
+  #eco-settings-modal .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  #eco-settings-modal .field label {
+    font-size: 12px;
+    color: var(--text-sub);
+  }
+  #eco-settings-modal .field input {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    border-radius: 8px;
+    padding: 6px;
+    font-size: 12px;
+  }
+  #eco-settings-modal details {
+    margin-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 8px;
+  }
+  #eco-settings-modal summary {
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--primary);
+    font-weight: 600;
+  }
+  #eco-settings-modal .button-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  #eco-settings-modal .save-btn {
+    flex: 1;
+    background: var(--primary);
+    color: #0b1220;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #eco-settings-modal .cancel-btn {
+    flex: 1;
+    background: rgba(255,255,255,0.12);
+    color: var(--text-main);
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #eco-settings-modal .save-btn:hover {
+    background: var(--primary-hover);
+  }
+  #eco-settings-modal .cancel-btn:hover {
+    background: rgba(255,255,255,0.18);
+  }
+
   #leftPanel { 
     position: absolute; 
     top: 72px; 
@@ -1027,6 +1150,56 @@
 <!-- hidden canvases used for raster probing -->
 <canvas id="canvasNDVI" style="display:none;"></canvas>
 <canvas id="canvasUHI" style="display:none;"></canvas>
+
+  <!-- Ecology settings button and modal -->
+  <div id="ecoSettingsBtn"><i class="fa-solid fa-gear"></i><span style="margin-left:6px;">Settings</span></div>
+  <div id="eco-settings-overlay">
+    <div id="eco-settings-modal">
+      <h2>Ecology &amp; MCDA Settings</h2>
+      <form id="eco-settings-form">
+        <h3>MCDA Weights</h3>
+        <div class="field"><label for="eco_weight_u">Urban heat mitigation weight (w<sub>U</sub>)</label><input type="number" step="0.01" id="eco_weight_u"></div>
+        <div class="field"><label for="eco_weight_n">Vegetation deficit weight (w<sub>N</sub>)</label><input type="number" step="0.01" id="eco_weight_n"></div>
+        <div class="field"><label for="eco_weight_c">Corridor proximity weight (w<sub>C</sub>)</label><input type="number" step="0.01" id="eco_weight_c"></div>
+        <div class="field"><label for="eco_weight_a">Building age weight (w<sub>A</sub>)</label><input type="number" step="0.01" id="eco_weight_a"></div>
+        <div class="field"><label for="eco_weight_r">Building area weight (w<sub>R</sub>)</label><input type="number" step="0.01" id="eco_weight_r"></div>
+        <h3>CBA Parameters</h3>
+        <div class="field"><label for="eco_discount">Discount rate (%)</label><input type="number" step="0.1" id="eco_discount"></div>
+        <div class="field"><label for="eco_horizon">Horizon (years)</label><input type="number" step="1" id="eco_horizon"></div>
+        <h3>Feasible Space Limits</h3>
+        <div class="field"><label for="eco_max_roof">Max roof eligible (%)</label><input type="number" step="1" id="eco_max_roof"></div>
+        <div class="field"><label for="eco_max_tree">Max tree area (m²)</label><input type="number" step="1" id="eco_max_tree"></div>
+        <h3>Unit Costs (€)</h3>
+        <div class="field"><label for="eco_cost_tree">Tree planting cost (€/tree)</label><input type="number" step="1" id="eco_cost_tree"></div>
+        <div class="field"><label for="eco_cost_roof">Green roof cost (€/m²)</label><input type="number" step="1" id="eco_cost_roof"></div>
+        <div class="field"><label for="eco_cost_infil">Infiltration strip cost (€/m²)</label><input type="number" step="1" id="eco_cost_infil"></div>
+      </form>
+      <details>
+        <summary>Show equations &amp; assumptions</summary>
+        <div style="margin-top:8px; font-size:12px; line-height:1.5; color:var(--text-sub)">
+          <p><strong>MCDA score:</strong> Score = w<sub>U</sub> · UHI + w<sub>N</sub> · Vegetation deficit + w<sub>C</sub> · Corridor proximity + w<sub>A</sub> · Age + w<sub>R</sub> · Area</p>
+          <p><strong>NPV:</strong> ∑<sub>t=1</sub><sup>T</sup> (Annual benefits)/(1 + r)<sup>t</sup> − Capex</p>
+          <p><strong>BCR:</strong> Present value of benefits ÷ Capex</p>
+          <p><strong>Budgets:</strong> Feasible space and budget caps limit the maximum area or funds allocated to interventions.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Stakeholders &amp; user stories</summary>
+        <div style="margin-top:8px; font-size:12px; line-height:1.5; color:var(--text-sub)">
+          <p><strong>Stakeholders:</strong> residents, local businesses, schools, NGOs, municipality, utilities.</p>
+          <p><strong>Users:</strong> municipal planners, sustainability officers, housing association asset managers, consultants/researchers.</p>
+          <p><strong>User story 1:</strong> A municipal planner adjusts weights and budgets to compare greening scenarios under a €X budget.</p>
+          <p><strong>User story 2:</strong> A housing corporation prioritises buildings for facade greening and green roofs based on MCDA weights.</p>
+          <p><strong>User story 3:</strong> A community group explores tree planting options and trade‑offs using customised weights.</p>
+        </div>
+      </details>
+      <div class="button-row">
+        <button type="button" id="eco-settings-apply" class="save-btn">Apply</button>
+        <button type="button" id="eco-settings-cancel" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
 
 <div id="uiLayer">
 
@@ -3940,14 +4113,30 @@ function runMCDA(){
   const budget = document.getElementById('mcdaBudget').value;
   const topN = clamp(parseInt(document.getElementById('mcdaTopN').value || '5'), 1, 15);
 
+  // Base weights for MCDA.  These may be overridden by the objective
+  // dropdown or by custom values provided via ECO_SETTINGS.  If
+  // ECO_SETTINGS.weights is defined the custom values supersede the
+  // objective presets and corridor adjustment below.
   let wU = 0.46, wN = 0.28, wC = 0.10, wA = 0.08, wR = 0.08;
-
-  if(obj === 'cooling'){      wU = 0.55; wN = 0.20; wC = 0.10; wA = 0.05; wR = 0.10; }
-  if(obj === 'biodiversity'){ wU = 0.32; wN = 0.42; wC = 0.14; wA = 0.06; wR = 0.06; }
-  if(obj === 'stormwater'){   wU = 0.38; wN = 0.26; wC = 0.12; wA = 0.06; wR = 0.18; }
-  if(obj === 'balanced'){     wU = 0.46; wN = 0.28; wC = 0.10; wA = 0.08; wR = 0.08; }
-
-  if(corr === 'high'){ wC += 0.06; wU -= 0.03; wN -= 0.03; }
+  let customWeights = null;
+  try {
+    if (window.ECO_SETTINGS && window.ECO_SETTINGS.weights) {
+      customWeights = window.ECO_SETTINGS.weights;
+    }
+  } catch (e) { customWeights = null; }
+  if (!customWeights) {
+    if(obj === 'cooling'){      wU = 0.55; wN = 0.20; wC = 0.10; wA = 0.05; wR = 0.10; }
+    if(obj === 'biodiversity'){ wU = 0.32; wN = 0.42; wC = 0.14; wA = 0.06; wR = 0.06; }
+    if(obj === 'stormwater'){   wU = 0.38; wN = 0.26; wC = 0.12; wA = 0.06; wR = 0.18; }
+    if(obj === 'balanced'){     wU = 0.46; wN = 0.28; wC = 0.10; wA = 0.08; wR = 0.08; }
+    if(corr === 'high'){ wC += 0.06; wU -= 0.03; wN -= 0.03; }
+  } else {
+    wU = (customWeights.uhi      !== undefined) ? customWeights.uhi      : wU;
+    wN = (customWeights.ndvi     !== undefined) ? customWeights.ndvi     : wN;
+    wC = (customWeights.corridor !== undefined) ? customWeights.corridor : wC;
+    wA = (customWeights.age      !== undefined) ? customWeights.age      : wA;
+    wR = (customWeights.area     !== undefined) ? customWeights.area     : wR;
+  }
 
   const prefer = (budget === 'low') ? 'shrubs' : (budget === 'medium' ? 'mixed' : 'trees');
 
@@ -6060,12 +6249,123 @@ window.addEventListener('load', () => {
 window.addEventListener('message', (event) => {
   const msg = event.data;
   if (!msg || typeof msg.type !== 'string') return;
-  if (msg.type === 'SETTINGS_UPDATE') {
-    window.GLOBAL_SETTINGS = msg.payload || {};
+  if (msg.type === 'SETTINGS_UPDATE' || msg.type === 'ECO_SETTINGS_UPDATE') {
+    const payload = msg.payload || {};
+    window.GLOBAL_SETTINGS = payload;
+    window.ECO_SETTINGS = payload;
+    try { localStorage.setItem('GLOBAL_ECO_SETTINGS', JSON.stringify(payload)); } catch(e) {}
   } else if (msg.type === 'SCENARIO_UPDATE') {
     // No scenario toggling implemented for ecology at this time
   }
 });
+</script>
+
+<!-- Standalone ecology settings management -->
+<script>
+// -------------------------------------------------------------------------
+// Standalone ecology settings management
+//
+// Provides an in‑app UI for adjusting MCDA weights, cost parameters,
+// discount rate, horizon and feasible space limits when running the
+// stand‑alone ecology digital twin.  Values are loaded from a default
+// object or pulled from GLOBAL_ECO_SETTINGS in localStorage.  When the
+// user applies the settings the values are persisted to localStorage,
+// stored on window.ECO_SETTINGS for other scripts to read, and basic UI
+// updates or recomputations can be triggered.  The settings button is
+// automatically hidden when the page is embedded inside the Nexus.
+(function(){
+  let ecologySettings = {
+    weights: { uhi: 0.46, ndvi: 0.28, corridor: 0.10, age: 0.08, area: 0.08 },
+    costs: { tree: 150, greenRoofPerM2: 80, infiltrationPerM2: 50 },
+    discountRate: 0.04,
+    horizonYears: 30,
+    budgets: { maxRoofPercent: 20, maxTreeArea: 1000 }
+  };
+  try {
+    const stored = localStorage.getItem('GLOBAL_ECO_SETTINGS');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === 'object') {
+        ecologySettings = Object.assign({}, ecologySettings, parsed);
+        if (parsed.weights) ecologySettings.weights = Object.assign({}, ecologySettings.weights, parsed.weights);
+        if (parsed.costs) ecologySettings.costs = Object.assign({}, ecologySettings.costs, parsed.costs);
+        if (parsed.budgets) ecologySettings.budgets = Object.assign({}, ecologySettings.budgets, parsed.budgets);
+      }
+    }
+  } catch(e) {}
+  function openEcoSettings(){
+    const s = ecologySettings;
+    document.getElementById('eco_weight_u').value   = s.weights.uhi ?? '';
+    document.getElementById('eco_weight_n').value   = s.weights.ndvi ?? '';
+    document.getElementById('eco_weight_c').value   = s.weights.corridor ?? '';
+    document.getElementById('eco_weight_a').value   = s.weights.age ?? '';
+    document.getElementById('eco_weight_r').value   = s.weights.area ?? '';
+    document.getElementById('eco_discount').value   = ((s.discountRate || 0) * 100).toFixed(2);
+    document.getElementById('eco_horizon').value    = s.horizonYears ?? '';
+    document.getElementById('eco_max_roof').value   = s.budgets.maxRoofPercent ?? '';
+    document.getElementById('eco_max_tree').value   = s.budgets.maxTreeArea ?? '';
+    document.getElementById('eco_cost_tree').value  = s.costs.tree ?? '';
+    document.getElementById('eco_cost_roof').value  = s.costs.greenRoofPerM2 ?? '';
+    document.getElementById('eco_cost_infil').value = s.costs.infiltrationPerM2 ?? '';
+    document.getElementById('eco-settings-overlay').classList.add('active');
+  }
+  function closeEcoSettings(){
+    document.getElementById('eco-settings-overlay').classList.remove('active');
+  }
+  function applyEcoSettingsStandalone(){
+    const s = ecologySettings;
+    const wU = parseFloat(document.getElementById('eco_weight_u').value);
+    const wN = parseFloat(document.getElementById('eco_weight_n').value);
+    const wC = parseFloat(document.getElementById('eco_weight_c').value);
+    const wA = parseFloat(document.getElementById('eco_weight_a').value);
+    const wR = parseFloat(document.getElementById('eco_weight_r').value);
+    if(Number.isFinite(wU)) s.weights.uhi = wU;
+    if(Number.isFinite(wN)) s.weights.ndvi = wN;
+    if(Number.isFinite(wC)) s.weights.corridor = wC;
+    if(Number.isFinite(wA)) s.weights.age = wA;
+    if(Number.isFinite(wR)) s.weights.area = wR;
+    const rIn = parseFloat(document.getElementById('eco_discount').value);
+    if(Number.isFinite(rIn)) s.discountRate = rIn / 100;
+    const hIn = parseFloat(document.getElementById('eco_horizon').value);
+    if(Number.isFinite(hIn)) s.horizonYears = hIn;
+    const maxRoof = parseFloat(document.getElementById('eco_max_roof').value);
+    if(Number.isFinite(maxRoof)) s.budgets.maxRoofPercent = maxRoof;
+    const maxTree = parseFloat(document.getElementById('eco_max_tree').value);
+    if(Number.isFinite(maxTree)) s.budgets.maxTreeArea = maxTree;
+    const cTree = parseFloat(document.getElementById('eco_cost_tree').value);
+    if(Number.isFinite(cTree)) s.costs.tree = cTree;
+    const cRoof = parseFloat(document.getElementById('eco_cost_roof').value);
+    if(Number.isFinite(cRoof)) s.costs.greenRoofPerM2 = cRoof;
+    const cInfil = parseFloat(document.getElementById('eco_cost_infil').value);
+    if(Number.isFinite(cInfil)) s.costs.infiltrationPerM2 = cInfil;
+    try { localStorage.setItem('GLOBAL_ECO_SETTINGS', JSON.stringify(ecologySettings)); } catch(e) {}
+    try { window.ECO_SETTINGS = JSON.parse(JSON.stringify(ecologySettings)); } catch(e) { window.ECO_SETTINGS = ecologySettings; }
+    closeEcoSettings();
+    try {
+      if (typeof updateLeftPanel === 'function') updateLeftPanel();
+      if (typeof runMCDA === 'function') runMCDA();
+    } catch(e) {}
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('ecoSettingsBtn');
+    if (btn) btn.addEventListener('click', (ev) => { ev.stopPropagation(); openEcoSettings(); });
+    const applyBtn  = document.getElementById('eco-settings-apply');
+    const cancelBtn = document.getElementById('eco-settings-cancel');
+    if (applyBtn)  applyBtn.addEventListener('click', applyEcoSettingsStandalone);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeEcoSettings);
+  });
+  window.addEventListener('load', () => {
+    try {
+      if (window.self !== window.top) {
+        const sb = document.getElementById('ecoSettingsBtn');
+        if (sb) sb.style.display = 'none';
+      }
+    } catch (e) {}
+  });
+  window.openEcoSettings = openEcoSettings;
+  window.closeEcoSettings = closeEcoSettings;
+  window.applyEcoSettings = applyEcoSettingsStandalone;
+})();
 </script>
 
 <!-- Small on‑screen hint summarising the camera controls. This helps users understand how to pan, zoom and rotate. -->
