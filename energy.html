@@ -1521,6 +1521,16 @@ let labelCoverageCount = 0;
 let labelTotalCount = 0;
 let labelLastRefreshed = null;
 let showCertifiedOnly = false;
+// --------------------------------------------------------------------
+// Twekkelerveld contains approximately 1 465 buildings (see intro).
+// In some deployments a GeoJSON dataset may not be available at run‑time.
+// When no entities have been loaded the label integration should still
+// report the total number of buildings so that coverage displays "0 / 1465"
+// instead of "0 / 0".  Define a constant for the approximate building
+// count and fall back to this value when myEntities is empty.  If your
+// dataset contains a different number of buildings you can adjust the
+// constant below accordingly.
+const TOTAL_BUILDINGS_APPROX = 1465;
 
 async function loadEnergyLabels(){
   // Reset any existing state before loading.  This ensures that repeated
@@ -1540,7 +1550,12 @@ async function loadEnergyLabels(){
       // Skip meta candidates during data pass
       if (/meta/i.test(cand.url)) continue;
       try {
-        const res = await fetch(encodeURI(cand.url), { cache: "no-store" });
+        // Use dataUrl() to construct a fully qualified URL with any Cloudflare R2
+        // prefix.  Without this labels stored on remote storage (e.g. R2) will not
+        // be resolved correctly.  Fall back to the raw filename when no R2
+        // configuration is present.
+        const urlToFetch = dataUrl(cand.url);
+        const res = await fetch(encodeURI(urlToFetch), { cache: "no-store" });
         if (!res.ok) continue;
         const ext = (cand.url.split('.').pop() || cand.type || '').toLowerCase();
         const type = cand.type || (ext === 'json' ? 'json' : (ext === 'csv' ? 'csv' : ((ext === 'xlsx' || ext === 'xls') ? 'xlsx' : 'text')));
@@ -1638,7 +1653,8 @@ async function loadEnergyLabels(){
     for (const cand of LABEL_SOURCES) {
       if (!/meta/i.test(cand.url)) continue;
       try {
-        const res = await fetch(encodeURI(cand.url), { cache: "no-store" });
+        const urlToFetchMeta = dataUrl(cand.url);
+        const res = await fetch(encodeURI(urlToFetchMeta), { cache: "no-store" });
         if (!res.ok) continue;
         const text = await res.text();
         let obj;
@@ -1663,7 +1679,13 @@ async function loadEnergyLabels(){
     // building gets a LabelLetter, LabelGroup (AB / CD / EG) and ProvSource
     // annotation.  Buildings without a matching ID are marked as proxies.
     let matchedCount = 0;
-    labelTotalCount = myEntities ? myEntities.length : 0;
+    // Determine the total number of buildings.  Prefer the number of loaded
+    // entities if available; otherwise fall back to the approximate constant.
+    if (Array.isArray(myEntities) && myEntities.length > 0) {
+      labelTotalCount = myEntities.length;
+    } else {
+      labelTotalCount = TOTAL_BUILDINGS_APPROX;
+    }
     if (myEntities) {
       for (const e of myEntities) {
         const b = e._b;
