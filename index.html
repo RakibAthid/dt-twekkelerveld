@@ -1097,6 +1097,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      position: relative; /* allow dropdown positioning */
     }
     .settings-controls select {
       background: rgba(30, 41, 59, 0.6);
@@ -1119,6 +1120,31 @@
     .settings-controls .settings-btn:hover {
       background: rgba(56,189,248,0.15);
       color: var(--accent);
+    }
+    /* Dropdown menu for consolidated settings */
+    .settings-dropdown {
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: none;
+      flex-direction: column;
+      min-width: 160px;
+      z-index: 1000;
+    }
+    .settings-dropdown .dropdown-item {
+      padding: 8px 12px;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      text-align: left;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .settings-dropdown .dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.05);
     }
     .settings-modal-overlay {
       position: fixed;
@@ -1250,9 +1276,13 @@
         <option value="community">Community group</option>
         <option value="researcher">Researcher</option>
       </select>
-      <button id="open-settings-btn" class="settings-btn"><i class="fa-solid fa-sliders"></i> Settings</button>
-      <!-- Additional button to configure energy and cost parameters shared across twins -->
-      <button id="open-energy-settings-btn" class="settings-btn"><i class="fa-solid fa-gear"></i> Energy Settings</button>
+      <button id="settings-menu-btn" class="settings-btn"><i class="fa-solid fa-sliders"></i> Settings</button>
+      <!-- Dropdown menu with sections for Energy, Ecology and Combined Scenario -->
+      <div id="settings-dropdown" class="settings-dropdown">
+        <button id="settings-energy" class="dropdown-item">Energy</button>
+        <button id="settings-ecology" class="dropdown-item">Ecology</button>
+        <button id="settings-combined" class="dropdown-item">Combined Scenario</button>
+      </div>
     </div>
   </header>
 
@@ -1905,7 +1935,10 @@
       window.__IR_initialized = true;
 
       // Use baseline values from the global object defined in the mission control enhancements.  
-      const IR_BASE = Object.assign({}, window.IR_BASE_GLOBAL);
+      // Use a reference to the global baseline so updates to settings propagate into scenario computations.
+      // Reference the global baseline object instead of cloning it.  
+      // This ensures that updates made via the settings modal propagate to scenario computations.
+      const IR_BASE = window.IR_BASE = window.IR_BASE_GLOBAL;
 
       // Full screen toggle logic
       (function() {
@@ -2936,6 +2969,77 @@
     };
 
   </script>
+  <!-- Consolidated settings dropdown and ecology modal logic -->
+  <script>
+    // Settings dropdown logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const menuBtn = document.getElementById('settings-menu-btn');
+      const dropdown = document.getElementById('settings-dropdown');
+      if (menuBtn && dropdown) {
+        menuBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+        function hideMenu() { dropdown.style.display = 'none'; }
+        const energyBtn = document.getElementById('settings-energy');
+        const ecoBtn    = document.getElementById('settings-ecology');
+        const combBtn   = document.getElementById('settings-combined');
+        if (energyBtn) energyBtn.addEventListener('click', function(){ hideMenu(); if (typeof openEnergyModal === 'function') openEnergyModal(); });
+        if (ecoBtn)    ecoBtn.addEventListener('click', function(){ hideMenu(); if (typeof openEcologyModal === 'function') openEcologyModal(); });
+        if (combBtn)   combBtn.addEventListener('click', function(){ hideMenu(); if (typeof openCombinedSettings === 'function') openCombinedSettings(); });
+        document.addEventListener('click', function(ev) {
+          if (!dropdown.contains(ev.target) && ev.target !== menuBtn) {
+            dropdown.style.display = 'none';
+          }
+        });
+      }
+    });
+    // Ecology settings modal logic
+    function openEcologyModal() {
+      const el = document.getElementById('ecology-settings-overlay');
+      if (el) el.classList.add('active');
+    }
+    function closeEcologyModal() {
+      const el = document.getElementById('ecology-settings-overlay');
+      if (el) el.classList.remove('active');
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const closeBtn = document.getElementById('ecology-settings-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', closeEcologyModal);
+      }
+    });
+
+    // Combined scenario settings modal logic
+    function openCombinedSettings() {
+      const overlay = document.getElementById('settings-overlay');
+      if (overlay) overlay.classList.add('active');
+      // Populate the form using the same logic as the built‑in settings modal.  
+      // If the exposed population helper is available use it, otherwise fall back to a simple localStorage parse.
+      if (window.DT_onResetDefaults) {
+        try { window.DT_onResetDefaults(); } catch(e) {}
+      }
+      if (window.DT_populateSettingsForm) {
+        try {
+          window.DT_populateSettingsForm();
+        } catch(e) {
+          console.error(e);
+        }
+      } else {
+        try {
+          const str = localStorage.getItem('DT_SETTINGS');
+          const s = str ? JSON.parse(str) : {};
+          const form = document.getElementById('settings-form');
+          if (form) {
+            Object.keys(s).forEach(key => {
+              const field = form.querySelector('[name="'+key+'"]');
+              if (field) field.value = s[key];
+            });
+          }
+        } catch(e) {}
+      }
+    }
+  </script>
   <!-- -------------------------------------------------------------------------
        Global Energy & Economic Settings Modal
 
@@ -2986,7 +3090,58 @@
         <button type="button" id="energy-settings-cancel" class="cancel-btn">Cancel</button>
       </div>
     </div>
-  </div>
+    </div>
+
+    <!-- Ecology settings modal -->
+    <div id="ecology-settings-overlay" class="settings-modal-overlay">
+      <div class="settings-modal">
+        <h2>Ecology &amp; MCDA Settings</h2>
+        <form id="ecology-settings-form">
+          <h3>Weights (0–1)</h3>
+          <div class="field"><label for="eco_weight_ndvi">Vegetation weight</label><input type="number" step="0.01" min="0" max="1" id="eco_weight_ndvi"></div>
+          <div class="field"><label for="eco_weight_uhi">UHI weight</label><input type="number" step="0.01" min="0" max="1" id="eco_weight_uhi"></div>
+          <div class="field"><label for="eco_weight_water">Stormwater weight</label><input type="number" step="0.01" min="0" max="1" id="eco_weight_water"></div>
+          <h3>Costs</h3>
+          <div class="field"><label for="eco_cost_tree">Tree cost (€/tree)</label><input type="number" step="1" id="eco_cost_tree"></div>
+          <div class="field"><label for="eco_cost_greenRoof">Green roof cost (€/m²)</label><input type="number" step="1" id="eco_cost_greenRoof"></div>
+          <div class="field"><label for="eco_cost_infiltration">Infiltration strip cost (€/m²)</label><input type="number" step="1" id="eco_cost_infiltration"></div>
+          <h3>CBA parameters</h3>
+          <div class="field"><label for="eco_cba_discount">Discount rate (%)</label><input type="number" step="0.1" id="eco_cba_discount"></div>
+          <div class="field"><label for="eco_cba_horizon">Horizon (years)</label><input type="number" step="1" id="eco_cba_horizon"></div>
+          <h3>Feasible space limits</h3>
+          <div class="field"><label for="eco_max_tree_area">Max tree area (m²)</label><input type="number" step="10" id="eco_max_tree_area"></div>
+          <div class="field"><label for="eco_max_greenRoof_pct">Max green roof (%)</label><input type="number" step="1" id="eco_max_greenRoof_pct"></div>
+          <details class="field">
+            <summary>Show equations &amp; assumptions</summary>
+            <div style="margin-top:8px; font-size:12px; line-height:1.5; color:var(--text-muted)">
+              <p><strong>Tree carbon sequestering:</strong> ~20 kg CO₂/year/tree; benefits include shade and amenity.</p>
+              <p><strong>Green roof:</strong> Provides insulation and reduces runoff; cost per m² specified above.</p>
+              <p><strong>Infiltration strip:</strong> A vegetated zone along creeks to retain stormwater and cool the microclimate.</p>
+              <p><strong>NPV:</strong> ∑<sub>t=1</sub><sup>T</sup> (Annual benefits)/(1 + r)<sup>t</sup> − Capex.</p>
+              <p><strong>BCR:</strong> Present value of benefits ÷ Capex.</p>
+            </div>
+          </details>
+          <details class="field">
+            <summary>Stakeholders &amp; users</summary>
+            <div style="margin-top:8px; font-size:12px; line-height:1.5; color:var(--text-muted)">
+              <p><strong>Stakeholders:</strong> residents, local businesses, schools, NGOs, municipality, utilities.</p>
+              <p><strong>Users:</strong> municipal planners, sustainability officers, housing association asset managers, consultants/researchers.</p>
+              <p><strong>User stories:</strong></p>
+              <ul style="margin-left:15px;">
+                <li>Municipal planner compares scenarios under a €X budget.</li>
+                <li>Housing corporation prioritizes buildings for retrofit &amp; PV.</li>
+                <li>Community group explores greening options and trade‑offs.</li>
+                <li>Researcher studies the trade‑off between carbon and heat mitigation.</li>
+              </ul>
+            </div>
+          </details>
+        </form>
+        <div class="button-row">
+          <button type="button" id="ecology-settings-apply" class="save-btn">Apply</button>
+          <button type="button" id="ecology-settings-cancel" class="cancel-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
 
   <script>
   // -------------------------------------------------------------------------
@@ -3081,7 +3236,88 @@
       if (applyBtn) applyBtn.addEventListener('click', applyEnergySettings);
       if (cancelBtn) cancelBtn.addEventListener('click', closeEnergyModal);
     });
+    // Expose energy settings helpers globally so they can be triggered from the settings dropdown.
+    window.openEnergyModal = openEnergyModal;
+    window.closeEnergyModal = closeEnergyModal;
+    window.applyEnergySettings = applyEnergySettings;
   })();
+  </script>
+  <!-- Ecology settings management for Nexus -->
+  <script>
+    (function(){
+      // Default parameters for ecology cost-benefit analysis and MCDA.  Values are modest to encourage exploring settings.
+      let ecologySettings = {
+        weights: { ndvi: 0.5, uhi: 0.3, water: 0.2 },
+        costs: { tree: 350, greenRoof: 100, infiltration: 80 },
+        discountRate: 0.04,
+        horizonYears: 20,
+        limits: { maxTreeArea: 2000, maxGreenRoofPct: 50 }
+      };
+      try {
+        const stored = localStorage.getItem('GLOBAL_ECO_SETTINGS');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed === 'object') {
+            ecologySettings = Object.assign({}, ecologySettings, parsed);
+          }
+        }
+      } catch(e) {}
+      function openEcologyModal() {
+        const s = ecologySettings;
+        document.getElementById('eco_weight_ndvi').value    = s.weights.ndvi ?? '';
+        document.getElementById('eco_weight_uhi').value     = s.weights.uhi ?? '';
+        document.getElementById('eco_weight_water').value   = s.weights.water ?? '';
+        document.getElementById('eco_cost_tree').value      = s.costs.tree ?? '';
+        document.getElementById('eco_cost_greenRoof').value = s.costs.greenRoof ?? '';
+        document.getElementById('eco_cost_infiltration').value = s.costs.infiltration ?? '';
+        document.getElementById('eco_cba_discount').value   = ((s.discountRate || 0) * 100).toFixed(2);
+        document.getElementById('eco_cba_horizon').value    = s.horizonYears ?? '';
+        document.getElementById('eco_max_tree_area').value  = s.limits.maxTreeArea ?? '';
+        document.getElementById('eco_max_greenRoof_pct').value = s.limits.maxGreenRoofPct ?? '';
+        document.getElementById('ecology-settings-overlay').classList.add('active');
+      }
+      function closeEcologyModal() {
+        document.getElementById('ecology-settings-overlay').classList.remove('active');
+      }
+      function applyEcologySettings() {
+        const wNd = parseFloat(document.getElementById('eco_weight_ndvi').value);
+        const wUhi= parseFloat(document.getElementById('eco_weight_uhi').value);
+        const wWat= parseFloat(document.getElementById('eco_weight_water').value);
+        const cTree = parseFloat(document.getElementById('eco_cost_tree').value);
+        const cRoof = parseFloat(document.getElementById('eco_cost_greenRoof').value);
+        const cInf  = parseFloat(document.getElementById('eco_cost_infiltration').value);
+        const rIn   = parseFloat(document.getElementById('eco_cba_discount').value);
+        const tIn   = parseFloat(document.getElementById('eco_cba_horizon').value);
+        const area  = parseFloat(document.getElementById('eco_max_tree_area').value);
+        const pct   = parseFloat(document.getElementById('eco_max_greenRoof_pct').value);
+        if (Number.isFinite(wNd)) ecologySettings.weights.ndvi = wNd;
+        if (Number.isFinite(wUhi)) ecologySettings.weights.uhi = wUhi;
+        if (Number.isFinite(wWat)) ecologySettings.weights.water = wWat;
+        if (Number.isFinite(cTree)) ecologySettings.costs.tree = cTree;
+        if (Number.isFinite(cRoof)) ecologySettings.costs.greenRoof = cRoof;
+        if (Number.isFinite(cInf))  ecologySettings.costs.infiltration = cInf;
+        if (Number.isFinite(rIn)) ecologySettings.discountRate = rIn / 100;
+        if (Number.isFinite(tIn)) ecologySettings.horizonYears = tIn;
+        if (Number.isFinite(area)) ecologySettings.limits.maxTreeArea = area;
+        if (Number.isFinite(pct)) ecologySettings.limits.maxGreenRoofPct = pct;
+        try { localStorage.setItem('GLOBAL_ECO_SETTINGS', JSON.stringify(ecologySettings)); } catch(e) {}
+        const ecoFrame = document.getElementById('ecoFrame');
+        if (ecoFrame && ecoFrame.contentWindow) {
+          ecoFrame.contentWindow.postMessage({ type:'ECO_SETTINGS_UPDATE', payload: ecologySettings }, '*');
+        }
+        closeEcologyModal();
+      }
+      document.addEventListener('DOMContentLoaded', () => {
+        const applyBtn  = document.getElementById('ecology-settings-apply');
+        const cancelBtn = document.getElementById('ecology-settings-cancel');
+        if (applyBtn)  applyBtn.addEventListener('click', applyEcologySettings);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeEcologyModal);
+      });
+      // Expose ecology helpers globally so the dropdown can open the modal
+      window.openEcologyModal = openEcologyModal;
+      window.closeEcologyModal = closeEcologyModal;
+      window.applyEcologySettings = applyEcologySettings;
+    })();
   </script>
   <!-- Translation helper script: dictionaries and runtime language switcher -->
   <script>
@@ -3821,6 +4057,13 @@
       });
     });
     window.DT_updateBaselineFromSettings = updateBaselineFromSettings;
+    // Expose utility functions so they can be called from outside the module.  
+    // This allows the combined settings menu to reuse the existing form population and settings logic.
+    window.DT_populateSettingsForm = populateSettingsForm;
+    window.DT_getSettings = getSettings;
+    window.DT_collectSettingsForm = collectSettingsForm;
+    window.DT_onSaveSettings = onSaveSettings;
+    window.DT_onResetDefaults = onResetDefaults;
   })();
   </script>
 </body>
