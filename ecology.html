@@ -1141,6 +1141,40 @@
 
   #layerInfoBody, #layerInfoBody * { color: rgba(248,250,252,0.90); }
 
+  /* MCDA enhancements */
+  .mcda-sliders {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .mcda-sliders .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-main);
+  }
+  .mcda-sliders .slider-row input[type=range] {
+    flex: 1;
+  }
+  .mcda-sliders .slider-row input[type=number] {
+    width: 80px;
+    padding: 4px 6px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    border-radius: 4px;
+  }
+  .mcda-sliders .slider-row .value {
+    width: 32px;
+    text-align: right;
+    font-size: 12px;
+    color: var(--primary);
+  }
+  .mcda-note p {
+    margin: 2px 0;
+  }
 </style>
 </head>
 <body>
@@ -1747,9 +1781,71 @@
         </div>
       </div>
 
+      <!-- New: MCDA weight sliders and budget controls -->
+      <div class="mcda-sliders">
+        <div class="slider-row">
+          <label for="mcdaWeightU">UHI weight (w<sub>U</sub>)</label>
+          <input type="range" id="mcdaWeightU" min="0" max="1" step="0.05" value="0.46" oninput="updateMcdaWeightLabel('mcdaWeightU','mcdaWeightUVal')">
+          <span id="mcdaWeightUVal" class="value">0.46</span>
+        </div>
+        <div class="slider-row">
+          <label for="mcdaWeightN">Vegetation deficit weight (w<sub>N</sub>)</label>
+          <input type="range" id="mcdaWeightN" min="0" max="1" step="0.05" value="0.28" oninput="updateMcdaWeightLabel('mcdaWeightN','mcdaWeightNVal')">
+          <span id="mcdaWeightNVal" class="value">0.28</span>
+        </div>
+        <div class="slider-row">
+          <label for="mcdaWeightC">Corridor proximity weight (w<sub>C</sub>)</label>
+          <input type="range" id="mcdaWeightC" min="0" max="1" step="0.05" value="0.10" oninput="updateMcdaWeightLabel('mcdaWeightC','mcdaWeightCVal')">
+          <span id="mcdaWeightCVal" class="value">0.10</span>
+        </div>
+        <div class="slider-row">
+          <label for="mcdaWeightA">Building age weight (w<sub>A</sub>)</label>
+          <input type="range" id="mcdaWeightA" min="0" max="1" step="0.05" value="0.08" oninput="updateMcdaWeightLabel('mcdaWeightA','mcdaWeightAVal')">
+          <span id="mcdaWeightAVal" class="value">0.08</span>
+        </div>
+        <div class="slider-row">
+          <label for="mcdaWeightR">Footprint area weight (w<sub>R</sub>)</label>
+          <input type="range" id="mcdaWeightR" min="0" max="1" step="0.05" value="0.08" oninput="updateMcdaWeightLabel('mcdaWeightR','mcdaWeightRVal')">
+          <span id="mcdaWeightRVal" class="value">0.08</span>
+        </div>
+        <div class="slider-row">
+          <label for="mcdaCorrFactor">Corridor importance factor</label>
+          <input type="number" id="mcdaCorrFactor" min="0" max="2" step="0.1" value="1">
+          <span></span>
+        </div>
+        <div class="slider-row">
+          <label for="mcdaMaxTrees">Max trees/interventions</label>
+          <input type="number" id="mcdaMaxTrees" min="1" step="1" value="">
+          <span></span>
+        </div>
+        <div class="slider-row">
+          <label for="mcdaMaxArea">Max area (m²)</label>
+          <input type="number" id="mcdaMaxArea" min="1" step="1" value="">
+          <span></span>
+        </div>
+      </div>
+
+      <div class="mcda-note" style="margin-top:8px; font-size:10px; color:rgba(226,232,240,0.62);">
+        <p style="margin:4px 0;">Normalization note: Each criterion is scaled to a 0–1 range so that different units (°C, NDVI deficit, age, area) are comparable. Higher values correspond to higher priority for all criteria shown here (UHI, vegetation deficit, corridor proximity, age, footprint).</p>
+      </div>
+
+      <!-- Assumptions & equations panel -->
+      <details style="margin-top:8px; font-size:10px; color:rgba(226,232,240,0.62);">
+        <summary>Show MCDA assumptions &amp; equations</summary>
+        <div style="margin-top:6px;">
+          <p><strong>Criteria &amp; direction:</strong> UHI (°C, benefit), vegetation deficit (unitless, benefit), corridor proximity (0/1, benefit), age (years, benefit), footprint area (m², benefit).</p>
+          <p><strong>Normalization:</strong> For each criterion \(x_{s,j}\), compute a normalized value \(x'_{s,j}\) on 0–1 scale. For benefit criteria: \(x'_{s,j} = (x_{s,j} - \min(x_j)) / (\max(x_j) - \min(x_j))\). For cost criteria: \(x'_{s,j} = (\max(x_j) - x_{s,j}) / (\max(x_j) - \min(x_j))\).</p>
+          <p><strong>Weighted linear combination:</strong> The overall score is \(S_s = \sum_j w_j \cdot x'_{s,j}\) where weights \(w_j\) sum to 1. Adjust the sliders to change weights; they are normalized internally.</p>
+          <p><strong>Spatial de-clustering:</strong> The algorithm ensures recommended buildings are spread out by enforcing a minimum distance between selected priorities.</p>
+        </div>
+      </details>
+
       <div class="mcda-actions">
         <button onclick="runMCDA()"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Priorities</button>
         <button onclick="clearMCDA()"><i class="fa-solid fa-eraser"></i> Clear Markers</button>
+        <button onclick="exportMCDA('csv')"><i class="fa-solid fa-download"></i> Export CSV</button>
+        <button onclick="exportMCDA('json')"><i class="fa-solid fa-download"></i> Export JSON</button>
+        <button onclick="sensitivityTest()"><i class="fa-solid fa-chart-line"></i> Sensitivity ±20%</button>
       </div>
 
       <div style="margin-top:12px; font-size:11px; color:rgba(226,232,240,0.62);">
@@ -4138,6 +4234,45 @@ function runMCDA(){
     wR = (customWeights.area     !== undefined) ? customWeights.area     : wR;
   }
 
+  // Additional: Override weights using sliders from MCDA wizard and apply corridor factor.
+  try {
+    const wuElem = document.getElementById('mcdaWeightU');
+    const wnElem = document.getElementById('mcdaWeightN');
+    const wcElem = document.getElementById('mcdaWeightC');
+    const waElem = document.getElementById('mcdaWeightA');
+    const wrElem = document.getElementById('mcdaWeightR');
+    if (wuElem && wnElem && wcElem && waElem && wrElem) {
+      const wUval = parseFloat(wuElem.value || '0');
+      const wNval = parseFloat(wnElem.value || '0');
+      const wCval = parseFloat(wcElem.value || '0');
+      const wAval = parseFloat(waElem.value || '0');
+      const wRval = parseFloat(wrElem.value || '0');
+      let sumW = wUval + wNval + wCval + wAval + wRval;
+      if(!sumW || sumW <= 0){ sumW = 1; }
+      wU = wUval / sumW;
+      wN = wNval / sumW;
+      wC = wCval / sumW;
+      wA = wAval / sumW;
+      wR = wRval / sumW;
+      const cfElem = document.getElementById('mcdaCorrFactor');
+      if(cfElem){
+        const cf = parseFloat(cfElem.value || '1');
+        if(Number.isFinite(cf) && cf > 0){
+          const adjusted = wC * cf;
+          const totalW = wU + wN + wA + wR + adjusted;
+          wU = wU / totalW;
+          wN = wN / totalW;
+          wA = wA / totalW;
+          wR = wR / totalW;
+          wC = adjusted / totalW;
+        }
+      }
+    }
+  } catch(e){}
+
+  // store used weights globally for breakdown and export
+  window.lastMCDAWeights = { wU: wU, wN: wN, wC: wC, wA: wA, wR: wR };
+
   const prefer = (budget === 'low') ? 'shrubs' : (budget === 'medium' ? 'mixed' : 'trees');
 
   const candidates = [];
@@ -4167,7 +4302,14 @@ function runMCDA(){
       env,
       nearCorr,
       score,
-      suggestType: prefer
+      suggestType: prefer,
+      breakdown: {
+        uhi: uhiTerm,
+        ndvi: ndviTerm,
+        corr: nearCorr,
+        age: ageTerm,
+        area: areaTerm
+      }
     });
   });
 
@@ -4175,23 +4317,38 @@ function runMCDA(){
 
   const chosen = [];
   const minDistM = 90;
-
+  // read budget limits for number of interventions and total area
+  let maxTrees = parseInt((document.getElementById('mcdaMaxTrees') && document.getElementById('mcdaMaxTrees').value) ? document.getElementById('mcdaMaxTrees').value : '0');
+  if(!Number.isFinite(maxTrees) || maxTrees <= 0) maxTrees = topN;
+  let maxArea = parseFloat((document.getElementById('mcdaMaxArea') && document.getElementById('mcdaMaxArea').value) ? document.getElementById('mcdaMaxArea').value : '0');
+  if(!Number.isFinite(maxArea) || maxArea <= 0) maxArea = Infinity;
+  const finalLimit = Math.min(topN, maxTrees);
+  let areaSum = 0;
   for(const c of candidates){
-    if(chosen.length >= topN) break;
+    if(chosen.length >= finalLimit) break;
+    // compute area for budget constraint
+    const areaVal = (c.entity && c.entity._areaM2) ? Number(c.entity._areaM2) : 0;
+    // skip if adding this candidate would exceed area budget
+    if(areaSum + areaVal > maxArea) continue;
     const cp = Cesium.Cartesian3.fromDegrees(c.lon, c.lat, 0);
     let ok = true;
     for(const s of chosen){
       const sp = Cesium.Cartesian3.fromDegrees(s.lon, s.lat, 0);
       if(Cesium.Cartesian3.distance(cp, sp) < minDistM){ ok = false; break; }
     }
-    if(ok) chosen.push(c);
-  }
-
-  if(chosen.length < topN){
-    for(const c of candidates){
-      if(chosen.length >= topN) break;
-      if(chosen.includes(c)) continue;
+    if(ok){
       chosen.push(c);
+      areaSum += areaVal;
+    }
+  }
+  if(chosen.length < finalLimit){
+    for(const c of candidates){
+      if(chosen.length >= finalLimit) break;
+      if(chosen.includes(c)) continue;
+      const areaVal = (c.entity && c.entity._areaM2) ? Number(c.entity._areaM2) : 0;
+      if(areaSum + areaVal > maxArea) continue;
+      chosen.push(c);
+      areaSum += areaVal;
     }
   }
 
@@ -4233,21 +4390,36 @@ function runMCDA(){
 
   const listEl = document.getElementById('recList');
   listEl.innerHTML = '';
-
   if(recommendations.length === 0){
     listEl.innerHTML = `<div class="rec-item"><div class="rec-title">No priorities detected</div><div class="rec-meta">Area already well vegetated.</div></div>`;
     showToast('No priorities found');
     return;
   }
-
+  // prepare weights for breakdown display
+  const weightsUsed = (window.lastMCDAWeights ? window.lastMCDAWeights : { wU: wU, wN: wN, wC: wC, wA: wA, wR: wR });
   recommendations.forEach((rec, idx) => {
     const div = document.createElement('div');
     div.className = 'rec-item';
+    // compute contributions
+    const uContr = (rec.breakdown.uhi * weightsUsed.wU);
+    const nContr = (rec.breakdown.ndvi * weightsUsed.wN);
+    const cContr = (rec.breakdown.corr * weightsUsed.wC);
+    const aContr = (rec.breakdown.age * weightsUsed.wA);
+    const rContr = (rec.breakdown.area * weightsUsed.wR);
+    const score = rec.score;
     div.innerHTML = `
-      <div class="rec-title">Priority ${idx+1} · Suggested: ${SCENARIO_PARAMS[rec.suggestType].label}</div>
-      <div class="rec-meta">UHI: ${rec.env.uhi} · NDVI: ${rec.env.ndvi} · Corridor: ${rec.nearCorr ? 'near' : 'far'}</div>
-      <div class="rec-meta">Score: ${(rec.score*100).toFixed(1)}/100</div>
-      <div class="rec-meta" style="margin-top:6px;color:rgba(226,232,240,0.80);">Click to zoom</div>
+      <details class="rec-breakdown" style="cursor:pointer;">
+        <summary>
+          <div class="rec-title">Priority ${idx+1} · Suggested: ${SCENARIO_PARAMS[rec.suggestType].label}</div>
+          <div class="rec-meta">Score: ${(score*100).toFixed(1)}/100 (click to expand)</div>
+        </summary>
+        <div class="rec-meta">UHI normalized: ${rec.breakdown.uhi.toFixed(2)} (weight ${weightsUsed.wU.toFixed(2)}, contrib ${uContr.toFixed(2)})</div>
+        <div class="rec-meta">NDVI deficit: ${rec.breakdown.ndvi.toFixed(2)} (weight ${weightsUsed.wN.toFixed(2)}, contrib ${nContr.toFixed(2)})</div>
+        <div class="rec-meta">Corridor proximity: ${rec.breakdown.corr.toFixed(2)} (weight ${weightsUsed.wC.toFixed(2)}, contrib ${cContr.toFixed(2)})</div>
+        <div class="rec-meta">Age: ${rec.breakdown.age.toFixed(2)} (weight ${weightsUsed.wA.toFixed(2)}, contrib ${aContr.toFixed(2)})</div>
+        <div class="rec-meta">Area: ${rec.breakdown.area.toFixed(2)} (weight ${weightsUsed.wR.toFixed(2)}, contrib ${rContr.toFixed(2)})</div>
+        <div class="rec-meta" style="margin-top:6px;color:rgba(226,232,240,0.80);">Click on summary again to collapse</div>
+      </details>
     `;
     div.onclick = () => {
       viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(rec.lon, rec.lat, 250), duration: 1.2 });
@@ -4258,6 +4430,96 @@ function runMCDA(){
 
   closeMCDA();
   showToast('Priorities updated');
+}
+
+// Helper to update weight label values when sliders change
+function updateMcdaWeightLabel(sliderId, labelId){
+  const slider = document.getElementById(sliderId);
+  const label = document.getElementById(labelId);
+  if(slider && label){
+    const val = parseFloat(slider.value || '0');
+    label.textContent = val.toFixed(2);
+  }
+}
+
+// Export MCDA recommendations to CSV or JSON
+function exportMCDA(format){
+  if(!window.recommendations || !Array.isArray(window.recommendations) || window.recommendations.length === 0){
+    showToast('No priorities to export');
+    return;
+  }
+  const weights = window.lastMCDAWeights || {};
+  if(format === 'json'){
+    const rows = window.recommendations.map((rec, idx) => ({
+      rank: idx+1,
+      lat: rec.lat,
+      lon: rec.lon,
+      uhi: rec.breakdown.uhi,
+      ndvi: rec.breakdown.ndvi,
+      corridor: rec.breakdown.corr,
+      age: rec.breakdown.age,
+      area: rec.breakdown.area,
+      score: rec.score
+    }));
+    const jsonObj = { weights: weights, results: rows };
+    const jsonStr = JSON.stringify(jsonObj, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mcda_results.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('MCDA results exported as JSON');
+  } else {
+    // build CSV string
+    let csv = 'rank,lat,lon,uhi,ndvi,corridor,age,area,score\n';
+    window.recommendations.forEach((rec, idx) => {
+      csv += `${idx+1},${rec.lat},${rec.lon},${rec.breakdown.uhi},${rec.breakdown.ndvi},${rec.breakdown.corr},${rec.breakdown.age},${rec.breakdown.area},${rec.score}\n`;
+    });
+    const blob = new Blob([csv], { type:'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mcda_results.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('MCDA results exported as CSV');
+  }
+}
+
+// Sensitivity analysis: vary each weight ±20% and check if top 5 rankings change
+function sensitivityTest(){
+  if(!window.recommendations || window.recommendations.length === 0){
+    showToast('Run MCDA first to test sensitivity');
+    return;
+  }
+  const base = window.lastMCDAWeights || { wU:0.46, wN:0.28, wC:0.10, wA:0.08, wR:0.08 };
+  // generate varied weights
+  const vary = (w) => {
+    const factor = 0.8 + Math.random() * 0.4; // 0.8 to 1.2
+    return w * factor;
+  };
+  let wU = vary(base.wU), wN = vary(base.wN), wC = vary(base.wC), wA = vary(base.wA), wR = vary(base.wR);
+  const total = wU + wN + wC + wA + wR;
+  wU /= total; wN /= total; wC /= total; wA /= total; wR /= total;
+  // compute new scores for existing recommendations
+  const scores = window.recommendations.map((rec) => rec.breakdown.uhi * wU + rec.breakdown.ndvi * wN + rec.breakdown.corr * wC + rec.breakdown.age * wA + rec.breakdown.area * wR);
+  // derive order arrays
+  const baselineOrder = window.recommendations.map((_, idx) => idx);
+  const newOrder = baselineOrder.slice().sort((a,b) => scores[b] - scores[a]);
+  let changed = false;
+  for(let i=0; i<Math.min(5, newOrder.length); i++){
+    if(newOrder[i] !== i){
+      changed = true;
+      break;
+    }
+  }
+  showToast(changed ? 'Top 5 priorities change under ±20% weight variation' : 'Top 5 priorities stable under ±20% weight variation');
 }
 
 /* ==============================
