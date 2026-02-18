@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Twekkelerveld Smart Energy Twin</title>
 
-<!-- Cloudflare/R2 config (optional). If missing, the app falls back to local files. -->
-<script src="config.js"></script>
-
 <!-- CesiumJS -->
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/Cesium.js"></script>
 <link href="https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/Cesium.js" rel="preload" as="script">
@@ -582,6 +579,156 @@
   #rightPanel.collapsed #energySegChartContainer {
     display: none !important;
   }
+
+  /* -------------------------------------------------------------------------
+     Settings button and modal styles
+
+     A new settings button is added to the top‑right of the energy twin.
+     It opens a modal allowing users to adjust prices, costs, CO₂ factors,
+     discount rate, horizon and budget cap.  When embedded in the nexus the
+     button is hidden via an onload handler defined below.  The modal uses
+     glassy dark backgrounds consistent with the existing UI.
+  */
+  #settingsBtn {
+    position: absolute;
+    top: 20px;
+    right: 150px;
+    z-index: 1000;
+    background: var(--glass-bg);
+    color: var(--text-muted);
+    border: 1px solid var(--glass-border);
+    padding: 8px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.2s;
+    backdrop-filter: blur(12px);
+    user-select: none;
+  }
+  #settingsBtn:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border-color: #fff;
+  }
+  .settings-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 2000;
+  }
+  .settings-modal-overlay.active {
+    display: flex;
+  }
+  .settings-modal {
+    background: #0f172a;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 20px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80%;
+    overflow-y: auto;
+    color: var(--text-main);
+  }
+  .settings-modal h2 {
+    margin-top: 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .settings-modal h3 {
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .settings-modal .field {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+  }
+  .settings-modal label {
+    font-size: 12px;
+    margin-bottom: 4px;
+    color: var(--text-muted);
+  }
+  .settings-modal input[type='number'] {
+    padding: 8px;
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-main);
+    font-size: 14px;
+  }
+  .settings-modal .button-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .settings-modal button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .settings-modal button.save-btn {
+    background: var(--accent-primary);
+    color: #0f172a;
+  }
+  .settings-modal button.cancel-btn {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-main);
+  }
+
+  /* ------------------------------------------------------------------
+     Settings & Stakeholders buttons styling
+     We expose the advanced settings outside of the info panel. Both the
+     settings and stakeholders buttons are positioned in the top right
+     area underneath the existing "Energy Overview" button. These
+     buttons adopt the same glassy appearance and interaction as
+     other controls. Labels in the settings modal inherit the main
+     text colour for legibility on dark backgrounds.
+  ------------------------------------------------------------------ */
+  #settingsBtn,
+  #stakeBtn {
+    position: absolute;
+    right: 20px;
+    z-index: 1000;
+    background: var(--glass-bg);
+    color: var(--text-muted);
+    border: 1px solid var(--glass-border);
+    padding: 8px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.2s;
+    backdrop-filter: blur(12px);
+    user-select: none;
+  }
+  #settingsBtn:hover,
+  #stakeBtn:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border-color: white;
+  }
+  /* Vertical placement for stacked controls: settings below energy overview, stakeholders below settings */
+  #settingsBtn { top: 60px; }
+  #stakeBtn    { top: 100px; }
+
+  /* Ensure labels inside the settings modal are visible on dark backgrounds */
+  #settingsModal label {
+    color: var(--text-main);
+  }
 </style>
 </head>
 
@@ -608,6 +755,38 @@
       solar panels at the individual building level, supported by certified label information where available.
     </p>
     <button class="modal-btn" onclick="document.getElementById('overviewModal').style.display='none'">Start Exploring</button>
+  </div>
+</div>
+
+<!-- Stakeholders vs Users Modal -->
+<div id="stakeholdersModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) this.style.display='none'">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:600px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <h1 style="margin:0;"><span style="color:var(--accent-primary)">👥</span> Stakeholders vs Users</h1>
+      <button onclick="document.getElementById('stakeholdersModal').style.display='none'"
+        style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">×</button>
+    </div>
+    <div style="overflow-y:auto; max-height:70vh;">
+      <h3 style="margin-top:0;">Stakeholders and Users</h3>
+      <table style="width:100%; font-size:12px; color:var(--text-main); border-collapse:collapse; margin-bottom:10px;">
+        <tr style="color:var(--accent-primary); text-transform:uppercase; font-size:11px;">
+          <th style="text-align:left; padding:4px 6px;">Stakeholders</th>
+          <th style="text-align:left; padding:4px 6px;">Users</th>
+        </tr>
+        <tr><td style="padding:4px 6px;">Residents</td><td style="padding:4px 6px;">Municipal planners</td></tr>
+        <tr><td style="padding:4px 6px;">Local businesses</td><td style="padding:4px 6px;">Sustainability officers</td></tr>
+        <tr><td style="padding:4px 6px;">Schools</td><td style="padding:4px 6px;">Housing association asset managers</td></tr>
+        <tr><td style="padding:4px 6px;">NGOs</td><td style="padding:4px 6px;">Consultants/researchers</td></tr>
+        <tr><td style="padding:4px 6px;">Municipality</td><td style="padding:4px 6px;"></td></tr>
+        <tr><td style="padding:4px 6px;">Utilities</td><td style="padding:4px 6px;"></td></tr>
+      </table>
+      <h3>User Stories</h3>
+      <ul style="list-style:disc; margin-left:20px; font-size:12px; color:var(--text-main); line-height:1.5;">
+        <li>Municipal planner compares scenarios under a budget cap.</li>
+        <li>Housing corporation prioritizes buildings for retrofit and PV.</li>
+        <li>Community group explores greening options and trade-offs.</li>
+      </ul>
+    </div>
   </div>
 </div>
 
@@ -735,6 +914,64 @@
   </div>
 </div>
 
+<!-- Advanced Settings Modal -->
+<div id="settingsModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) this.style.display='none'">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:600px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <h1 style="margin:0;"><span style="color:var(--accent-primary)">⚙️</span> Advanced Settings</h1>
+      <button onclick="document.getElementById('settingsModal').style.display='none'"
+        style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">×</button>
+    </div>
+    <div style="overflow-y:auto; max-height:70vh;">
+      <h3 style="margin-top:0;">Prices (€/unit)</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <label style="font-size:11px;">Electricity import €/kWh<br><input id="paramPriceElecImport" type="number" step="0.01" class="tiny-input"></label>
+        <label style="font-size:11px;">Gas € per m³<br><input id="paramPriceGas" type="number" step="0.01" class="tiny-input"></label>
+        <label style="font-size:11px;">Feed‑in €/kWh<br><input id="paramPriceFeedIn" type="number" step="0.01" class="tiny-input"></label>
+        <label style="font-size:11px;">P2P €/kWh<br><input id="paramPriceP2P" type="number" step="0.01" class="tiny-input"></label>
+      </div>
+      <h3>Costs</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <label style="font-size:11px;">PV cost €/Wp<br><input id="paramCostPvPerWp" type="number" step="0.01" class="tiny-input"></label>
+        <label style="font-size:11px;">Insulation €/m²<br><input id="paramCostInsul" type="number" step="0.1" class="tiny-input"></label>
+        <label style="font-size:11px;">Hybrid heat pump €<br><input id="paramCostHybridHp" type="number" step="100" class="tiny-input"></label>
+        <label style="font-size:11px;">All‑electric heat pump €<br><input id="paramCostAllHp" type="number" step="100" class="tiny-input"></label>
+      </div>
+      <h3>CO₂ factors (kg CO₂ per unit)</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <label style="font-size:11px;">Electricity kgCO₂/kWh<br><input id="paramCo2Elec" type="number" step="0.001" class="tiny-input"></label>
+        <label style="font-size:11px;">Gas kgCO₂/m³<br><input id="paramCo2Gas" type="number" step="0.001" class="tiny-input"></label>
+      </div>
+      <h3>CBA parameters</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <label style="font-size:11px;">Discount rate (%)<br><input id="cbaDiscountRate" type="number" step="0.1" class="tiny-input"></label>
+        <label style="font-size:11px;">Horizon (years)<br><input id="cbaHorizon" type="number" step="1" class="tiny-input"></label>
+      </div>
+      <h3>Budget cap</h3>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:11px;">Max investment €<br><input id="budgetCap" type="number" step="100" class="tiny-input"></label>
+      </div>
+      <details style="margin-top:12px; font-size:12px; color:var(--text-main);">
+        <summary style="cursor:pointer; font-size:13px; font-weight:600; color:var(--accent-primary);">Show equations &amp; assumptions</summary>
+        <div style="margin-top:10px; font-size:12px; color:var(--text-main); line-height:1.4;">
+          <ul style="list-style:disc; margin-left:18px;">
+            <li><b>Energy cost:</b> (gas × price<sub>gas</sub>) + (imported electricity × price<sub>elec</sub>) − (exported electricity × feed‑in tariff)</li>
+            <li><b>CO₂ savings:</b> (baseline energy − new energy) × emission factor</li>
+            <li><b>Cost assumptions:</b> PV cost per Wp (costs.pvPerWp), insulation per m² (costs.insulationSqM), heat pump costs (costs.hybridPump/allElectric)</li>
+            <li><b>NPV:</b> ∑<sub>t=1</sub><sup>T</sup> (Annual savings)/(1 + r)<sup>t</sup> − Capex</li>
+            <li><b>BCR:</b> Present value of benefits ÷ Capex</li>
+            <li><b>Defaults:</b> values drawn from the PARAMS object (units as indicated)</li>
+          </ul>
+        </div>
+      </details>
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button class="action-btn" style="flex:1; background:var(--accent-primary); color:white;" onclick="applySettings()">Apply</button>
+        <button class="action-btn" style="flex:1; background:rgba(255,255,255,0.1); color:white;" onclick="document.getElementById('settingsModal').style.display='none'">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="titleBar" onclick="document.getElementById('overviewModal').style.display='flex'">
   Twekkelerveld Smart Energy Twin
   <!-- Added reset view button to recenter the map when users get lost -->
@@ -742,6 +979,10 @@
           onclick="event.stopPropagation(); resetCameraView();">↺</button>
 </div>
 <div id="methodBtn" onclick="document.getElementById('methodologyModal').style.display='flex'">Energy Overview</div>
+<!-- Exposed settings button (outside of info panel) -->
+<div id="settingsBtn" onclick="showSettings()">⚙️ Settings</div>
+<!-- New Stakeholders vs Users button -->
+<div id="stakeBtn" onclick="document.getElementById('stakeholdersModal').style.display='flex'">👥 Stakeholders vs Users</div>
 <div id="hoverTooltip"></div>
 
 <div id="searchBar">
@@ -1046,6 +1287,8 @@
     <div class="trade-row"><span>Opex new (annual)</span> <span id="tradeOpexNew" class="trade-good">-</span></div>
     <div class="trade-row"><span>Annual savings</span> <span id="tradeSave" class="trade-good">-</span></div>
     <div class="trade-row"><span>Break-even time</span> <span id="tradePay" style="color:white; font-weight:600;">-</span></div>
+    <div class="trade-row"><span>NPV (discounted)</span> <span id="tradeNPV" class="trade-good">-</span></div>
+    <div class="trade-row"><span>Benefit-cost ratio</span> <span id="tradeBCR" class="trade-good">-</span></div>
     <div id="tradeNote" style="margin-top:8px; font-size:11px; color:#93c5fd; font-style:italic; border-top:1px solid rgba(255,255,255,0.1); padding-top:6px;"></div>
   </div>
 
@@ -1055,6 +1298,8 @@
 
   <div id="downloadRow">
     <button id="btnDownloadPdf" class="action-btn" onclick="generatePDF()">📄 Download PDF Report</button>
+    <button id="btnExportJson" class="action-btn" onclick="exportJSON()">🗄️ Export JSON</button>
+    <button id="btnOpenSettings" class="action-btn" onclick="showSettings()" style="display:none;">⚙️ Settings</button>
   </div>
 </div>
 
@@ -1081,46 +1326,40 @@
   Run via local server (Live Server).
 ------------------------------------------------------------ */
 
-// ------------------------------------------------------------
-// Cloudflare Pages + R2 support
-// If config.js defines window.DT_CONFIG.R2_BASE, all data assets
-// are loaded from that public R2 bucket. If empty, local relative
-// paths are used (works on localhost / Live Server).
-// ------------------------------------------------------------
-const R2_BASE   = (window.DT_CONFIG?.R2_BASE || "").replace(/\/+$/, "");
-const R2_PREFIX = (window.DT_CONFIG?.R2_PREFIX || "").replace(/^\/+|\/+$/g, "");
-function dataUrl(name){
-  if(!R2_BASE) return name;
-  const parts = [R2_BASE];
-  if(R2_PREFIX) parts.push(R2_PREFIX);
-  parts.push(String(name || "").replace(/^\/+/, ""));
-  return parts.join("/");
-}
-
 // =============================
 // 0) FILES 
 // =============================
-// Updated shadow raster filenames to use the new dataset. Changing these names
-// ensures the application loads the updated ground‑plane shadow raster when toggled.
-const LOCAL_SHADOW_PNG = dataUrl("Aggregated Shadow Raster_updated.png");
-const LOCAL_SHADOW_PGW = dataUrl("Aggregated Shadow Raster_updated.pgw");
+// Shadow raster (ground plane). Filenames can be easy to mismatch (spaces/case/"updated").
+// To make the app robust, we try a small set of candidate filenames.
+const SHADOW_PNG_CANDIDATES = [
+  "Aggregated Shadow Raster_updated.png",
+  "Aggregated Shadow Raster updated.png",
+  "Aggregated Shadow Raster.png"
+];
+const SHADOW_PGW_CANDIDATES = [
+  "Aggregated Shadow Raster_updated.pgw",
+  "Aggregated Shadow Raster updated.pgw",
+  "Aggregated Shadow Raster.pgw"
+];
+const LOCAL_SHADOW_PNG = SHADOW_PNG_CANDIDATES[0];
+const LOCAL_SHADOW_PGW = SHADOW_PGW_CANDIDATES[0];
 
-const LOCAL_IRR_PNG    = dataUrl("Roof Irradiance Raster(kWh).png");
-const LOCAL_IRR_PGW    = dataUrl("Roof Irradiance Raster(kWh).pgw");
+const LOCAL_IRR_PNG    = "Roof Irradiance Raster(kWh).png";
+const LOCAL_IRR_PGW    = "Roof Irradiance Raster(kWh).pgw";
 
 
 const IRR_SCALE_JSON   = null;
 
 // ✅ EnergyEst MUST be loaded from your BAG-PAND fixed table (EnergyEst column)
 const CSV_CANDIDATES = [
-  dataUrl("Twekkelerveld_bag_pand_FIXED.csv"),
-  dataUrl("twekkelerveld_bag_pand_FIXED.csv"),
-  dataUrl("Twekkelerveld_bag_pand_Fixed.csv")
+  "Twekkelerveld_bag_pand_FIXED.csv",
+  "twekkelerveld_bag_pand_FIXED.csv",
+  "Twekkelerveld_bag_pand_Fixed.csv"
 ];
 let CSV_FILE_ACTUAL = null;
 
 // LOD 1 footprint file
-const GEOJSON_FILE = dataUrl("twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson");
+const GEOJSON_FILE = "twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson";
 
 // =============================
 // 1) CONFIG
@@ -1173,9 +1412,11 @@ viewer.camera.setView({
 
 // Reset camera to the initial study area view when the reset button is clicked.
 function resetCameraView(){
+  // Fly the camera back to the original neighbourhood location.  Use a brief duration
+  // for a smooth transition rather than an instant jump.
   // Fly the camera back to the study area.  When entity data has loaded, reuse the
   // bounding extent of those entities for a more accurate reset.  Otherwise fall back
-  // to the original coordinates.  Use a brief duration for a smooth transition.
+  // to the original coordinates.
   if (Array.isArray(myEntities) && myEntities.length > 0) {
     viewer.flyTo(myEntities, {
       duration: 1.5,
@@ -1246,11 +1487,11 @@ const LABEL_COLOR_MAP = {
 // candidate defines both a URL (relative to this HTML file) and the
 // expected type.
 const LABEL_SOURCES = [
-  { url: dataUrl("energy_labels_meta.json"),         type: "json" },
-  { url: dataUrl("energy_labels_meta"),              type: "json" },
-  { url: dataUrl("energy_labels_twekkelerveld.csv"), type: "csv" },
-  { url: dataUrl("energy_labels_twekkelerveld.xlsx"), type: "xlsx" },
-  { url: dataUrl("energy_labels_twekkelerveld"),     type: "csv" }
+  { url: "energy_labels_meta.json",       type: "json" },
+  { url: "energy_labels_meta",            type: "json" },
+  { url: "energy_labels_twekkelerveld.csv", type: "csv" },
+  { url: "energy_labels_twekkelerveld.xlsx", type: "xlsx" },
+  { url: "energy_labels_twekkelerveld",    type: "csv" }
 ];
 let labelMap = new Map();
 let labelCoverageCount = 0;
@@ -2042,49 +2283,66 @@ class RasterSampler {
 }
 
 async function loadLocalRasters(){
-  // Attempt to load both rasters in parallel.  If the shadow raster fails
-  // (for example, because its .pgw file is missing), fall back to a simple
-  // single‑tile overlay that uses the irradiance raster's bounds.  This ensures
-  // the shade overlay remains visible even when georeference data is unavailable.
+  // Load irradiance first (needed for bounds + fallback rectangle).
   try {
-    shadowRaster = new RasterSampler("Shade", LOCAL_SHADOW_PNG, LOCAL_SHADOW_PGW);
-    irrRaster    = new RasterSampler("Sunlight", LOCAL_IRR_PNG, LOCAL_IRR_PGW);
-    await Promise.all([shadowRaster.load(), irrRaster.load()]);
+    irrRaster = new RasterSampler("Sunlight", LOCAL_IRR_PNG, LOCAL_IRR_PGW);
+    await irrRaster.load();
   } catch(err) {
-    console.error("Raster load failed:", err);
-    // Ensure the irradiance raster is loaded; if it fails, we bail out.
+    console.error("Irradiance raster load failed:", err);
+    return;
+  }
+
+  // Try to load the shade raster with its world file. If it fails (missing/CRS mismatch),
+  // fall back to a simple single‑tile overlay using the irradiance bounds.
+  let lastErr = null;
+  let loadedShadow = false;
+  for(let i = 0; i < SHADOW_PNG_CANDIDATES.length; i++){
+    const png = SHADOW_PNG_CANDIDATES[i];
+    const pgw = SHADOW_PGW_CANDIDATES[Math.min(i, SHADOW_PGW_CANDIDATES.length - 1)];
     try {
-      if (!irrRaster) {
-        irrRaster = new RasterSampler("Sunlight", LOCAL_IRR_PNG, LOCAL_IRR_PGW);
-      }
-      await irrRaster.load();
-    } catch(subErr) {
-      console.error("Irradiance raster load also failed:", subErr);
-      return;
-    }
-    // Create a simple imagery layer using the shadow PNG and the irradiance bounds
-    try {
-      const provider = new Cesium.SingleTileImageryProvider({
-        url: encodeURI(LOCAL_SHADOW_PNG),
-        rectangle: irrRaster.rectangleDegrees
-      });
-      const layer = viewer.imageryLayers.addImageryProvider(provider);
-      layer.alpha = 0.65;
-      layer.show = false;
-      viewer.imageryLayers.raiseToTop(layer);
-      // Replace shadowRaster with a stub so subsequent code can enable/disable the layer
-      shadowRaster = {
-        name: "Shade (fallback)",
-        pngUrl: LOCAL_SHADOW_PNG,
-        pgwUrl: null,
-        ready: true,
-        imageryLayer: layer,
-        sampleFromCartographic: () => null
-      };
-    } catch(fallbackErr) {
-      console.error("Fallback shadow overlay failed:", fallbackErr);
+      shadowRaster = new RasterSampler("Shade", png, pgw);
+      await shadowRaster.load();
+      loadedShadow = true;
+      lastErr = null;
+      console.log("Shade raster loaded:", png, pgw);
+      break;
+    } catch(e) {
+      lastErr = e;
     }
   }
+
+  if(!loadedShadow){
+    console.warn("Shade raster georeferenced load failed; using fallback overlay.", lastErr);
+    for(const png of SHADOW_PNG_CANDIDATES){
+      try {
+        const provider = new Cesium.SingleTileImageryProvider({
+          url: encodeURI(png),
+          rectangle: irrRaster.rectangleDegrees
+        });
+        const layer = viewer.imageryLayers.addImageryProvider(provider);
+        layer.alpha = 0.65;
+        layer.show = false;
+        viewer.imageryLayers.raiseToTop(layer);
+        shadowRaster = {
+          name: "Shade (fallback)",
+          pngUrl: png,
+          pgwUrl: null,
+          ready: true,
+          imageryLayer: layer,
+          sampleFromCartographic: () => null
+        };
+        console.log("Shade fallback overlay loaded:", png);
+        loadedShadow = true;
+        break;
+      } catch(fallbackErr) {
+        console.error("Fallback shade overlay failed for", png, fallbackErr);
+      }
+    }
+  }
+
+  // If the user toggled the overlay before rasters finished loading, sync visibility now.
+  if(typeof applyLod2Overlays === 'function') applyLod2Overlays();
+  viewer.scene.requestRender();
 }
 
 // =============================
@@ -2538,7 +2796,22 @@ function applyLod2Overlays(){
 }
 
 // -----------------------------------------------------------------------------
-// Messaging bridge to parent page (see energy.html for details)
+// Messaging bridge to parent page
+//
+// When this energy twin is embedded inside a parent page via an iframe, we want
+// to keep its economic parameters (prices, costs, CO₂ factors, discount
+// rate, horizon and budget cap) in sync with a single source of truth.  The
+// parent page can send updates via postMessage with a payload describing the
+// new settings.  We also support simple scenario switching via postMessage.
+//
+// Message types:
+// - SETTINGS_UPDATE: payload is an object with optional `prices`, `costs`,
+//   `co2`, `discountRate`, `horizonYears` and `budgetCap` properties.  Each
+//   sub‑object is merged into the corresponding section of PARAMS.  Scalar
+//   values are assigned directly.
+// - SCENARIO_UPDATE: payload is a string identifier (e.g. 'baseline', 'addPV',
+//   'insulate', 'heatPump', 'p2p').  Calls setScenario() if available.
+
 window.addEventListener('message', (event) => {
   const msg = event.data;
   if (!msg || typeof msg.type !== 'string') return;
@@ -2563,11 +2836,31 @@ window.addEventListener('message', (event) => {
       if (s.budgetCap !== undefined) {
         budgetCap = (s.budgetCap === null || isNaN(s.budgetCap)) ? null : s.budgetCap;
       }
+      // Persist the merged settings into localStorage so that the energy
+      // twin remembers the latest values even after a reload.  This mirrors
+      // the behaviour of the settings modal.
+      try {
+        const globalObj = {
+          prices: Object.assign({}, PARAMS.prices),
+          costs: Object.assign({}, PARAMS.costs),
+          co2: Object.assign({}, PARAMS.co2),
+          discountRate: discountRate,
+          horizonYears: horizonYears,
+          budgetCap: budgetCap
+        };
+        localStorage.setItem('GLOBAL_ENERGY_SETTINGS', JSON.stringify(globalObj));
+      } catch (err) {
+        console.warn('Failed to persist GLOBAL_ENERGY_SETTINGS', err);
+      }
+      // Refresh UI to reflect new parameters.  We re‑render the selected
+      // building (if any), update the legend, refresh the visualisation and
+      // redraw the energy segmentation chart.
       if (typeof selectedEnt !== 'undefined' && selectedEnt && selectedEnt._b) {
         renderInfo(selectedEnt);
       }
       if (typeof updateLeftLegend === 'function') updateLeftLegend();
       if (typeof updateVis === 'function') updateVis();
+      if (typeof updateEnergySegChart === 'function') updateEnergySegChart();
     } catch (e) {
       console.warn('Failed to apply SETTINGS_UPDATE', e);
     }
@@ -2579,7 +2872,8 @@ window.addEventListener('message', (event) => {
   }
 });
 
-// Hide Settings button when embedded in iframe
+// Hide the internal Settings button when embedded in an iframe.  The parent
+// page exposes its own unified settings UI, so this avoids duplicate panels.
 window.addEventListener('load', () => {
   try {
     if (window.self !== window.top) {
@@ -2588,6 +2882,145 @@ window.addEventListener('load', () => {
     }
   } catch (e) {}
 });
+
+// ------------------------------------------------------------
+// Advanced settings & cost‑benefit analysis
+// ------------------------------------------------------------
+// Default economic parameters. These can be updated via the settings modal.
+let discountRate = 0.04;
+let horizonYears = 20;
+let budgetCap = null;
+
+// Display the settings modal and fill in current parameter values
+function showSettings() {
+  const m = document.getElementById('settingsModal');
+  document.getElementById('paramPriceElecImport').value = PARAMS.prices.elecImport ?? '';
+  document.getElementById('paramPriceGas').value = PARAMS.prices.gas ?? '';
+  document.getElementById('paramPriceFeedIn').value = PARAMS.prices.feedIn ?? '';
+  document.getElementById('paramPriceP2P').value = PARAMS.prices.p2p ?? '';
+  document.getElementById('paramCostPvPerWp').value = PARAMS.costs.pvPerWp ?? '';
+  document.getElementById('paramCostInsul').value = PARAMS.costs.insulationSqM ?? '';
+  document.getElementById('paramCostHybridHp').value = PARAMS.costs.hybridPump ?? '';
+  document.getElementById('paramCostAllHp').value = PARAMS.costs.allElectric ?? '';
+  document.getElementById('paramCo2Elec').value = PARAMS.co2.elec ?? '';
+  document.getElementById('paramCo2Gas').value = PARAMS.co2.gas ?? '';
+  document.getElementById('cbaDiscountRate').value = ((discountRate || 0) * 100).toFixed(2);
+  document.getElementById('cbaHorizon').value = horizonYears ?? '';
+  document.getElementById('budgetCap').value = budgetCap ?? '';
+  m.style.display = 'flex';
+}
+
+// Apply settings from the modal back into the PARAMS object and refresh the UI
+function applySettings() {
+  const pEI = parseFloat(document.getElementById('paramPriceElecImport').value);
+  if(Number.isFinite(pEI)) PARAMS.prices.elecImport = pEI;
+  const pG = parseFloat(document.getElementById('paramPriceGas').value);
+  if(Number.isFinite(pG)) PARAMS.prices.gas = pG;
+  const pF = parseFloat(document.getElementById('paramPriceFeedIn').value);
+  if(Number.isFinite(pF)) PARAMS.prices.feedIn = pF;
+  const pP = parseFloat(document.getElementById('paramPriceP2P').value);
+  if(Number.isFinite(pP)) PARAMS.prices.p2p = pP;
+  const cPV = parseFloat(document.getElementById('paramCostPvPerWp').value);
+  if(Number.isFinite(cPV)) PARAMS.costs.pvPerWp = cPV;
+  const cI = parseFloat(document.getElementById('paramCostInsul').value);
+  if(Number.isFinite(cI)) PARAMS.costs.insulationSqM = cI;
+  const cH = parseFloat(document.getElementById('paramCostHybridHp').value);
+  if(Number.isFinite(cH)) PARAMS.costs.hybridPump = cH;
+  const cA = parseFloat(document.getElementById('paramCostAllHp').value);
+  if(Number.isFinite(cA)) PARAMS.costs.allElectric = cA;
+  const coE = parseFloat(document.getElementById('paramCo2Elec').value);
+  if(Number.isFinite(coE)) PARAMS.co2.elec = coE;
+  const coG = parseFloat(document.getElementById('paramCo2Gas').value);
+  if(Number.isFinite(coG)) PARAMS.co2.gas = coG;
+  const rIn = parseFloat(document.getElementById('cbaDiscountRate').value);
+  if(Number.isFinite(rIn)) discountRate = rIn / 100;
+  const tIn = parseFloat(document.getElementById('cbaHorizon').value);
+  if(Number.isFinite(tIn)) horizonYears = tIn;
+  const bIn = parseFloat(document.getElementById('budgetCap').value);
+  budgetCap = Number.isFinite(bIn) ? bIn : null;
+  // Hide the settings modal
+  document.getElementById('settingsModal').style.display = 'none';
+  // Persist updated parameters into a global object and store them in localStorage so the
+  // energy twin remembers the user’s choices across reloads.  We collect the current
+  // price, cost and CO₂ factors, along with the discount rate, horizon and budget cap.
+  try {
+    const globalObj = {
+      prices: Object.assign({}, PARAMS.prices),
+      costs: Object.assign({}, PARAMS.costs),
+      co2: Object.assign({}, PARAMS.co2),
+      discountRate: discountRate,
+      horizonYears: horizonYears,
+      budgetCap: budgetCap
+    };
+    localStorage.setItem('GLOBAL_ENERGY_SETTINGS', JSON.stringify(globalObj));
+  } catch (e) {
+    console.warn('Failed to persist GLOBAL_ENERGY_SETTINGS', e);
+  }
+  // Update the UI to reflect new parameters.  We re-render the selected building,
+  // update the legend, refresh the visualisation and redraw the energy segmentation chart.
+  if (typeof selectedEnt !== 'undefined' && selectedEnt && selectedEnt._b) { renderInfo(selectedEnt); }
+  if (typeof updateLeftLegend === 'function') updateLeftLegend();
+  if (typeof updateVis === 'function') updateVis();
+  if (typeof updateEnergySegChart === 'function') updateEnergySegChart();
+}
+
+// Calculate the NPV and benefit‑cost ratio for a given economic summary
+function computeCBA(eco) {
+  const A = eco.savings || 0;
+  const C = eco.cost || 0;
+  let pvBenefits = 0;
+  if(discountRate > 0 && horizonYears > 0) {
+    pvBenefits = (A / discountRate) * (1 - Math.pow(1 + discountRate, -horizonYears));
+  } else {
+    pvBenefits = A * horizonYears;
+  }
+  const npvVal = pvBenefits - C;
+  const bcrVal = (C > 0) ? (pvBenefits / C) : null;
+  return { npv: npvVal, bcr: bcrVal };
+}
+
+// Export a JSON file containing the current parameters and selected scenario/building context
+function exportJSON() {
+  const out = {};
+  if(typeof selectedEnt !== 'undefined' && selectedEnt && selectedEnt._b) {
+    const b = selectedEnt._b;
+    const eco = calculateTradeoffs(selectedEnt);
+    const cba = computeCBA(eco);
+    out.building = {
+      id: b.ID || null,
+      year: b.Year,
+      area: b.Area,
+      upgrades: {
+        pv: !!b.customPV || activeScen === 'addPV' || activeScen === 'p2p',
+        insulation: !!b.customRetro || activeScen === 'insulate',
+        heatPump: activeScen === 'heatPump'
+      }
+    };
+    out.economics = {
+      cost: eco.cost,
+      savings: eco.savings,
+      payback: eco.payback,
+      npv: cba.npv,
+      bcr: cba.bcr,
+      discountRate: discountRate,
+      horizonYears: horizonYears,
+      budgetCap: budgetCap
+    };
+    out.scenario = activeScen;
+    out.indicator = activeInd;
+  }
+  out.params = JSON.parse(JSON.stringify(PARAMS));
+  const jsonStr = JSON.stringify(out, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'energy_settings.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 // =======================================
 //  Energy segment chart (dynamic)
@@ -4030,11 +4463,16 @@ window.generatePDF = function() {
   doc.text(`Opex new: €${Math.round(eco.newTotal).toLocaleString()} /yr`, 15, 95);
   doc.text(`Annual savings: €${Math.round(eco.savings).toLocaleString()} /yr`, 15, 100);
   doc.text(`Break-even time: ${eco.payback} yrs`, 15, 105);
-
-  // Include building chart image lower down
+  // Cost‑benefit results (NPV and benefit‑cost ratio) based on discount rate & horizon
+  const cbaRes = computeCBA(eco);
+  const npvDispPdf = (cbaRes && Number.isFinite(cbaRes.npv)) ? `€${Math.round(cbaRes.npv).toLocaleString()}` : 'N/A';
+  const bcrDispPdf = (cbaRes && cbaRes.bcr !== null) ? cbaRes.bcr.toFixed(2) : 'N/A';
+  doc.text(`NPV: ${npvDispPdf}`, 15, 110);
+  doc.text(`Benefit-cost ratio: ${bcrDispPdf}`, 15, 115);
+  // Include building chart image lower down (shifted down to avoid overlap)
   const canvas = document.getElementById('buildingChart');
   const imgData = canvas.toDataURL("image/png", 1.0);
-  doc.addImage(imgData, 'PNG', 15, 115, 180, 90);
+  doc.addImage(imgData, 'PNG', 15, 120, 180, 90);
 
   // Save the PDF
   doc.save(`EnergyReport_${b.ID}.pdf`);
@@ -4580,15 +5018,36 @@ function renderInfo(e) {
   if(activeScen !== 'baseline' || b.customPV || b.customRetro) {
     tradeBox.style.display = 'block';
     const eco = calculateTradeoffs(e);
+    const cbaRes = computeCBA(eco);
     const pColor = (parseFloat(eco.payback) > 15 || eco.payback === "N/A") ? "#f87171" : "#10b981";
-    // populate capex/opex and savings, include time units
+    // populate capex/opex and savings
     document.getElementById('tradeCost').innerText = "€" + Math.round(eco.cost).toLocaleString();
     document.getElementById('tradeOpexBase').innerText = "€" + Math.round(eco.baseTotal).toLocaleString() + " /yr";
     document.getElementById('tradeOpexNew').innerText = "€" + Math.round(eco.newTotal).toLocaleString() + " /yr";
     document.getElementById('tradeSave').innerText = "€" + Math.round(eco.savings).toLocaleString() + " /yr";
     document.getElementById('tradePay').innerText = eco.payback + " yrs";
     document.getElementById('tradePay').style.color = pColor;
-    document.getElementById('tradeNote').innerText = eco.note;
+    // update NPV and BCR
+    const npvDisp = (cbaRes && Number.isFinite(cbaRes.npv)) ? "€" + Math.round(cbaRes.npv).toLocaleString() : "N/A";
+    const bcrDisp = (cbaRes && cbaRes.bcr !== null) ? cbaRes.bcr.toFixed(2) : "N/A";
+    document.getElementById('tradeNPV').innerText = npvDisp;
+    document.getElementById('tradeBCR').innerText = bcrDisp;
+    // build note and handle budget cap
+    let noteTxt = eco.note || "";
+    const btnPV = document.getElementById('btnIndivPV');
+    const btnRet = document.getElementById('btnIndivRetro');
+    if(budgetCap !== null && eco.cost > budgetCap) {
+      noteTxt = noteTxt ? noteTxt + " • " : "";
+      noteTxt += "Capex exceeds budget cap";
+      document.getElementById('tradeCost').style.color = "var(--accent-danger)";
+      if(btnPV) { btnPV.style.pointerEvents = 'none'; btnPV.style.opacity = 0.5; }
+      if(btnRet) { btnRet.style.pointerEvents = 'none'; btnRet.style.opacity = 0.5; }
+    } else {
+      document.getElementById('tradeCost').style.color = "";
+      if(btnPV) { btnPV.style.pointerEvents = ''; btnPV.style.opacity = ''; }
+      if(btnRet) { btnRet.style.pointerEvents = ''; btnRet.style.opacity = ''; }
+    }
+    document.getElementById('tradeNote').innerText = noteTxt;
   } else {
     tradeBox.style.display = 'none';
   }
@@ -4770,6 +5229,46 @@ function applyLod2Overlays(){
   if(irrRaster && irrRaster.imageryLayer) irrRaster.imageryLayer.show = (inLod2 && L2_SHOW_IRR_OVERLAY);
   if(shadowRaster && shadowRaster.imageryLayer) shadowRaster.imageryLayer.show = (inLod2 && L2_SHOW_SHADOW_OVERLAY);
 }
+</script>
+<!-- Load persisted energy settings from localStorage on page load -->
+<script>
+// When running the stand‑alone energy twin, load any previously saved
+// settings from localStorage and apply them to the PARAMS object and
+// economic parameters (discount rate, horizon, budget cap).  This ensures
+// that user‑defined assumptions persist across page reloads.  If no
+// stored settings exist the defaults defined in the script remain in
+// effect.  Note: this block runs immediately and does not depend on
+// DOMContentLoaded.
+(function() {
+  try {
+    const stored = localStorage.getItem('GLOBAL_ENERGY_SETTINGS');
+    if (stored) {
+      const g = JSON.parse(stored);
+      if (g && typeof g === 'object') {
+        if (g.prices && typeof g.prices === 'object') {
+          PARAMS.prices = Object.assign({}, PARAMS.prices || {}, g.prices);
+        }
+        if (g.costs && typeof g.costs === 'object') {
+          PARAMS.costs = Object.assign({}, PARAMS.costs || {}, g.costs);
+        }
+        if (g.co2 && typeof g.co2 === 'object') {
+          PARAMS.co2 = Object.assign({}, PARAMS.co2 || {}, g.co2);
+        }
+        if (typeof g.discountRate === 'number' && !isNaN(g.discountRate)) {
+          discountRate = g.discountRate;
+        }
+        if (typeof g.horizonYears === 'number' && !isNaN(g.horizonYears)) {
+          horizonYears = g.horizonYears;
+        }
+        if (g.budgetCap !== undefined) {
+          budgetCap = (g.budgetCap === null || isNaN(g.budgetCap)) ? null : g.budgetCap;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load GLOBAL_ENERGY_SETTINGS', e);
+  }
+})();
 </script>
 </body>
 </html>
