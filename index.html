@@ -1622,7 +1622,7 @@
                 <i class="fa-solid fa-diagram-project"></i> Combined Scenario Analysis
               </div>
               <div class="top-sub">
-                Simulate trees, PV, retrofits and heatwaves to see impacts on ecology, energy, CO₂ and investments.
+                Simulate trees, PV, retrofits and green roofs to see how ecological and energy interventions work together, impacting greenness, heat, energy use, CO₂ and cost.
               </div>
             </div>
             <div class="top-actions">
@@ -1776,6 +1776,34 @@
               <div class="summary-label">Protected HH</div><div class="summary-value positive" id="IR_summaryEquity">0%</div>
             </div>
           </div>
+
+          <!--
+            Added equations/assumptions info section to make the combined scenario more transparent.
+            This collapsible panel lists the formulas used for key metrics, explains parameter meanings,
+            outlines default cost assumptions and highlights how energy and ecology measures interact.
+          -->
+          <details class="equations-info" style="margin-top: 20px; background: rgba(15,23,42,0.85); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+            <summary style="cursor:pointer; font-size: 14px; font-weight: 600; color: var(--accent);">
+              <i class="fa-solid fa-circle-info"></i> Equations &amp; assumptions
+            </summary>
+            <div style="margin-top: 10px; font-size: 13px; line-height: 1.5; color: var(--text-muted);">
+              <p><strong>Energy cost:</strong> (gas consumption × price<sub>gas</sub>) + (imported electricity × price<sub>elec</sub>) − (exported electricity × feed‑in tariff).</p>
+              <p><strong>CO₂ savings:</strong> (baseline energy − new energy) × emission factor.</p>
+              <p><strong>Benefit–cost analysis:</strong> Net present value (NPV) = Σ (cash flow ÷ (1&nbsp;+&nbsp;discount&nbsp;rate)<sup>year</sup>) − capital cost; Benefit–cost ratio (BCR) = NPV of benefits ÷ NPV of costs.</p>
+              <p><strong>Tree carbon sequestration:</strong> Each additional tree is assumed to absorb ~10 kg of CO₂ per year and provides shade and cooling benefits.</p>
+              <p><strong>Green roofs &amp; vegetation:</strong> Vegetation and green roofs help cool buildings and neighborhoods by shading surfaces, deflecting solar radiation and releasing moisture.</p>
+              <p><strong>PV costs:</strong> High‑efficiency PV modules are about €0.115 per Wp; the slider's default of €5,400 per +1 % PV capacity is based on typical installed costs.</p>
+              <p><strong>Default parameter values:</strong> Tree cost €350 per tree; PV cost €5,400 per +1 % capacity; retrofit cost €12,000 per dwelling; green roof cost €8,000 per +10 % roof coverage.</p>
+              <p>These formulas and assumptions show how ecological (trees, green roofs) and energy (PV, retrofits) interventions interact. More trees and green roofs increase greenness and reduce urban heat, while PV and insulation reduce energy use and emissions. The combined scenario score weighs these co‑benefits against investment and space budgets over your selected time horizon.</p>
+              <p><em>Sources:</em> 
+                <a href="https://www.investopedia.com/terms/n/npv.asp" target="_blank">Investopedia – NPV formula</a>; 
+                <a href="https://www.investopedia.com/terms/b/bcr.asp" target="_blank">Investopedia – BCR</a>; 
+                <a href="https://onetreeplanted.org/blogs/stories/how-much-co2-does-tree-absorb" target="_blank">One Tree Planted – tree CO₂ absorption</a>; 
+                <a href="https://www.epa.gov/green-infrastructure/reduce-heat-islands" target="_blank">US EPA – heat‑island benefits of vegetation</a>; 
+                <a href="https://www.rinnovabili.net/business/energy/photovoltaic-module-prices-2025-updated-data/" target="_blank">Rinnovabili – PV module prices</a>.
+              </p>
+            </div>
+          </details>
 
         </div>
       </section>
