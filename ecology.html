@@ -1740,6 +1740,15 @@
   <div class="modal-content small">
     <div class="modal-header">
       <span style="font-size:18px; font-weight:900; color:white;">Decision Support Wizard (MCDA)</span>
+      <!-- Added info icon providing plain language explanation -->
+      <details class="mcda-info" style="display:inline-block;margin-left:6px;">
+        <summary style="list-style:none; cursor:pointer;">
+          <i class="fa-solid fa-circle-info" style="color:var(--primary); font-size:14px;"></i>
+        </summary>
+        <div style="background:rgba(2,6,23,0.95); border:1px solid var(--border); padding:10px; border-radius:8px; max-width:300px; font-size:11px; color:var(--text-sub); position:absolute; z-index:1000;">
+          <p style="margin-top:0;"><strong>How it works:</strong> The wizard ranks buildings by combining five criteria — UHI, vegetation deficit, proximity to green corridors, building age and footprint area — into a single score. Each criterion is first <em>normalized</em> to a 0–1 range so that different units are comparable. You then assign <em>weights</em> to indicate relative importance. The final score is a weighted sum of the normalized values (this method is called a <em>weighted linear combination</em>). Weights are automatically scaled to sum to one before scoring. See <a href="https://www.inowas.com/tools/t05-gis-mcda/#5" target="_blank">WLC guidance</a>, <a href="https://knowledge4policy.ec.europa.eu/composite-indicators/toolkit_en/navigation-page/10-step-guide_en/step-5-normalisation_en" target="_blank">normalisation guidelines</a> and <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6011778/" target="_blank">weighting best practice</a> for details.</p>
+        </div>
+      </details>
       <button class="close-btn" onclick="closeMCDA()">×</button>
     </div>
     <div class="modal-body">
@@ -1837,6 +1846,8 @@
           <p><strong>Normalization:</strong> For each criterion \(x_{s,j}\), compute a normalized value \(x'_{s,j}\) on 0–1 scale. For benefit criteria: \(x'_{s,j} = (x_{s,j} - \min(x_j)) / (\max(x_j) - \min(x_j))\). For cost criteria: \(x'_{s,j} = (\max(x_j) - x_{s,j}) / (\max(x_j) - \min(x_j))\).</p>
           <p><strong>Weighted linear combination:</strong> The overall score is \(S_s = \sum_j w_j \cdot x'_{s,j}\) where weights \(w_j\) sum to 1. Adjust the sliders to change weights; they are normalized internally.</p>
           <p><strong>Spatial de-clustering:</strong> The algorithm ensures recommended buildings are spread out by enforcing a minimum distance between selected priorities.</p>
+          <p><strong>No double counting:</strong> Each criterion captures a distinct aspect (temperature mitigation, vegetation deficit, corridor proximity, age and footprint). MCDA best practice recommends avoiding highly correlated criteria to prevent double counting.</p>
+          <p style="margin-top:6px;"><em>References:</em> Weighted linear combination method explanation, normalisation to avoid “apples vs pears” comparisons and weighting guidance where importance weights are scaled to 0–1 and sum to one.</p>
         </div>
       </details>
 
@@ -4474,8 +4485,10 @@ function exportMCDA(format){
     URL.revokeObjectURL(url);
     showToast('MCDA results exported as JSON');
   } else {
-    // build CSV string
-    let csv = 'rank,lat,lon,uhi,ndvi,corridor,age,area,score\n';
+    // build CSV string including weights for transparency
+    let csv = 'weights_uhi,weights_ndvi,weights_corridor,weights_age,weights_area\n';
+    csv += `${weights.wU ?? ''},${weights.wN ?? ''},${weights.wC ?? ''},${weights.wA ?? ''},${weights.wR ?? ''}\n`;
+    csv += 'rank,lat,lon,uhi,ndvi,corridor,age,area,score\n';
     window.recommendations.forEach((rec, idx) => {
       csv += `${idx+1},${rec.lat},${rec.lon},${rec.breakdown.uhi},${rec.breakdown.ndvi},${rec.breakdown.corr},${rec.breakdown.age},${rec.breakdown.area},${rec.score}\n`;
     });
@@ -6516,6 +6529,28 @@ window.addEventListener('message', (event) => {
     window.GLOBAL_SETTINGS = payload;
     window.ECO_SETTINGS = payload;
     try { localStorage.setItem('GLOBAL_ECO_SETTINGS', JSON.stringify(payload)); } catch(e) {}
+    // Apply incoming weights to MCDA sliders when provided and re-run MCDA
+    try {
+      if (payload && payload.weights) {
+        const w = payload.weights;
+        const setSlider = (id, val, labelId) => {
+          const elem = document.getElementById(id);
+          const lab  = document.getElementById(labelId);
+          if (elem && Number.isFinite(val)) {
+            elem.value = val;
+            if (lab) lab.textContent = Number(val).toFixed(2);
+          }
+        };
+        setSlider('mcdaWeightU',   w.uhi,      'mcdaWeightUVal');
+        setSlider('mcdaWeightN',   w.ndvi,     'mcdaWeightNVal');
+        setSlider('mcdaWeightC',   w.corridor, 'mcdaWeightCVal');
+        setSlider('mcdaWeightA',   w.age,      'mcdaWeightAVal');
+        setSlider('mcdaWeightR',   w.area,     'mcdaWeightRVal');
+      }
+      if (typeof runMCDA === 'function') {
+        runMCDA();
+      }
+    } catch(e){}
   } else if (msg.type === 'SCENARIO_UPDATE') {
     // No scenario toggling implemented for ecology at this time
   }
@@ -6607,6 +6642,23 @@ window.addEventListener('message', (event) => {
       if (typeof updateLeftPanel === 'function') updateLeftPanel();
       if (typeof runMCDA === 'function') runMCDA();
     } catch(e) {}
+    // Synchronise weight sliders to new settings
+    try {
+      const w = ecologySettings.weights || {};
+      const setSlider = (id, val, labelId) => {
+        const elem = document.getElementById(id);
+        const lab  = document.getElementById(labelId);
+        if (elem && Number.isFinite(val)) {
+          elem.value = val;
+          if (lab) lab.textContent = Number(val).toFixed(2);
+        }
+      };
+      setSlider('mcdaWeightU',   w.uhi,      'mcdaWeightUVal');
+      setSlider('mcdaWeightN',   w.ndvi,     'mcdaWeightNVal');
+      setSlider('mcdaWeightC',   w.corridor, 'mcdaWeightCVal');
+      setSlider('mcdaWeightA',   w.age,      'mcdaWeightAVal');
+      setSlider('mcdaWeightR',   w.area,     'mcdaWeightRVal');
+    } catch(e){}
   }
   document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('ecoSettingsBtn');
