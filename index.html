@@ -905,6 +905,16 @@
       list-style-type: disc;
     }
 
+    /* Info icon styling used in the cost vs benefits card header.  The icon uses the theme accent colour
+       and provides a subtle indicator that additional explanation is available. */
+    .info-icon {
+      margin-left: 6px;
+      font-size: 14px;
+      color: var(--accent);
+      cursor: pointer;
+      vertical-align: middle;
+    }
+
     #interrelation-panel .summary {
       margin-top: 10px; padding: 8px 10px; background: rgba(15,23,42,0.95); border-radius: 12px;
       border: 1px solid rgba(148, 163, 184, 0.35); display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 8px; font-size: 11px;
@@ -1763,7 +1773,16 @@
                 </div>
                   <!-- Cost vs benefit chart card -->
                   <div class="chart-card">
-                    <div class="chart-header"><div class="chart-title">Cost vs Benefits</div><div class="chart-tag">Scenario</div></div>
+                  <div class="chart-header">
+                    <div class="chart-title">Cost &amp; Space vs Benefits</div>
+                    <div class="chart-tag">Scenario</div>
+                    <!-- Add an info icon with a descriptive tooltip to explain how the cost–benefit analysis works.
+                         The tooltip clarifies that costs are normalised relative to the budget, space use is shown as
+                         a share of the allowable area for greening, and benefits are averaged across greenness, cooling,
+                         energy savings, CO₂ reduction and health improvements.  The link directs users to the detailed
+                         assumptions section for further reading. -->
+                    <i class="fa-solid fa-circle-info info-icon" title="This chart compares your total project cost and space use against the selected budget and space budget, alongside the average benefit score. Benefits combine greening, cooling, energy savings, CO₂ reduction and estimated health improvements. See the Equations & assumptions section below for formulas and sources."></i>
+                  </div>
                     <div class="chart-wrap"><canvas id="IR_chartCostBenefit"></canvas></div>
                   </div>
               </div>
@@ -1811,6 +1830,7 @@
               <p><strong>Green roofs &amp; vegetation:</strong> Vegetation and green roofs help cool buildings and neighborhoods by shading surfaces, deflecting solar radiation and releasing moisture.</p>
               <p><strong>PV costs:</strong> High‑efficiency PV modules are about €0.115 per Wp; the slider's default of €5,400 per +1 % PV capacity is based on typical installed costs.</p>
               <p><strong>Default parameter values:</strong> Tree cost €350 per tree; PV cost €5,400 per +1 % capacity; retrofit cost €12,000 per dwelling; green roof cost €8,000 per +10 % roof coverage.</p>
+              <p><strong>Health benefits:</strong> Exposure to trees and green spaces is linked to better mental and physical health. A scoping review reported that a 25 % increase in neighbourhood tree canopy correlated with a one‑point decrease on the 5‑point Depression Anxiety and Stress Scales【546683102957072†L848-L861】. Time spent in nature decreases stress levels and improves mental focus【355704895513457†L134-L146】. The health score used in this dashboard assumes that both additional trees and green roofs contribute equally to these wellness benefits.</p>
               <p>These formulas and assumptions show how ecological (trees, green roofs) and energy (PV, retrofits) interventions interact. More trees and green roofs increase greenness and reduce urban heat, while PV and insulation reduce energy use and emissions. The combined scenario score weighs these co‑benefits against investment and space budgets over your selected time horizon.</p>
               <p><em>Sources:</em> 
                 <a href="https://www.investopedia.com/terms/n/npv.asp" target="_blank">Investopedia – NPV formula</a>; 
@@ -1923,6 +1943,13 @@
       const energyScore = Math.min(100, 40 + ((IR.energy_kwh - energyScenario_kwh) / IR.energy_kwh) * 60);
       const co2Score = Math.min(100, 40 + ((IR.co2_kg - co2Scenario_kg) / IR.co2_kg) * 60);
 
+      // Estimate health improvements based on added trees and green roof coverage.
+      // A larger tree canopy and more green roofs are associated with reduced stress levels and improved
+      // physical health【355704895513457†L134-L152】. We normalise this effect to a 0–100 scale,
+      // starting at 40 and adding up to 60 points as greening increases. Both trees and green roofs
+      // contribute equally: 1,500 trees or 100% green roof coverage yield the maximum additional 60 points.
+      const healthScore = Math.min(100, 40 + ((treesAdded / 1500) + (greenRoofPct / 100)) * 30);
+
       const treeCost = treesAdded * IR.cost_tree_eur;
       const pvCost = pvExtraPct * IR.cost_pv_per_pct_eur;
       const dwellingsInsulated = IR.dwellings * (retroPct / 100);
@@ -1940,6 +1967,7 @@
         co2Scenario_kg, greenScore, coolScore, energyScore, co2Score,
         treeCost, pvCost, retrofitCost, greenRoofCost, totalCost,
         protectedHH, equityPct, treeShadePVLoss
+        , healthScore
       };
     };
 
@@ -2123,15 +2151,21 @@
         }
       });
 
-      // Setup cost vs benefits chart (initialised with zero values)
+      // Setup cost vs benefits chart (initialised with zero values). This chart now compares cost and space usage
+      // as percentages of the user‑selected budgets and the averaged benefit score. Each bar shares a common 0–100
+      // scale for easier comparison.
       const ctxCostBenefit = document.getElementById("IR_chartCostBenefit").getContext("2d");
       const IR_chartCostBenefit = new Chart(ctxCostBenefit, {
         type: "bar",
         data: {
-          labels: ["Cost (k€)", "Benefit"],
+          labels: ["Cost (% Budget)", "Space used (%)", "Benefit score"],
           datasets: [{
-            data: [0, 0],
-            backgroundColor: ["rgba(239, 68, 68, 0.8)", "rgba(34, 197, 94, 0.8)"],
+            data: [0, 0, 0],
+            backgroundColor: [
+              "rgba(239, 68, 68, 0.8)",   // red for cost relative to budget
+              "rgba(251, 191, 36, 0.8)",   // amber for space utilisation
+              "rgba(34, 197, 94, 0.8)"     // green for benefits
+            ],
             borderRadius: 6,
             maxBarThickness: 30
           }]
@@ -2140,7 +2174,12 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true } }
+          scales: {
+            y: {
+              beginAtZero: true,
+              suggestedMax: 100
+            }
+          }
         }
       });
 
@@ -2279,6 +2318,13 @@
         const energyScore = Math.min(100, 40 + ((IR_BASE.energy_kwh - energyScenario_kwh) / IR_BASE.energy_kwh) * 60);
         const co2Score = Math.min(100, 40 + ((IR_BASE.co2_kg - co2Scenario_kg) / IR_BASE.co2_kg) * 60);
 
+        // Estimate health improvements based on added trees and green roof coverage.
+        // A larger tree canopy and more green roofs are associated with reduced stress levels and improved
+        // physical health【355704895513457†L134-L152】. We normalise this effect to a 0–100 scale,
+        // starting at 40 and adding up to 60 points as greening increases. Both trees and green roofs
+        // contribute equally: 1,500 trees or 100% green roof coverage yield the maximum additional 60 points.
+        const healthScore = Math.min(100, 40 + ((treesAdded / 1500) + (greenRoofPct / 100)) * 30);
+
         const treeCost = treesAdded * IR_BASE.cost_tree_eur;
         const pvCost = pvExtraPct * IR_BASE.cost_pv_per_pct_eur;
         const dwellingsInsulated = IR_BASE.dwellings * (retroPct / 100);
@@ -2291,7 +2337,7 @@
         const protectedHH = totalVulnerable * (retroPct / 100);
         const equityPct = totalVulnerable ? (protectedHH / totalVulnerable) * 100 : 0;
 
-        return { treesAdded, pvExtraPct, retroPct, heatLevel, greenRoofPct, ndviScenario, uhiScenario, energyScenario_kwh, pvScenario_kwh, netGridScenario_kwh, co2Scenario_kg, greenScore, coolScore, energyScore, co2Score, treeCost, pvCost, retrofitCost, greenRoofCost, totalCost, protectedHH, equityPct, treeShadePVLoss };
+        return { treesAdded, pvExtraPct, retroPct, heatLevel, greenRoofPct, ndviScenario, uhiScenario, energyScenario_kwh, pvScenario_kwh, netGridScenario_kwh, co2Scenario_kg, greenScore, coolScore, energyScore, co2Score, treeCost, pvCost, retrofitCost, greenRoofCost, totalCost, protectedHH, equityPct, treeShadePVLoss, healthScore };
       }
 
       function IR_buildInsightsLines(s, greenPct, uhiDelta, energyPct, co2Pct) {
@@ -2353,8 +2399,11 @@
 
         // Compute stakeholder benefit scores
         // Citizen score emphasises energy and comfort, while planner score focuses on CO₂ and greenness
-        const citizenScoreRaw = (s.energyScore * 0.5 + s.coolScore * 0.3 + s.greenScore * 0.1 + s.co2Score * 0.1) - ((s.pvCost + s.retrofitCost) / 20000);
-        const plannerScoreRaw = (s.co2Score * 0.4 + s.greenScore * 0.3 + s.coolScore * 0.2 + s.energyScore * 0.1) - ((s.treeCost + s.greenRoofCost) / 20000);
+        // Include health benefits in stakeholder scoring. Citizens value energy savings and comfort
+        // most, but greenness and health also improve well-being. Planners prioritise CO₂ reduction
+        // yet also consider greenness, cooling and health. We normalise weights to sum to 1.
+        const citizenScoreRaw = (s.energyScore * 0.4 + s.coolScore * 0.2 + s.greenScore * 0.2 + (s.healthScore || 0) * 0.2) - ((s.pvCost + s.retrofitCost) / 20000);
+        const plannerScoreRaw = (s.co2Score * 0.4 + s.greenScore * 0.2 + s.coolScore * 0.2 + (s.healthScore || 0) * 0.2) - ((s.treeCost + s.greenRoofCost) / 20000);
         const clampScore = v => Math.max(0, Math.min(100, v));
         const citizenScore = clampScore(citizenScoreRaw);
         const plannerScore = clampScore(plannerScoreRaw);
@@ -2383,8 +2432,25 @@
 
         // Update cost vs benefits chart
         if (typeof IR_chartCostBenefit !== 'undefined' && IR_chartCostBenefit) {
-          const benefit = (s.greenScore + s.coolScore + s.energyScore + s.co2Score) / 4;
-          IR_chartCostBenefit.data.datasets[0].data = [s.totalCost / 1000, benefit];
+          // Compute cost as a percentage of the selected budget. Avoid division by zero.
+          let costPct = 0;
+          if (typeof elBudget !== 'undefined' && elBudget) {
+            const budgetVal = parseInt(elBudget.value || 0, 10);
+            costPct = budgetVal > 0 ? (s.totalCost / budgetVal) * 100 : 0;
+          }
+          // Compute space usage as a percentage of the space budget.
+          let spaceUsedPct = 0;
+          if (typeof elSpace !== 'undefined' && elSpace) {
+            const spaceBudget = parseInt(elSpace.value || 100, 10);
+            const usedTreesPct = (s.treesAdded / 1500) * 100;
+            const usedGreenPct = s.greenRoofPct;
+            const maxUsed = Math.max(usedTreesPct, usedGreenPct);
+            spaceUsedPct = spaceBudget > 0 ? (maxUsed / spaceBudget) * 100 : 0;
+          }
+          // Average benefit across greenness, cooling, energy, CO₂ reduction and health improvement.
+          const healthComponent = typeof s.healthScore !== 'undefined' ? s.healthScore : 0;
+          const benefit = (s.greenScore + s.coolScore + s.energyScore + s.co2Score + healthComponent) / 5;
+          IR_chartCostBenefit.data.datasets[0].data = [costPct, spaceUsedPct, benefit];
           IR_chartCostBenefit.update("none");
         }
 
