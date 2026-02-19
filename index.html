@@ -1622,7 +1622,7 @@
                 <i class="fa-solid fa-diagram-project"></i> Combined Scenario Analysis
               </div>
               <div class="top-sub">
-                Simulate trees, PV, retrofits and green roofs to see how ecological and energy interventions work together, impacting greenness, heat, energy use, CO₂ and cost.
+                Simulate integrated energy and ecology measures to maximise co‑benefits. Balance space and investment budgets while exploring greenness, heat, energy use, CO₂ and cost.
               </div>
             </div>
             <div class="top-actions">
@@ -1695,6 +1695,15 @@
                 <input id="IR_sliderBudget" type="range" min="0" max="2000000" step="50000" value="0">
                 <div class="slider-hint">Maximum investment budget to optimize scenario.</div>
               </div>
+              <!-- Space budget slider -->
+              <div class="slider-row">
+                <div class="slider-top">
+                  <div class="slider-label"><i class="fa-solid fa-expand"></i> <span>Space budget</span></div>
+                  <div class="slider-value"><span id="IR_spaceValue">100</span>% space</div>
+                </div>
+                <input id="IR_sliderSpace" type="range" min="10" max="100" step="10" value="100">
+                <div class="slider-hint">Maximum share of available space that can be used for trees and green roofs.</div>
+              </div>
               <div class="slider-row" style="text-align:center;">
                 <button class="open-tab-btn" id="IR_btnOptimize">Maximize Score</button>
               </div>
@@ -1752,6 +1761,11 @@
                     </ul>
                   </div>
                 </div>
+                  <!-- Cost vs benefit chart card -->
+                  <div class="chart-card">
+                    <div class="chart-header"><div class="chart-title">Cost vs Benefits</div><div class="chart-tag">Scenario</div></div>
+                    <div class="chart-wrap"><canvas id="IR_chartCostBenefit"></canvas></div>
+                  </div>
               </div>
             </div>
           </div>
@@ -1774,6 +1788,9 @@
             </div>
             <div class="summary-item">
               <div class="summary-label">Protected HH</div><div class="summary-value positive" id="IR_summaryEquity">0%</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">Space used</div><div class="summary-value positive" id="IR_summarySpace">0%</div>
             </div>
           </div>
 
@@ -2106,6 +2123,44 @@
         }
       });
 
+      // Setup cost vs benefits chart (initialised with zero values)
+      const ctxCostBenefit = document.getElementById("IR_chartCostBenefit").getContext("2d");
+      const IR_chartCostBenefit = new Chart(ctxCostBenefit, {
+        type: "bar",
+        data: {
+          labels: ["Cost (k€)", "Benefit"],
+          datasets: [{
+            data: [0, 0],
+            backgroundColor: ["rgba(239, 68, 68, 0.8)", "rgba(34, 197, 94, 0.8)"],
+            borderRadius: 6,
+            maxBarThickness: 30
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      // References for space budget slider and label
+      const elSpace = document.getElementById("IR_sliderSpace");
+      const labelSpace = document.getElementById("IR_spaceValue");
+      const summarySpace = document.getElementById("IR_summarySpace");
+      // Global variable to hold current space budget percentage
+      window.IR_space_budget = 100;
+      if (elSpace && labelSpace) {
+        const updateSpaceLabel = () => {
+          const val = parseInt(elSpace.value || 0, 10);
+          labelSpace.textContent = val;
+          window.IR_space_budget = val;
+        };
+        elSpace.addEventListener('input', updateSpaceLabel);
+        // Initialise on load
+        updateSpaceLabel();
+      }
+
       // Attach click handlers to the charts to display details when clicked
       function attachChartClick(chart, type) {
         chart.options.onClick = function() {
@@ -2313,6 +2368,24 @@
           const eqVal = s.equityPct || 0;
           summaryEquity.textContent = `${Math.round(eqVal)}%`;
           summaryEquity.className = "summary-value " + (eqVal >= 0 ? "positive" : "negative");
+        }
+
+        // Update space usage summary
+        if (typeof summarySpace !== 'undefined' && summarySpace && elSpace) {
+          const spaceBudget = parseInt(elSpace.value || 100, 10);
+          const usedTreesPct = (s.treesAdded / 1500) * 100;
+          const usedGreenPct = s.greenRoofPct;
+          const maxUsed = Math.max(usedTreesPct, usedGreenPct);
+          const spaceUsedPct = spaceBudget > 0 ? (maxUsed / spaceBudget) * 100 : 0;
+          summarySpace.textContent = `${Math.round(spaceUsedPct)}%`;
+          summarySpace.className = "summary-value " + (spaceUsedPct <= 100 ? "positive" : "negative");
+        }
+
+        // Update cost vs benefits chart
+        if (typeof IR_chartCostBenefit !== 'undefined' && IR_chartCostBenefit) {
+          const benefit = (s.greenScore + s.coolScore + s.energyScore + s.co2Score) / 4;
+          IR_chartCostBenefit.data.datasets[0].data = [s.totalCost / 1000, benefit];
+          IR_chartCostBenefit.update("none");
         }
 
         // Build insights and include shading warnings
