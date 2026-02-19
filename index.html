@@ -1781,7 +1781,12 @@
                          a share of the allowable area for greening, and benefits are averaged across greenness, cooling,
                          energy savings, CO₂ reduction and health improvements.  The link directs users to the detailed
                          assumptions section for further reading. -->
-                    <i class="fa-solid fa-circle-info info-icon" title="This chart compares your total project cost and space use against the selected budget and space budget, alongside the average benefit score. Benefits combine greening, cooling, energy savings, CO₂ reduction and estimated health improvements. See the Equations & assumptions section below for formulas and sources."></i>
+                    <!-- Wrap the info icon in a link so that users can click to learn how the cost–benefit scores are calculated.
+                         The link points to a new section further down the page (id="cba-explained") where the normalisation
+                         formulas and assumptions are explained. A short tooltip still hints at its purpose. -->
+                    <a href="#cba-explained" class="info-icon-link" title="Click to see how cost‑benefit scores are calculated." style="text-decoration:none;">
+                      <i class="fa-solid fa-circle-info info-icon"></i>
+                    </a>
                   </div>
                     <div class="chart-wrap"><canvas id="IR_chartCostBenefit"></canvas></div>
                   </div>
@@ -1814,6 +1819,30 @@
           </div>
 
           <!--
+            Cost‑benefit explanation section
+            --------------------------------
+            This collapsible panel explains how the cost‑benefit bar chart normalises cost and space
+            relative to the selected budgets and how the composite benefit score is computed.  It also
+            cites external sources on data normalisation and health impacts of greening so that the
+            narrative is transparent and all references are clickable.
+          -->
+          <details id="cba-explained" class="equations-info" style="margin-top: 20px; background: rgba(15,23,42,0.85); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+            <summary style="cursor:pointer; font-size: 14px; font-weight: 600; color: var(--accent);">
+              <i class="fa-solid fa-circle-info"></i> Cost–benefit calculation explained
+            </summary>
+            <div style="margin-top: 10px; font-size: 13px; line-height: 1.5; color: var(--text-muted);">
+              <p>Cost–benefit scores allow you to compare different aspects of the scenario on a common 0–100 scale. The total project cost is divided by your selected budget and multiplied by 100. Space use is normalised in the same way against the available space budget. The benefit score is the arithmetic mean of greenness, cooling, energy savings, CO₂ reduction and a health score. Normalisation aligns values with different units to a common range and is typically applied before averaging.</p>
+              <p>The health score draws on evidence linking green space and well‑being. A scoping review found that a 25 % increase in neighbourhood tree canopy was associated with a one‑point decrease on the 5‑point Depression Anxiety and Stress Scales (DASS). Another study reported that spending 10–50 minutes in natural spaces improved mood, focus and physiological markers like blood pressure and heart rate. Both trees and green roofs therefore contribute to the health benefits shown in this dashboard.</p>
+              <p>For formal definitions of net present value (NPV) and benefit–cost ratio (BCR), and other underlying formulas, see the Equations &amp; assumptions section below.</p>
+              <p><em>Sources:</em>
+                <a href="https://en.wikipedia.org/wiki/Normalization_(statistics)#Feature_scaling" target="_blank">Wikipedia – Normalization (statistics)</a>;
+                <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7345658/#:~:text=25%25%20increase%20in%20neighbourhood%20tree%20canopy" target="_blank">Urban Trees &amp; Human Health</a>;
+                <a href="https://www.vet.cornell.edu/about-us/news/20200225/spending-time-nature-reduces-stress-and-anxiety" target="_blank">Spending time in nature reduces stress</a>.
+              </p>
+            </div>
+          </details>
+
+          <!--
             Added equations/assumptions info section to make the combined scenario more transparent.
             This collapsible panel lists the formulas used for key metrics, explains parameter meanings,
             outlines default cost assumptions and highlights how energy and ecology measures interact.
@@ -1830,7 +1859,11 @@
               <p><strong>Green roofs &amp; vegetation:</strong> Vegetation and green roofs help cool buildings and neighborhoods by shading surfaces, deflecting solar radiation and releasing moisture.</p>
               <p><strong>PV costs:</strong> High‑efficiency PV modules are about €0.115 per Wp; the slider's default of €5,400 per +1 % PV capacity is based on typical installed costs.</p>
               <p><strong>Default parameter values:</strong> Tree cost €350 per tree; PV cost €5,400 per +1 % capacity; retrofit cost €12,000 per dwelling; green roof cost €8,000 per +10 % roof coverage.</p>
-              <p><strong>Health benefits:</strong> Exposure to trees and green spaces is linked to better mental and physical health. A scoping review reported that a 25 % increase in neighbourhood tree canopy correlated with a one‑point decrease on the 5‑point Depression Anxiety and Stress Scales【546683102957072†L848-L861】. Time spent in nature decreases stress levels and improves mental focus【355704895513457†L134-L146】. The health score used in this dashboard assumes that both additional trees and green roofs contribute equally to these wellness benefits.</p>
+              <p><strong>Health benefits:</strong> Exposure to trees and green spaces is linked to better mental and physical health. A scoping review reported that a 25 % increase in neighbourhood tree canopy correlated with a one‑point decrease on the 5‑point Depression Anxiety and Stress Scales (DASS)
+                <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7345658/#:~:text=25%25%20increase%20in%20neighbourhood%20tree%20canopy" target="_blank">[study]</a>.
+                Researchers at Cornell University found that spending 10–50 minutes in natural spaces improved mood, focus and physiological markers like blood pressure and heart rate
+                <a href="https://www.vet.cornell.edu/about-us/news/20200225/spending-time-nature-reduces-stress-and-anxiety" target="_blank">[study]</a>.
+                The health score used in this dashboard assumes that both additional trees and green roofs contribute equally to these wellness benefits.</p>
               <p>These formulas and assumptions show how ecological (trees, green roofs) and energy (PV, retrofits) interventions interact. More trees and green roofs increase greenness and reduce urban heat, while PV and insulation reduce energy use and emissions. The combined scenario score weighs these co‑benefits against investment and space budgets over your selected time horizon.</p>
               <p><em>Sources:</em> 
                 <a href="https://www.investopedia.com/terms/n/npv.asp" target="_blank">Investopedia – NPV formula</a>; 
