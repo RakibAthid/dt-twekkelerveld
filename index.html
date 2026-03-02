@@ -835,7 +835,18 @@
       -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 999px;
       background: #ffffff; border: 1px solid #4b5563; cursor: pointer; box-shadow: 0 0 0 3px rgba(59,130,246,0.25);
     }
-    #interrelation-panel .slider-hint { font-size: 10px; color: #6b7280; margin-top: 2px; }
+    /*
+       The slider hints provide supplemental information (e.g. “Trees sequester ~20 kg CO₂ per year…”).
+       Previously these hints used a very low‑contrast grey (#6b7280) that was hard to read against the
+       dark dashboard background. To improve legibility while still matching the overall design
+       language, we raise the colour to a lighter slate (#cbd5e1), which is used elsewhere for
+       secondary text. The font size and spacing remain unchanged for consistency.
+    */
+    #interrelation-panel .slider-hint {
+      font-size: 10px;
+      color: #cbd5e1;
+      margin-top: 2px;
+    }
 
     #interrelation-panel .scenario-insights {
       margin-top: 4px; padding: 8px 9px; font-size: 11px; line-height: 1.5; border-radius: 8px;
