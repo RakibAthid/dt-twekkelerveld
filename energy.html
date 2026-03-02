@@ -2463,9 +2463,24 @@ function setupLod2EnergyStyling(){
     return;
   }
 
+  // When styling the LOD2 tiles we reference a custom property called
+  // `_dt_class` that is assigned asynchronously when a tile becomes visible.
+  // If this property hasn't been set yet (i.e. the building hasn't been
+  // processed by the `tileVisible` hook) then Cesium will treat it as
+  // `null`. Without an explicit null-check the comparison operators below
+  // would attempt to compare `undefined`/`null` against a number which
+  // triggers a runtime error such as:
+  //   "RuntimeError: Operator ">=" requires number arguments. Arguments are undefined and 2."
+  // To avoid crashing the renderer we add a guard condition up-front that
+  // matches any features without a defined `_dt_class` and applies a neutral
+  // colour. This ensures subsequent comparisons only operate on numeric
+  // values.
   lod2Tileset.style = new Cesium.Cesium3DTileStyle({
     color: {
       conditions: [
+        // Guard: features missing the `_dt_class` property are rendered
+        // with a light colour to avoid triggering numerical comparisons.
+        ["${_dt_class} === null", "color('rgba(255,255,255,0.9)')"],
         ["${_dt_class} >= 2", "color('#b91c1c', 0.95)"],
         ["${_dt_class} >= 1", "color('#d97706', 0.95)"],
         ["${_dt_class} >= 0", "color('#15803d', 0.95)"],
