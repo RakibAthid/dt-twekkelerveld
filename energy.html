@@ -2480,7 +2480,10 @@ function setupLod2EnergyStyling(){
       conditions: [
         // Guard: features missing the `_dt_class` property are rendered
         // with a light colour to avoid triggering numerical comparisons.
-        ["${_dt_class} === null", "color('rgba(255,255,255,0.9)')"],
+        // Use loose equality so the guard also catches `undefined` (missing properties)
+        // in addition to `null`. Missing properties are what triggered the Cesium
+        // runtime error on some tiles before the per-feature class value was set.
+        ["${_dt_class} == null", "color('rgba(255,255,255,0.9)')"],
         ["${_dt_class} >= 2", "color('#b91c1c', 0.95)"],
         ["${_dt_class} >= 1", "color('#d97706', 0.95)"],
         ["${_dt_class} >= 0", "color('#15803d', 0.95)"],
@@ -2489,7 +2492,9 @@ function setupLod2EnergyStyling(){
     }
   });
 
+  let hookedNow = false;
   if(!lod2TileHooked){
+    hookedNow = true;
     lod2TileHooked = true;
     lod2Tileset.tileVisible.addEventListener(function(tile){
       try{
@@ -2513,6 +2518,25 @@ function setupLod2EnergyStyling(){
         }
       }catch(e){}
     });
+  }
+
+  // If the user turns the energy styling on after the tileset has already been
+  // displayed, some tiles may already be visible and therefore won't fire the
+  // `tileVisible` event again. Those features would keep `_dt_class` undefined
+  // (and thus either render with the guard colour or, in older code, crash the
+  // renderer). When we install the hook we briefly toggle visibility to force a
+  // fresh visibility pass so currently visible tiles get processed.
+  if(hookedNow){
+    try{
+      if(lod2Tileset.show){
+        lod2Tileset.show = false;
+        viewer.scene.requestRender();
+        setTimeout(() => {
+          lod2Tileset.show = true;
+          viewer.scene.requestRender();
+        }, 0);
+      }
+    }catch(e){}
   }
 }
 
