@@ -598,8 +598,9 @@
       z-index: 4000;
     }
     .developer-banner img {
-      width: 40px;
-      height: 40px;
+      /* Increase logo size to make the ITC and University branding more legible */
+      width: 70px;
+      height: 70px;
       object-fit: contain;
       border-radius: 4px;
     }
@@ -637,6 +638,49 @@
     .timeline-item span {
       font-size: 12px;
       color: var(--text-muted);
+    }
+
+    /* Raster layer gallery for the overview page */
+    .raster-section {
+      margin-top: 40px;
+    }
+    .raster-section h3 {
+      margin-bottom: 10px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .raster-section p {
+      margin-bottom: 16px;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .raster-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .raster-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      width: calc(50% - 8px);
+      display: flex;
+      flex-direction: column;
+    }
+    .raster-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .raster-card .raster-label {
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      background: rgba(148, 163, 184, 0.1);
     }
 
     .presets-section {
@@ -1630,6 +1674,30 @@
             </div>
           </div>
         </div>
+        <!-- Raster layer gallery inserted for environmental layers -->
+        <div class="raster-section">
+          <h3>Spatial Analysis Layers</h3>
+          <p>Explore the baseline environmental metrics across the Twekkelerveld neighbourhood.</p>
+          <div class="raster-grid">
+            <a class="raster-card" href="UHI.png" target="_blank">
+              <img src="UHI.png" alt="Urban heat island raster">
+              <div class="raster-label">UHI peak (°C)</div>
+            </a>
+            <a class="raster-card" href="NDVI.png" target="_blank">
+              <img src="NDVI.png" alt="Normalized Difference Vegetation Index">
+              <div class="raster-label">NDVI</div>
+            </a>
+            <a class="raster-card" href="Roof Irradiance Raster(kWh).png" target="_blank">
+              <img src="Roof Irradiance Raster(kWh).png" alt="Roof irradiance potential">
+              <div class="raster-label">Roof irradiance (kWh)</div>
+            </a>
+            <a class="raster-card" href="Aggregated Shadow Raster_updated.png" target="_blank">
+              <img src="Aggregated Shadow Raster_updated.png" alt="Aggregated shadow analysis">
+              <div class="raster-label">Aggregated shadow</div>
+            </a>
+          </div>
+        </div>
+
         <!-- Additional modal for timeline policy popups -->
         <div id="timeline-modal" class="modal-overlay">
           <div class="modal-content policy-modal">
