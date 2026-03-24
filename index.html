@@ -582,31 +582,38 @@
       color: #000;
     }
 
-    /* Developer banner (logo and name) */
+    /* Developer banner (logo and name)
+       
+       The floating banner containing the ITC/UT logo and developer name has been
+       adjusted to be more prominent and moved to the bottom‑left corner of the
+       viewport. This ensures it does not overlap with the chatbots on the right
+       side of the interface. The banner is only displayed on the Overview,
+       Ecology and Energy tabs via a small script further down in this file.
+    */
     .developer-banner {
       position: fixed;
       bottom: 16px;
-      right: 16px;
+      left: 16px; /* Move banner to the left side */
+      right: auto;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       background: rgba(15, 23, 42, 0.85);
       border: 1px solid rgba(148, 163, 184, 0.3);
-      padding: 8px 12px;
+      padding: 10px 16px;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
       z-index: 4000;
     }
     .developer-banner img {
-      /* Increase logo size to make the ITC and University branding more legible */
-      width: 70px;
-      height: 70px;
+      width: 60px;  /* enlarge the logo for better visibility */
+      height: auto;  /* maintain aspect ratio */
       object-fit: contain;
       border-radius: 4px;
     }
     .developer-banner .dev-name {
-      font-size: 14px;
-      color: var(--text-muted);
+      font-size: 15px; /* slightly larger text */
+      color: var(--text-main); /* use main text colour for higher contrast */
       white-space: nowrap;
     }
 
@@ -638,49 +645,6 @@
     .timeline-item span {
       font-size: 12px;
       color: var(--text-muted);
-    }
-
-    /* Raster layer gallery for the overview page */
-    .raster-section {
-      margin-top: 40px;
-    }
-    .raster-section h3 {
-      margin-bottom: 10px;
-      font-size: 20px;
-      font-weight: 600;
-    }
-    .raster-section p {
-      margin-bottom: 16px;
-      color: var(--text-muted);
-      font-size: 14px;
-      line-height: 1.4;
-    }
-    .raster-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    .raster-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-      text-decoration: none;
-      color: inherit;
-      width: calc(50% - 8px);
-      display: flex;
-      flex-direction: column;
-    }
-    .raster-card img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .raster-card .raster-label {
-      padding: 8px 12px;
-      font-size: 14px;
-      font-weight: 500;
-      background: rgba(148, 163, 184, 0.1);
     }
 
     .presets-section {
@@ -1674,30 +1638,6 @@
             </div>
           </div>
         </div>
-        <!-- Raster layer gallery inserted for environmental layers -->
-        <div class="raster-section">
-          <h3>Spatial Analysis Layers</h3>
-          <p>Explore the baseline environmental metrics across the Twekkelerveld neighbourhood.</p>
-          <div class="raster-grid">
-            <a class="raster-card" href="UHI.png" target="_blank">
-              <img src="UHI.png" alt="Urban heat island raster">
-              <div class="raster-label">UHI peak (°C)</div>
-            </a>
-            <a class="raster-card" href="NDVI.png" target="_blank">
-              <img src="NDVI.png" alt="Normalized Difference Vegetation Index">
-              <div class="raster-label">NDVI</div>
-            </a>
-            <a class="raster-card" href="Roof Irradiance Raster(kWh).png" target="_blank">
-              <img src="Roof Irradiance Raster(kWh).png" alt="Roof irradiance potential">
-              <div class="raster-label">Roof irradiance (kWh)</div>
-            </a>
-            <a class="raster-card" href="Aggregated Shadow Raster_updated.png" target="_blank">
-              <img src="Aggregated Shadow Raster_updated.png" alt="Aggregated shadow analysis">
-              <div class="raster-label">Aggregated shadow</div>
-            </a>
-          </div>
-        </div>
-
         <!-- Additional modal for timeline policy popups -->
         <div id="timeline-modal" class="modal-overlay">
           <div class="modal-content policy-modal">
@@ -1992,26 +1932,49 @@
   <script>
     // --- Tab Switching Logic ---
     window.switchTab = function(targetId, btn) {
-      if(btn) {
+      // Manage active state on navigation pills
+      if (btn) {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
       } else {
         document.querySelectorAll('.nav-btn').forEach(b => {
-          if(b.onclick.toString().includes(targetId)) {
+          if (b.onclick.toString().includes(targetId)) {
             document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
             b.classList.add('active');
           }
         });
       }
 
+      // Switch the visible panel
       document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
       document.getElementById(targetId).classList.add('active');
 
+      // Conditionally show the developer/ITC banner only on specified panels
+      const devBanner = document.querySelector('.developer-banner');
+      if (devBanner) {
+        const allowedPanels = ['panel-overview', 'panel-energy', 'panel-ecology'];
+        if (allowedPanels.includes(targetId)) {
+          devBanner.style.display = 'flex';
+        } else {
+          devBanner.style.display = 'none';
+        }
+      }
+
       // Initialize interrelation on tab switch if not already done
-      if (targetId === "panel-interrelation" && window.IR_init && !window.__IR_initialized) {
+      if (targetId === 'panel-interrelation' && window.IR_init && !window.__IR_initialized) {
         window.IR_init();
       }
     };
+
+    // Ensure the banner visibility is correct on initial load
+    document.addEventListener('DOMContentLoaded', () => {
+      const initialBanner = document.querySelector('.developer-banner');
+      const activePanel = document.querySelector('.view-panel.active');
+      if (initialBanner && activePanel) {
+        const allowed = ['panel-overview', 'panel-energy', 'panel-ecology'];
+        initialBanner.style.display = allowed.includes(activePanel.id) ? 'flex' : 'none';
+      }
+    });
 
     /*
       Define a global baseline object and helper functions so that metrics can be computed
@@ -3278,7 +3241,10 @@
 
   <!-- Developer banner: floating logo and developer name -->
   <div class="developer-banner">
-    <img src="logo.png" alt="Developer Logo" />
+    <!-- Use a local copy of the ITC/UT logo. The image is stored alongside this HTML
+         file as itc_logo.jpg. If an alternate logo is provided in the future,
+         simply replace the file and update this path. -->
+    <img src="itc_logo.jpg" alt="ITC Logo" />
     <span class="dev-name">Rakibun Athid, MSc Spatial Engineering</span>
   </div>
   <!-- Consolidated settings dropdown and ecology modal logic -->
