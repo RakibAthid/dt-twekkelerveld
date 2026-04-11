@@ -1015,6 +1015,492 @@
     background: var(--primary-hover);
   }
 
+  /* =======================================
+     TASK 3 — AI Assistant Light/Bright Mode
+  ======================================= */
+  /* Panel container — keep border/shadow, change BG to near-white */
+  #assistantContainer {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10);
+  }
+  /* Message area — bright white */
+  #assistantMessages {
+    background: #f9f9f9;
+  }
+  /* Individual messages */
+  .assistant-message.bot span,
+  .assistant-message.bot {
+    color: #1a1a1a !important;
+    background: none;
+  }
+  .assistant-message.user {
+    color: #1a1a1a !important;
+  }
+  /* Bot message bubbles */
+  .assistant-message.bot {
+    background: none;
+  }
+
+  /* Header bar within the assistant — keep dark */
+  #assistantHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #1a1a1a;
+    border-radius: 16px 16px 0 0;
+  }
+  #assistantHeader .assistant-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #assistantHeader .assistant-title i { font-size: 14px; }
+  #assistantClose {
+    background: rgba(255,255,255,0.12);
+    border: none;
+    color: #f8fafc;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.18s;
+    border-radius: 6px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #assistantClose:hover { background: rgba(255,255,255,0.22); }
+
+  /* Chips area */
+  #assistantChips {
+    background: #f1f5f9;
+    border-top: 1px solid #e2e8f0;
+  }
+  .assistant-chip {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    transition: 0.18s;
+  }
+  .assistant-chip:hover {
+    border-color: #2dd4bf;
+    background: #e0fdf4;
+    color: #0f766e;
+  }
+
+  /* Input area */
+  #assistantInputArea {
+    background: #f9fafb;
+    border-top: 1px solid #e2e8f0;
+  }
+  #assistantInput {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #1a1a1a;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  }
+  #assistantInput:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(45,212,191,0.15); }
+  #assistantInput::placeholder { color: #9ca3af; }
+  #assistantSend {
+    background: #2dd4bf;
+    color: #0b1220;
+    font-weight: 700;
+  }
+  #assistantSend:hover { background: #14b8a6; }
+
+  /* Suggestions dropdown — light */
+  #assistantSuggestions {
+    padding: 8px;
+    border-top: 1px solid #e2e8f0;
+    max-height: 120px;
+    overflow-y: auto;
+    background: #ffffff;
+    display: none;
+  }
+  #assistantSuggestions .suggestion-item {
+    padding: 7px 10px;
+    font-size: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #1a1a1a;
+    transition: 0.18s;
+    border: 1px solid transparent;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    background: #f9fafb;
+    margin-bottom: 4px;
+  }
+  #assistantSuggestions .suggestion-item:hover {
+    background: #e0fdf4;
+    border-color: #2dd4bf;
+    color: #0f766e;
+    box-shadow: 0 2px 8px rgba(45,212,191,0.15);
+  }
+
+  /* =======================================
+     TASK 1 — Tree Removal Impact Counter
+  ======================================= */
+  #treeImpactCounter {
+    position: fixed;
+    top: 72px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    background: rgba(2, 6, 23, 0.92);
+    border: 1px solid rgba(251, 113, 133, 0.45);
+    border-radius: 14px;
+    padding: 10px 18px;
+    display: none;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    backdrop-filter: blur(14px);
+    pointer-events: auto;
+  }
+  #treeImpactCounter .tic-title {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(251, 113, 133, 0.95);
+    white-space: nowrap;
+  }
+  .tic-stat { text-align: center; }
+  .tic-val  { font-size: 15px; font-weight: 800; color: #fca5a5; font-feature-settings: "tnum"; }
+  .tic-lbl  { font-size: 9px; color: rgba(226,232,240,0.65); text-transform: uppercase; letter-spacing: .5px; }
+  #treeImpactCounter .tic-btn {
+    background: rgba(251,113,133,0.12);
+    border: 1px solid rgba(251,113,133,0.35);
+    color: #fca5a5;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.18s;
+    white-space: nowrap;
+  }
+  #treeImpactCounter .tic-btn:hover { background: rgba(251,113,133,0.25); }
+
+  /* Tree removal popup section */
+  .tree-impact-section {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(251,113,133,0.08);
+    border: 1px solid rgba(251,113,133,0.25);
+    border-radius: 10px;
+  }
+  .tree-impact-title {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: #fb7185;
+    margin-bottom: 6px;
+  }
+  .tree-impact-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 11px;
+    gap: 8px;
+  }
+  .tree-impact-row:last-child { border-bottom: none; }
+  .tree-impact-row .ti-lbl { color: rgba(226,232,240,0.75); }
+  .tree-impact-row .ti-val { color: #fb7185; font-weight: 700; }
+  .btn-remove-tree {
+    width: 100%;
+    margin-top: 10px;
+    padding: 9px;
+    background: rgba(251,113,133,0.85);
+    border: none;
+    border-radius: 10px;
+    color: #1a0a0e;
+    font-weight: 900;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.18s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+  .btn-remove-tree:hover { background: #fb7185; transform: translateY(-1px); }
+  .btn-remove-tree:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* =======================================
+     TASK 2 — MCDA Wizard styling
+  ======================================= */
+  .mcda-step-bar {
+    display: flex;
+    align-items: center;
+    padding: 14px 24px;
+    background: #1a535c;
+    gap: 0;
+  }
+  .mcda-step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: 0.2s;
+  }
+  .mcda-step-item.active { opacity: 1; }
+  .mcda-step-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.30);
+    color: #f7fff7;
+    font-weight: 800;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+  }
+  .mcda-step-item.active .mcda-step-dot {
+    background: #ff6b35;
+    border-color: #ff6b35;
+    box-shadow: 0 0 12px rgba(255,107,53,0.55);
+  }
+  .mcda-step-item.done .mcda-step-dot {
+    background: #4ade80;
+    border-color: #4ade80;
+  }
+  .mcda-step-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: #f7fff7;
+    margin-top: 4px;
+    font-weight: 700;
+  }
+  .mcda-step-line {
+    flex: 1;
+    height: 2px;
+    background: rgba(255,255,255,0.20);
+    margin-bottom: 18px;
+  }
+
+  /* Step panels */
+  .mcda-step-panel {
+    display: none;
+    padding: 20px 24px;
+    animation: mcdaFadeIn 0.28s ease;
+  }
+  .mcda-step-panel.active { display: block; }
+  @keyframes mcdaFadeIn {
+    from { opacity: 0; transform: translateX(16px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Criterion cards */
+  .mcda-crit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .mcda-crit-card {
+    background: #fff;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: 0.18s;
+    user-select: none;
+  }
+  .mcda-crit-card:hover { border-color: #1a535c; }
+  .mcda-crit-card.selected {
+    border-color: #ff6b35;
+    background: #fff7f4;
+    box-shadow: 0 0 0 3px rgba(255,107,53,0.12);
+  }
+  .mcda-crit-icon { font-size: 22px; margin-bottom: 5px; }
+  .mcda-crit-name { font-size: 12px; font-weight: 700; color: #1a535c; }
+  .mcda-crit-desc { font-size: 10px; color: #6b7280; margin-top: 2px; }
+
+  /* Weight sliders (step 2) */
+  .mcda-w-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .mcda-w-icon { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
+  .mcda-w-label { font-size: 12px; font-weight: 600; color: #1a535c; min-width: 155px; }
+  .mcda-w-slider {
+    flex: 1;
+    accent-color: #ff6b35;
+    cursor: pointer;
+  }
+  .mcda-w-pct {
+    min-width: 38px;
+    text-align: right;
+    font-size: 13px;
+    font-weight: 800;
+    color: #ff6b35;
+  }
+  /* Use the main text and primary colours for MCDA weight UI for better contrast */
+  .mcda-w-label {
+    /* Override default dark label colour so text is legible on dark backgrounds */
+    color: var(--text-main);
+  }
+  .mcda-w-slider {
+    /* Use primary accent colour for sliders */
+    accent-color: var(--primary);
+  }
+  .mcda-w-pct {
+    /* Percent values use the primary accent colour */
+    color: var(--primary);
+  }
+  /* Numeric input for MCDA weights */
+  .mcda-w-num {
+    width: 50px;
+    padding: 4px 6px;
+    border: 1px solid rgba(148,163,184,0.25);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-main);
+    background: rgba(255,255,255,0.08);
+    text-align: right;
+    flex-shrink: 0;
+  }
+  /* Balance bar */
+  .mcda-balance-wrap { margin: 14px 0 6px; }
+  .mcda-balance-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: #6b7280;
+    margin-bottom: 6px;
+  }
+  .mcda-balance-bar {
+    height: 20px;
+    border-radius: 999px;
+    display: flex;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+  }
+  .mcda-balance-seg {
+    height: 100%;
+    transition: width 0.25s;
+    font-size: 0;
+  }
+  .mcda-balance-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .mcda-bl-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: #374151;
+  }
+  .mcda-bl-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  /* Results table (step 3) */
+  .mcda-results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+  .mcda-results-table th {
+    background: #1a535c;
+    color: #f7fff7;
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+  }
+  .mcda-results-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #1f2937;
+  }
+  .mcda-results-table tr:hover td { background: #f0faf8; }
+  .mcda-score-bar-wrap { width: 60px; height: 10px; background: #e5e7eb; border-radius: 999px; }
+  .mcda-score-bar { height: 100%; border-radius: 999px; }
+
+  /* Wizard nav buttons */
+  .mcda-nav {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+  }
+  .mcda-btn-back {
+    background: transparent;
+    border: 1px solid #d1d5db;
+    color: #6b7280;
+    padding: 9px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.18s;
+  }
+  .mcda-btn-back:hover { border-color: #9ca3af; color: #374151; }
+  .mcda-btn-next {
+    background: #ff6b35;
+    border: none;
+    color: #fff;
+    padding: 9px 22px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mcda-btn-next:hover { background: #e85d2a; transform: translateY(-1px); }
+  .mcda-btn-run {
+    background: #1a535c;
+    border: none;
+    color: #f7fff7;
+    padding: 9px 22px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mcda-btn-run:hover { background: #134048; }
+  .mcda-export-row { display:flex; gap:8px; margin-top:12px; }
+  .mcda-export-btn {
+    flex:1; background:#fff; border:1px solid #d1d5db; color:#1a535c;
+    padding:7px; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer;
+    transition:0.18s;
+  }
+  .mcda-export-btn:hover { background:#f0faf8; border-color:#1a535c; }
+
   /* === Custom additions for improved AI Assistant === */
   /* Make the assistant panel less transparent for better readability */
   #assistantContainer {
@@ -1050,24 +1536,6 @@
   }
   #assistantClose:hover {
     color: var(--primary);
-  }
-
-  /* Weather info icon to explain data sources and units */
-  .weather-info-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 6px;
-    font-size: 12px;
-    color: rgba(226,232,240,0.8);
-    cursor: help;
-  }
-
-  /* Small explanation text under charts */
-  .chart-explanation {
-    font-size: 10px;
-    color: rgba(226,232,240,0.75);
-    margin-top: 4px;
   }
   /* Floating toggle button for the assistant (collapsible like a messenger icon) */
   .assistant-toggle {
@@ -1139,8 +1607,48 @@
   #mcdaModal .mcda-card select, #mcdaModal .mcda-card input { color: rgba(248,250,252,0.95); }
   #mcdaModal .mcda-card select option { color: #0b1220; } /* keeps options readable in most browsers */
 
+  /* ── Fix 1: MCDA Wizard criteria & step-panel readability ── */
+  /* The blanket `.modal-content *` rule (white text) conflicts with white card
+     backgrounds. Override text colours specifically for wizard step panels. */
+  #mcdaModal .mcda-crit-card { color: #1a1a1a; }
+  #mcdaModal .mcda-crit-card * { color: #1a1a1a; }
+  #mcdaModal .mcda-crit-name { font-size: 12px; font-weight: 700; color: #1a535c !important; }
+  #mcdaModal .mcda-crit-desc { font-size: 10px; color: #6b7280 !important; }
+  #mcdaModal .mcda-crit-card.selected .mcda-crit-name { color: #e85d2a !important; }
+  #mcdaModal .mcda-crit-card:not(.selected) { border-color: #e5e7eb; }
+  /* Step 1 labels, selects, inputs */
+  #mcdaPanel1 label  { color: #1a535c !important; }
+  #mcdaPanel1 select { color: #1a535c !important; background: #fff !important; }
+  #mcdaPanel1 input[type="number"] { color: #1a535c !important; background: #fff !important; }
+  /* Instruction paragraphs */
+  #mcdaPanel1 p, #mcdaPanel2 p { color: #6b7280 !important; }
+  /* Balance bar caption & legend */
+  #mcdaModal .mcda-balance-label { color: #6b7280 !important; }
+  #mcdaModal .mcda-bl-item       { color: #374151 !important; }
+  /* Small note at bottom of weights step */
+  #mcdaPanel2 > p:last-of-type   { color: #9ca3af !important; }
+  /* Results table */
+  #mcdaModal .mcda-results-table td { color: #1f2937 !important; }
+  /* Wizard bottom nav bar */
+  #mcdaModal .mcda-nav { background: #f9fafb; }
+  #mcdaModal .mcda-btn-back { color: #6b7280 !important; }
+  /* Weight-row labels and percent values */
+  #mcdaModal .mcda-w-label { color: var(--text-main) !important; }
+  #mcdaModal .mcda-w-pct   { color: var(--primary)   !important; }
+  #mcdaModal .mcda-w-num   { color: var(--text-main) !important; }
+
   #layerInfoBody, #layerInfoBody * { color: rgba(248,250,252,0.90); }
 
+  /* Weather info icon to explain data sources and units */
+  .weather-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    font-size: 12px;
+    color: rgba(226,232,240,0.8);
+    cursor: help;
+  }
   /* MCDA enhancements */
   .mcda-sliders {
     margin-top: 10px;
@@ -1180,6 +1688,29 @@
 <body>
 
 <div id="cesiumContainer"></div>
+
+    <!-- Tree Removal Impact Counter (Task 1) -->
+    <div id="treeImpactCounter">
+      <div class="tic-title">🌳 Removed Trees Impact</div>
+      <div class="tic-stat">
+        <div class="tic-val" id="ticCount">0</div>
+        <div class="tic-lbl">Trees Removed</div>
+      </div>
+      <div class="tic-stat">
+        <div class="tic-val" id="ticCO2">0 kg</div>
+        <div class="tic-lbl">CO₂ Loss/yr</div>
+      </div>
+      <div class="tic-stat">
+        <div class="tic-val" id="ticShade">0 m²</div>
+        <div class="tic-lbl">Shade Lost</div>
+      </div>
+      <div class="tic-stat">
+        <div class="tic-val" id="ticUHI">+0.00°C</div>
+        <div class="tic-lbl">UHI Increase</div>
+      </div>
+      <button class="tic-btn" onclick="undoLastRemoval()"><i class="fas fa-undo"></i> Undo Last</button>
+      <button class="tic-btn" onclick="resetAllRemovals()"><i class="fas fa-trash-restore"></i> Reset</button>
+    </div>
 
 <!-- hidden canvases used for raster probing -->
 <canvas id="canvasNDVI" style="display:none;"></canvas>
@@ -1355,11 +1886,9 @@
       </div>
 
       <h3>Performance Trade-offs</h3>
-        <div style="height:150px; position:relative;">
-          <canvas id="tradeoffChart"></canvas>
-          <!-- Explanation beneath the radar chart clarifying normalisation -->
-          <div class="chart-explanation">Scores are normalised between 0 and 100. Higher values indicate greater positive impact.</div>
-        </div>
+      <div style="height:150px; position:relative;">
+        <canvas id="tradeoffChart"></canvas>
+      </div>
       <button class="small-btn" onclick="downloadCharts()">
         <i class="fas fa-download"></i> Download Chart
       </button>
@@ -1641,10 +2170,6 @@
       <input type="range" min="0" max="1" step="1" value="1" id="shadowToggle" oninput="toggleShadowsFromSlider(this.value)">
       <span class="slider-val" id="lblShadows">ON</span>
     </div>
-      <!-- Hint below the sliders explaining how the shadow tool works -->
-      <div class="hint-pill" style="margin-top:6px;">
-        <i class="fa-solid fa-lightbulb"></i> Turn on shadows and adjust the shadow time slider to see shaded areas. This feature provides visual guidance only and is not a validated analysis.
-      </div>
   </div>
 
   <!--
@@ -1664,10 +2189,6 @@
     <div id="assistantHeader">
       <span class="assistant-title"><i class="fa-solid fa-robot"></i> AI Assistant</span>
       <button id="assistantClose">×</button>
-    </div>
-    <!-- Disclaimer clarifying the AI’s scope and limitations -->
-    <div id="assistantDisclaimer" style="padding:6px 12px; font-size:10px; color: rgba(226,232,240,0.72); border-bottom: 1px solid rgba(255,255,255,0.08);">
-      This assistant provides explanations and suggestions only. It does not generate geometry, validate policy decisions, or guarantee investment outcomes.
     </div>
     <div id="assistantMessages"></div>
     <div id="assistantChips"></div>
@@ -1736,7 +2257,7 @@
   </div>
 </div>
 
-<div id="mcdaModal">
+<div id="mcdaModal_old" style="display:none;">
   <div class="modal-content small">
     <div class="modal-header">
       <span style="font-size:18px; font-weight:900; color:white;">Decision Support Wizard (MCDA)</span>
@@ -1759,7 +2280,7 @@
       <div class="mcda-grid">
         <div class="mcda-card">
           <label>Primary Objective</label>
-          <select id="mcdaObjective">
+          <select id="old_mcdaObjective">
             <option value="cooling">Cooling (reduce heat)</option>
             <option value="biodiversity">Biodiversity</option>
             <option value="stormwater">Stormwater reduction</option>
@@ -1769,7 +2290,7 @@
 
         <div class="mcda-card">
           <label>Corridor Importance</label>
-          <select id="mcdaCorridor">
+          <select id="old_mcdaCorridor">
             <option value="low">Low</option>
             <option value="high" selected>High</option>
           </select>
@@ -1777,7 +2298,7 @@
 
         <div class="mcda-card">
           <label>Budget Level</label>
-          <select id="mcdaBudget">
+          <select id="old_mcdaBudget">
             <option value="low">Low (prefer grass/shrubs)</option>
             <option value="medium" selected>Medium (mixed)</option>
             <option value="high">High (trees + facades)</option>
@@ -1786,50 +2307,50 @@
 
         <div class="mcda-card">
           <label>How many priorities?</label>
-          <input id="mcdaTopN" type="number" min="1" max="15" value="5" />
+          <input id="old_mcdaTopN" type="number" min="1" max="15" value="5" />
         </div>
       </div>
 
       <!-- New: MCDA weight sliders and budget controls -->
       <div class="mcda-sliders">
         <div class="slider-row">
-          <label for="mcdaWeightU">UHI weight (w<sub>U</sub>)</label>
-          <input type="range" id="mcdaWeightU" min="0" max="1" step="0.05" value="0.46" oninput="updateMcdaWeightLabel('mcdaWeightU','mcdaWeightUVal')">
-          <span id="mcdaWeightUVal" class="value">0.46</span>
+          <label for="old_mcdaWeightU">UHI weight (w<sub>U</sub>)</label>
+          <input type="range" id="old_mcdaWeightU" min="0" max="1" step="0.05" value="0.46" oninput="updateMcdaWeightLabel('old_mcdaWeightU','old_mcdaWeightUVal')">
+          <span id="old_mcdaWeightUVal" class="value">0.46</span>
         </div>
         <div class="slider-row">
-          <label for="mcdaWeightN">Vegetation deficit weight (w<sub>N</sub>)</label>
-          <input type="range" id="mcdaWeightN" min="0" max="1" step="0.05" value="0.28" oninput="updateMcdaWeightLabel('mcdaWeightN','mcdaWeightNVal')">
-          <span id="mcdaWeightNVal" class="value">0.28</span>
+          <label for="old_mcdaWeightN">Vegetation deficit weight (w<sub>N</sub>)</label>
+          <input type="range" id="old_mcdaWeightN" min="0" max="1" step="0.05" value="0.28" oninput="updateMcdaWeightLabel('old_mcdaWeightN','old_mcdaWeightNVal')">
+          <span id="old_mcdaWeightNVal" class="value">0.28</span>
         </div>
         <div class="slider-row">
-          <label for="mcdaWeightC">Corridor proximity weight (w<sub>C</sub>)</label>
-          <input type="range" id="mcdaWeightC" min="0" max="1" step="0.05" value="0.10" oninput="updateMcdaWeightLabel('mcdaWeightC','mcdaWeightCVal')">
-          <span id="mcdaWeightCVal" class="value">0.10</span>
+          <label for="old_mcdaWeightC">Corridor proximity weight (w<sub>C</sub>)</label>
+          <input type="range" id="old_mcdaWeightC" min="0" max="1" step="0.05" value="0.10" oninput="updateMcdaWeightLabel('old_mcdaWeightC','old_mcdaWeightCVal')">
+          <span id="old_mcdaWeightCVal" class="value">0.10</span>
         </div>
         <div class="slider-row">
-          <label for="mcdaWeightA">Building age weight (w<sub>A</sub>)</label>
-          <input type="range" id="mcdaWeightA" min="0" max="1" step="0.05" value="0.08" oninput="updateMcdaWeightLabel('mcdaWeightA','mcdaWeightAVal')">
-          <span id="mcdaWeightAVal" class="value">0.08</span>
+          <label for="old_mcdaWeightA">Building age weight (w<sub>A</sub>)</label>
+          <input type="range" id="old_mcdaWeightA" min="0" max="1" step="0.05" value="0.08" oninput="updateMcdaWeightLabel('old_mcdaWeightA','old_mcdaWeightAVal')">
+          <span id="old_mcdaWeightAVal" class="value">0.08</span>
         </div>
         <div class="slider-row">
-          <label for="mcdaWeightR">Footprint area weight (w<sub>R</sub>)</label>
-          <input type="range" id="mcdaWeightR" min="0" max="1" step="0.05" value="0.08" oninput="updateMcdaWeightLabel('mcdaWeightR','mcdaWeightRVal')">
-          <span id="mcdaWeightRVal" class="value">0.08</span>
+          <label for="old_mcdaWeightR">Footprint area weight (w<sub>R</sub>)</label>
+          <input type="range" id="old_mcdaWeightR" min="0" max="1" step="0.05" value="0.08" oninput="updateMcdaWeightLabel('old_mcdaWeightR','old_mcdaWeightRVal')">
+          <span id="old_mcdaWeightRVal" class="value">0.08</span>
         </div>
         <div class="slider-row">
-          <label for="mcdaCorrFactor">Corridor importance factor</label>
-          <input type="number" id="mcdaCorrFactor" min="0" max="2" step="0.1" value="1">
+          <label for="old_mcdaCorrFactor">Corridor importance factor</label>
+          <input type="number" id="old_mcdaCorrFactor" min="0" max="2" step="0.1" value="1">
           <span></span>
         </div>
         <div class="slider-row">
-          <label for="mcdaMaxTrees">Max trees/interventions</label>
-          <input type="number" id="mcdaMaxTrees" min="1" step="1" value="">
+          <label for="old_mcdaMaxTrees">Max trees/interventions</label>
+          <input type="number" id="old_mcdaMaxTrees" min="1" step="1" value="">
           <span></span>
         </div>
         <div class="slider-row">
-          <label for="mcdaMaxArea">Max area (m²)</label>
-          <input type="number" id="mcdaMaxArea" min="1" step="1" value="">
+          <label for="old_mcdaMaxArea">Max area (m²)</label>
+          <input type="number" id="old_mcdaMaxArea" min="1" step="1" value="">
           <span></span>
         </div>
       </div>
@@ -1862,6 +2383,201 @@
       <div style="margin-top:12px; font-size:11px; color:rgba(226,232,240,0.62);">
         Score uses: (UHI high) + (NDVI low) + (corridor proximity) + (age) + (footprint area). Results are also spatially de-clustered.
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- New MCDA wizard inserted (Task 2) -->
+<div id="mcdaModal">
+  <div class="modal-content small">
+    <!-- Header -->
+    <div class="mcda-wizard-header">
+      <h2><i class="fa-solid fa-compass" style="margin-right:8px; color:#ff6b35;"></i>Decision Support Wizard (MCDA)</h2>
+      <button onclick="closeMCDA()">×</button>
+    </div>
+
+    <!-- Step bar -->
+    <div class="mcda-step-bar">
+      <div class="mcda-step-item active" id="mcdaStepItem1" onclick="goMcdaStep(1)">
+        <div class="mcda-step-dot">1</div>
+        <div class="mcda-step-label">Criteria</div>
+      </div>
+      <div class="mcda-step-line"></div>
+      <div class="mcda-step-item" id="mcdaStepItem2" onclick="goMcdaStep(2)">
+        <div class="mcda-step-dot">2</div>
+        <div class="mcda-step-label">Weights</div>
+      </div>
+      <div class="mcda-step-line"></div>
+      <div class="mcda-step-item" id="mcdaStepItem3" onclick="goMcdaStep(3)">
+        <div class="mcda-step-dot">3</div>
+        <div class="mcda-step-label">Results</div>
+      </div>
+    </div>
+
+    <!-- STEP 1: Select Criteria & Objective -->
+    <div class="mcda-step-panel active" id="mcdaPanel1">
+      <p style="font-size:12px; color:#6b7280; margin:0 0 10px;">
+        Choose your primary objective and how many priority locations to identify.
+      </p>
+
+      <!-- Objective + Settings row -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+        <div>
+          <label style="font-size:11px; font-weight:700; color:#1a535c; display:block; margin-bottom:5px;">🎯 Primary Objective</label>
+          <select id="mcdaObjective" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:8px; font-size:12px; color:#1a535c; background:#fff;">
+            <option value="cooling">🌡️ Cooling (reduce heat)</option>
+            <option value="biodiversity">🦋 Biodiversity</option>
+            <option value="stormwater">💧 Stormwater reduction</option>
+            <option value="balanced" selected>⚖️ Balanced</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:700; color:#1a535c; display:block; margin-bottom:5px;">🏆 Top N Priorities</label>
+          <input id="mcdaTopN" type="number" min="1" max="15" value="5" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:8px; font-size:12px; box-sizing:border-box;">
+        </div>
+      </div>
+
+      <p style="font-size:11px; font-weight:700; color:#1a535c; margin:0 0 6px;">📋 Select Criteria to Include</p>
+      <div class="mcda-crit-grid">
+        <div class="mcda-crit-card selected" id="critCard_U" onclick="toggleCritCard('U',this)">
+          <div class="mcda-crit-icon">🌡️</div>
+          <div class="mcda-crit-name">Urban Heat Island</div>
+          <div class="mcda-crit-desc">Surface temperature; identifies overheated areas</div>
+        </div>
+        <div class="mcda-crit-card selected" id="critCard_N" onclick="toggleCritCard('N',this)">
+          <div class="mcda-crit-icon">🌱</div>
+          <div class="mcda-crit-name">Vegetation Deficit</div>
+          <div class="mcda-crit-desc">Low NDVI indicates lacking green cover</div>
+        </div>
+        <div class="mcda-crit-card selected" id="critCard_C" onclick="toggleCritCard('C',this)">
+          <div class="mcda-crit-icon">🌳</div>
+          <div class="mcda-crit-name">Corridor Proximity</div>
+          <div class="mcda-crit-desc">Connectivity to existing green corridors</div>
+        </div>
+        <div class="mcda-crit-card selected" id="critCard_A" onclick="toggleCritCard('A',this)">
+          <div class="mcda-crit-icon">🏗️</div>
+          <div class="mcda-crit-name">Building Age</div>
+          <div class="mcda-crit-desc">Older buildings have higher retrofit potential</div>
+        </div>
+        <div class="mcda-crit-card selected" id="critCard_R" onclick="toggleCritCard('R',this)" style="grid-column:1/-1;">
+          <div class="mcda-crit-icon">📐</div>
+          <div class="mcda-crit-name">Footprint Area</div>
+          <div class="mcda-crit-desc">Larger buildings benefit more from green roofs / facades</div>
+        </div>
+      </div>
+
+      <!-- Corridor setting -->
+      <div style="margin-top:12px; display:flex; align-items:center; gap:10px;">
+        <label style="font-size:11px; color:#6b7280;">Corridor factor:</label>
+        <input id="mcdaCorrFactor" type="number" min="0" max="2" step="0.1" value="1" style="width:70px; padding:6px; border:1px solid #d1d5db; border-radius:6px; font-size:12px;">
+        <select id="mcdaBudget" style="flex:1; padding:6px; border:1px solid #d1d5db; border-radius:6px; font-size:12px;">
+          <option value="low">💰 Low budget (grass/shrubs)</option>
+          <option value="medium" selected>💰💰 Medium budget</option>
+          <option value="high">💰💰💰 High (trees + facades)</option>
+        </select>
+        <input type="hidden" id="mcdaCorridor" value="high">
+      </div>
+    </div>
+
+    <!-- STEP 2: Assign Weights -->
+    <div class="mcda-step-panel" id="mcdaPanel2">
+      <p style="font-size:12px; color:#6b7280; margin:0 0 12px;">
+        Drag sliders or enter numbers to set the relative importance of each criterion. The raw weights should sum to 100%; the percentages on the right show the normalised values.
+      </p>
+
+      <!-- Weight sliders -->
+      <div id="mcdaWeightRows">
+        <div class="mcda-w-row" id="wrow_U">
+          <div class="mcda-w-icon">🌡️</div>
+          <div class="mcda-w-label">UHI (Urban Heat)</div>
+          <input type="range" class="mcda-w-slider" id="mcdaWeightU" min="0" max="100" step="1" value="46" oninput="onMcdaSlider()">
+          <input type="number" class="mcda-w-num" id="mcdaWeightUNum" min="0" max="100" step="1" value="46" oninput="onMcdaNumChange('U')">
+          <div class="mcda-w-pct" id="mcdaWeightUPct">46%</div>
+          <input type="hidden" id="mcdaWeightUVal" value="0.46">
+        </div>
+        <div class="mcda-w-row" id="wrow_N">
+          <div class="mcda-w-icon">🌱</div>
+          <div class="mcda-w-label">Vegetation Deficit</div>
+          <input type="range" class="mcda-w-slider" id="mcdaWeightN" min="0" max="100" step="1" value="28" oninput="onMcdaSlider()">
+          <input type="number" class="mcda-w-num" id="mcdaWeightNNum" min="0" max="100" step="1" value="28" oninput="onMcdaNumChange('N')">
+          <div class="mcda-w-pct" id="mcdaWeightNPct">28%</div>
+          <input type="hidden" id="mcdaWeightNVal" value="0.28">
+        </div>
+        <div class="mcda-w-row" id="wrow_C">
+          <div class="mcda-w-icon">🌳</div>
+          <div class="mcda-w-label">Corridor Proximity</div>
+          <input type="range" class="mcda-w-slider" id="mcdaWeightC" min="0" max="100" step="1" value="10" oninput="onMcdaSlider()">
+          <input type="number" class="mcda-w-num" id="mcdaWeightCNum" min="0" max="100" step="1" value="10" oninput="onMcdaNumChange('C')">
+          <div class="mcda-w-pct" id="mcdaWeightCPct">10%</div>
+          <input type="hidden" id="mcdaWeightCVal" value="0.10">
+        </div>
+        <div class="mcda-w-row" id="wrow_A">
+          <div class="mcda-w-icon">🏗️</div>
+          <div class="mcda-w-label">Building Age</div>
+          <input type="range" class="mcda-w-slider" id="mcdaWeightA" min="0" max="100" step="1" value="8" oninput="onMcdaSlider()">
+          <input type="number" class="mcda-w-num" id="mcdaWeightANum" min="0" max="100" step="1" value="8" oninput="onMcdaNumChange('A')">
+          <div class="mcda-w-pct" id="mcdaWeightAPct">8%</div>
+          <input type="hidden" id="mcdaWeightAVal" value="0.08">
+        </div>
+        <div class="mcda-w-row" id="wrow_R">
+          <div class="mcda-w-icon">📐</div>
+          <div class="mcda-w-label">Footprint Area</div>
+          <input type="range" class="mcda-w-slider" id="mcdaWeightR" min="0" max="100" step="1" value="8" oninput="onMcdaSlider()">
+          <input type="number" class="mcda-w-num" id="mcdaWeightRNum" min="0" max="100" step="1" value="8" oninput="onMcdaNumChange('R')">
+          <div class="mcda-w-pct" id="mcdaWeightRPct">8%</div>
+          <input type="hidden" id="mcdaWeightRVal" value="0.08">
+        </div>
+      </div>
+
+      <div id="mcdaWeightTotal" style="margin-top:10px; padding:8px 12px; background:rgba(45,212,191,0.1); border:1px solid rgba(45,212,191,0.3); border-radius:8px; font-size:12px; color:#f8fafc; display:flex; justify-content:space-between; align-items:center;">
+        <span>Weights total:</span>
+        <span id="mcdaWeightTotalPct" style="font-weight:700; color:#2dd4bf;">100%</span>
+      </div>
+
+      <!-- Balance bar -->
+      <div class="mcda-balance-wrap">
+        <div class="mcda-balance-label">Weight Distribution</div>
+        <div class="mcda-balance-bar" id="mcdaBalanceBar">
+          <div class="mcda-balance-seg" id="bseg_U" style="background:#ef4444;"></div>
+          <div class="mcda-balance-seg" id="bseg_N" style="background:#22c55e;"></div>
+          <div class="mcda-balance-seg" id="bseg_C" style="background:#3b82f6;"></div>
+          <div class="mcda-balance-seg" id="bseg_A" style="background:#f59e0b;"></div>
+          <div class="mcda-balance-seg" id="bseg_R" style="background:#a855f7;"></div>
+        </div>
+        <div class="mcda-balance-legend">
+          <div class="mcda-bl-item"><div class="mcda-bl-dot" style="background:#ef4444;"></div>UHI</div>
+          <div class="mcda-bl-item"><div class="mcda-bl-dot" style="background:#22c55e;"></div>Vegetation</div>
+          <div class="mcda-bl-item"><div class="mcda-bl-dot" style="background:#3b82f6;"></div>Corridor</div>
+          <div class="mcda-bl-item"><div class="mcda-bl-dot" style="background:#f59e0b;"></div>Age</div>
+          <div class="mcda-bl-item"><div class="mcda-bl-dot" style="background:#a855f7;"></div>Area</div>
+        </div>
+      </div>
+      <p style="font-size:10px; color:#9ca3af; margin:4px 0 0;">
+        Weights are normalised automatically so they always sum to 100%. Only active criteria (selected in Step 1) contribute.
+      </p>
+    </div>
+
+    <!-- STEP 3: Results -->
+    <div class="mcda-step-panel" id="mcdaPanel3">
+      <div id="mcdaResultsArea">
+        <div style="text-align:center; padding:20px; color:#9ca3af; font-size:13px;">
+          <i class="fas fa-wand-magic-sparkles" style="font-size:28px; margin-bottom:8px; display:block; color:#ff6b35;"></i>
+          Click <strong>Generate</strong> to run the analysis and see ranked results.
+        </div>
+      </div>
+      <div class="mcda-export-row" id="mcdaExportRow" style="display:none;">
+        <button class="mcda-export-btn" onclick="exportMCDA('csv')"><i class="fas fa-download"></i> Export CSV</button>
+        <button class="mcda-export-btn" onclick="exportMCDA('json')"><i class="fas fa-download"></i> Export JSON</button>
+        <button class="mcda-export-btn" onclick="sensitivityTest()"><i class="fas fa-chart-line"></i> Sensitivity ±20%</button>
+        <button class="mcda-export-btn" onclick="clearMCDA()"><i class="fas fa-eraser"></i> Clear</button>
+      </div>
+    </div>
+    <!-- Navigation -->
+    <div class="mcda-nav" id="mcdaNavRow">
+      <button class="mcda-btn-back" onclick="resetMcdaDefaults()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:#94a3b8;">↺ Reset Defaults</button>
+      <button class="mcda-btn-back" id="mcdaBtnBack" onclick="mcdaStepPrev()" style="display:none;"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="mcda-btn-next" id="mcdaBtnNext" onclick="mcdaStepNext()">Next <i class="fas fa-arrow-right"></i></button>
+      <button class="mcda-btn-run" id="mcdaBtnRun" style="display:none;" onclick="runMCDA(); document.getElementById('mcdaExportRow').style.display='flex';"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Priorities</button>
     </div>
   </div>
 </div>
@@ -1913,6 +2629,7 @@
    CONFIG
 ================================ */
 
+
 // ------------------------------------------------------------
 // Cloudflare Pages + R2 support
 // If config.js defines window.DT_CONFIG.R2_BASE, all data assets
@@ -1945,7 +2662,6 @@ const TREES_OPEN_GEOJSON      = dataUrl("trees_co2_4326_final.geojson"); // Upda
 // Municipality trees dataset; use correct filename (plural trees_ and point)
 const TREES_MUNI_GEOJSON      = dataUrl("trees_point_municipality.geojson");
 const NDVI_PNG                = dataUrl("NDVI.png");
-// NOTE: R2 is case-sensitive. Your bucket uses UHI.png (all caps), so keep it exact.
 const UHI_PNG                 = dataUrl("UHI.png");
 
 // for age normalization
@@ -2004,113 +2720,6 @@ viewer.shadowMap.enabled = true;
 viewer.camera.setView({
   destination: Cesium.Rectangle.fromDegrees(bounds.west, bounds.south, bounds.east, bounds.north)
 });
-
-// -----------------------------------------------------------------------------
-// Customise the camera controller to improve map navigation
-//
-// On some deployments (e.g. Cloudflare Pages) users reported that after
-// exiting planting mode the map would spin instead of panning left/right.  The
-// default Cesium behaviour assigns left‑drag to rotate and middle/right
-// buttons to translate (pan).  To make panning intuitive and ensure the
-// controls are restored after interaction modes, we explicitly assign
-// translation (panning) to the left mouse drag and rotation to the right
-// mouse drag.  Tilt remains on the middle mouse drag.  Pinch gestures on
-// touch devices continue to zoom/translate.  If you prefer the default
-// behaviour, comment out the following block.
-try {
-  const controller = viewer.scene.screenSpaceCameraController;
-  if (controller) {
-    controller.enableRotate = true;
-    controller.enableTranslate = true;
-    controller.enableTilt = true;
-    controller.enableZoom = true;
-    controller.enableLook = true;
-    // Build arrays of supported event types.  Older versions of Cesium may not
-    // define some constants (e.g. TWO_FINGER).  Only include values that are
-    // defined to avoid passing `undefined` into Cesium internals, which causes
-    // errors like "Cannot read properties of undefined (reading 'eventType')".
-    //
-    // Restore Cesium's default behaviour: right‑mouse drags pan (translate)
-    // and left‑mouse drags rotate around the globe.  Pinch gestures on touch
-    // screens continue to translate/zoom and two‑finger gestures rotate.  This
-    // makes it possible to move the view horizontally and vertically by
-    // dragging with the right mouse button, matching user expectations.
-    const translateEvents = [];
-    // Right mouse drag should pan (translate)
-    if (Cesium.CameraEventType.RIGHT_DRAG !== undefined) {
-      translateEvents.push(Cesium.CameraEventType.RIGHT_DRAG);
-    }
-    // Pinch gesture should translate/zoom on touch screens
-    if (Cesium.CameraEventType.PINCH !== undefined) {
-      translateEvents.push(Cesium.CameraEventType.PINCH);
-    }
-    controller.translateEventTypes = translateEvents;
-
-    // Left mouse drag should rotate around the globe
-    const rotateEvents = [];
-    if (Cesium.CameraEventType.LEFT_DRAG !== undefined) {
-      rotateEvents.push(Cesium.CameraEventType.LEFT_DRAG);
-    }
-    // Older Cesium versions may not support a separate two finger rotate gesture.
-    if (Cesium.CameraEventType.TWO_FINGER !== undefined) {
-      rotateEvents.push(Cesium.CameraEventType.TWO_FINGER);
-    }
-    controller.rotateEventTypes = rotateEvents;
-
-    // Middle mouse drag tilts the camera
-    const tiltEvents = [];
-    if (Cesium.CameraEventType.MIDDLE_DRAG !== undefined) {
-      tiltEvents.push(Cesium.CameraEventType.MIDDLE_DRAG);
-    }
-    controller.tiltEventTypes = tiltEvents;
-  }
-} catch (e) {
-  console.warn('Camera controller customisation failed', e);
-}
-
-// Helper to restore camera controls.  Calling this function ensures that
-// pan/rotate/tilt/zoom handlers are set correctly after toggling interaction
-// modes such as planting or drawing.  It applies the same assignments as
-// performed at initialisation.  Invoke this after leaving any custom mode.
-function resetCameraControls() {
-  try {
-    const ctrl = viewer.scene.screenSpaceCameraController;
-    if (!ctrl) return;
-    ctrl.enableRotate = true;
-    ctrl.enableTranslate = true;
-    ctrl.enableTilt = true;
-    ctrl.enableZoom = true;
-    ctrl.enableLook = true;
-    // Assemble translation (panning) events only if defined.  Newer Cesium versions may
-    // omit certain constants (e.g. TWO_FINGER), so guard against undefined values.
-    // Restore defaults: panning assigned to the right mouse drag, rotation to left
-    const translateEvents2 = [];
-    if (Cesium.CameraEventType.RIGHT_DRAG !== undefined) {
-      translateEvents2.push(Cesium.CameraEventType.RIGHT_DRAG);
-    }
-    if (Cesium.CameraEventType.PINCH !== undefined) {
-      translateEvents2.push(Cesium.CameraEventType.PINCH);
-    }
-    ctrl.translateEventTypes = translateEvents2;
-
-    const rotateEvents2 = [];
-    if (Cesium.CameraEventType.LEFT_DRAG !== undefined) {
-      rotateEvents2.push(Cesium.CameraEventType.LEFT_DRAG);
-    }
-    if (Cesium.CameraEventType.TWO_FINGER !== undefined) {
-      rotateEvents2.push(Cesium.CameraEventType.TWO_FINGER);
-    }
-    ctrl.rotateEventTypes = rotateEvents2;
-
-    const tiltEvents2 = [];
-    if (Cesium.CameraEventType.MIDDLE_DRAG !== undefined) {
-      tiltEvents2.push(Cesium.CameraEventType.MIDDLE_DRAG);
-    }
-    ctrl.tiltEventTypes = tiltEvents2;
-  } catch (err) {
-    console.warn('resetCameraControls failed', err);
-  }
-}
 
 viewer.canvas.addEventListener('contextmenu', (e) => e.preventDefault(), false);
 
@@ -2219,66 +2828,21 @@ const dataMaps = {
 };
 
 function loadMapData(id, url) {
-  /**
-   * Attempt to load a raster image from a list of candidate URLs.  On some deployments
-   * (e.g. Cloudflare R2) the NDVI or UHI PNG files may be stored with different casing
-   * or the bucket may not send permissive CORS headers.  In those cases using the
-   * original URL causes the image to fail to load or the resulting canvas becomes
-   * "tainted", meaning that pixel data cannot be read and default values are returned.
-   *
-   * To make probing robust, we try several filename variants (lower‑case/upper‑case)
-   * and wrap the load attempt in a recursive helper.  Each image is marked with
-   * crossOrigin='anonymous' prior to setting the src so that, when the bucket
-   * does send appropriate CORS headers, the pixel data remains readable.  When all
-   * variants fail the fallback silently falls back to defaults.
-   */
-  const candidates = [];
-  // always try the passed URL first
-  candidates.push(url);
-  // fallback variants: lower‑case and upper‑case filenames.  Some hosting providers
-  // (notably Cloudflare R2) are case-sensitive and may store assets using a
-  // different naming convention.  Trying multiple variants improves the chances of
-  // successfully loading the raster.
-  if (id === "ndvi") {
-    candidates.push(dataUrl("ndvi.png"));
-    candidates.push(dataUrl("NDVI.PNG"));
-    candidates.push(dataUrl("ndvi.PNG"));
-  }
-  if (id === "uhi") {
-    candidates.push(dataUrl("uhi.png"));
-    candidates.push(dataUrl("UHI.PNG"));
-    candidates.push(dataUrl("uhi.PNG"));
-  }
-  // helper to attempt loading sequentially
-  function attempt(i) {
-    if (i >= candidates.length) {
-      console.warn(`All ${id.toUpperCase()} image variants failed to load. Probing will use defaults.`);
-      return;
-    }
-    const candidate = candidates[i];
-    const img = new Image();
-    // Set crossOrigin to attempt an anonymous CORS request.  If the resource
-    // lacks the proper headers the image will still load but canvas pixel reads
-    // will be blocked.  In that case the next candidate is tried.
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const c = document.getElementById("canvas" + id.toUpperCase());
-      c.width = img.width;
-      c.height = img.height;
-      const ctx = c.getContext("2d", { willReadFrequently: true });
-      ctx.drawImage(img, 0, 0);
-      dataMaps[id].ctx = ctx;
-      dataMaps[id].width = img.width;
-      dataMaps[id].height = img.height;
-      dataMaps[id].loaded = true;
-    };
-    img.onerror = () => {
-      // try next variant
-      attempt(i + 1);
-    };
-    img.src = candidate;
-  }
-  attempt(0);
+  const img = new Image();
+  img.src = url;
+  img.onload = () => {
+    const c = document.getElementById("canvas" + id.toUpperCase());
+    c.width = img.width;
+    c.height = img.height;
+
+    const ctx = c.getContext("2d", { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0);
+    dataMaps[id].ctx = ctx;
+    dataMaps[id].width = img.width;
+    dataMaps[id].height = img.height;
+    dataMaps[id].loaded = true;
+  };
+  img.onerror = () => console.warn(`Image ${url} failed to load. Probing will use defaults.`);
 }
 loadMapData("ndvi", NDVI_PNG);
 loadMapData("uhi",  UHI_PNG);
@@ -2474,72 +3038,35 @@ Cesium.GeoJsonDataSource.load(GREENSPACES_GEOJSON, {
       if(d < bestD && d <= maxLinkDist){ bestD = d; bestJ = j; }
     }
     if(bestJ !== -1){
-        const positions = [centroids[i], centroids[bestJ]];
-        corridorPolylines.push(positions);
-        // Compute length and a holistic well‑being score.  Besides connectivity
-        // (shorter corridors are better), we also consider vegetation (NDVI) and
-        // cooling (UHI).  Each factor is normalised to 0–1 and weighted
-        // (NDVI 40%, UHI 40%, connectivity 20%).
-        const lengthMeters = bestD;
-        // Get geographic coordinates of the endpoints
-        const cartoA = Cesium.Cartographic.fromCartesian(centroids[i]);
-        const cartoB = Cesium.Cartographic.fromCartesian(centroids[bestJ]);
-        const latA = Cesium.Math.toDegrees(cartoA.latitude);
-        const lonA = Cesium.Math.toDegrees(cartoA.longitude);
-        const latB = Cesium.Math.toDegrees(cartoB.latitude);
-        const lonB = Cesium.Math.toDegrees(cartoB.longitude);
-        // Probe raster values at both ends
-        const pdA = getPixelData(latA, lonA);
-        const pdB = getPixelData(latB, lonB);
-        const ndviA = parseFloat(pdA.ndvi);
-        const ndviB = parseFloat(pdB.ndvi);
-        const avgNdvi = (ndviA + ndviB) / 2;
-        const uhiA = pdA.uhiVal;
-        const uhiB = pdB.uhiVal;
-        const avgUhi = (uhiA + uhiB) / 2;
-        // Normalise NDVI between 0 and 1 (higher NDVI is better)
-        let ndviScore;
-        if(dataMaps.ndvi && dataMaps.ndvi.max !== undefined && dataMaps.ndvi.min !== undefined){
-          ndviScore = (avgNdvi - dataMaps.ndvi.min) / (dataMaps.ndvi.max - dataMaps.ndvi.min);
-        } else {
-          ndviScore = 0;
-        }
-        ndviScore = Math.max(0, Math.min(1, ndviScore));
-        // Normalise UHI: cooler temperatures get higher scores
-        let uhiScore;
-        if(dataMaps.uhi && dataMaps.uhi.max !== undefined && dataMaps.uhi.min !== undefined){
-          uhiScore = (dataMaps.uhi.max - avgUhi) / (dataMaps.uhi.max - dataMaps.uhi.min);
-        } else {
-          uhiScore = 0;
-        }
-        uhiScore = Math.max(0, Math.min(1, uhiScore));
-        // Normalise connectivity (shorter distance is better)
-        let lengthScore = 1 - (lengthMeters / maxLinkDist);
-        lengthScore = Math.max(0, Math.min(1, lengthScore));
-        // Weighted combination
-        const score = (ndviScore * 0.4 + uhiScore * 0.4 + lengthScore * 0.2) * 100;
+      const positions = [centroids[i], centroids[bestJ]];
+      corridorPolylines.push(positions);
+      // Compute length and well‑being score based on connectivity
+      const lengthMeters = bestD;
+      const score = Math.max(0, (1 - (lengthMeters / maxLinkDist)) * 100);
 
-        const ent = viewer.entities.add({
-          polyline: {
-            positions,
-            width: 6,
-            material: new PolylineFlowMaterialProperty({
-              color: Cesium.Color.fromCssColorString('#86efac').withAlpha(0.95),
-              duration: 2.8,
-              repeat: 12.0
-            }),
-            clampToGround: true
-          },
-          show: false
-        });
-        // Tag entity type and store length/score properties for popups, along with
-        // average NDVI and UHI values for use in popups.
-        ent._type = "corridor";
-        ent._lengthMeters = lengthMeters;
-        ent._wellBeingScore = score;
-        ent._ndviAvg = avgNdvi;
-        ent._uhiAvg = avgUhi;
-        corridorEntities.push(ent);
+      const ent = viewer.entities.add({
+        polyline: {
+          positions,
+          // Increase line width for better visibility
+          width: 6,
+          // Use a softer green colour and adjust arrow repeat for a more approachable look
+          material: new PolylineFlowMaterialProperty({
+            // light green (#86efac) conveys a friendlier feel than the previous dark green
+            color: Cesium.Color.fromCssColorString('#86efac').withAlpha(0.95),
+            // Slow down the arrow animation slightly
+            duration: 2.8,
+            // Increase repeat to create smaller, more subtle arrows along the corridor
+            repeat: 12.0
+          }),
+          clampToGround: true
+        },
+        show: false
+      });
+      // Tag entity type and store length/score properties for popups
+      ent._type = "corridor";
+      ent._lengthMeters = lengthMeters;
+      ent._wellBeingScore = score;
+      corridorEntities.push(ent);
     }
   }
 
@@ -2959,36 +3486,48 @@ const LAYER_INFO = {
     html: `
       <p><strong>Description:</strong> Polygons delineating parks, lawns, sports fields and other vegetated areas.</p>
       <p>These areas provide habitat, recreation space and are used when analysing corridor connectivity and scenario planning.</p>
+      <p><strong>Ecological impact:</strong> Urban green spaces can reduce peak summer air temperatures by 1–5 °C through evapotranspiration and shading, and intercept up to 50–80 % of rainfall — significantly cutting stormwater runoff and reducing flood risk.</p>
+      <p><strong>🇳🇱 Policy context:</strong> The Dutch <em>Klimaatakkoord</em> (2019) and the EU Biodiversity Strategy 2030 call on municipalities to expand urban green cover. Enschede's green vision targets climate-resilient neighbourhoods through increased permeable surfaces and green space.</p>
+      <p><strong>💡 Did you know?</strong> A single hectare of urban park can sequester roughly 900 kg of CO₂ per year — equivalent to taking one car off the road for 6 months.</p>
     `
   },
   buildings3d: {
     title: "Buildings (LOD 2.2)",
     html: `
       <p><strong>Description:</strong> Level of Detail 2.2 building models sourced from Cesium ION (Asset ID: ${ION_LOD22_ASSET_ID}).</p>
-      <p>Each model has a detailed roof and wall geometry. Hidden attributes from LOD1 include BAG ID, construction year and footprint area.</p>
+      <p>Each model has detailed roof and wall geometry. Hidden attributes from LOD1 include BAG ID, construction year and footprint area.</p>
       <p>Click a building to inspect these attributes in the popup.</p>
+      <p><strong>Green roof potential:</strong> Buildings with flat or low-pitch roofs are ideal for green roof installation, which can reduce building cooling energy use by 10–25 % and increase roof longevity by up to 30 years. The Netherlands' <em>Bouwbesluit</em> increasingly supports green roof requirements in new urban developments.</p>
+      <p><strong>💡 Did you know?</strong> Extensive green roofs cost roughly €50–100/m² to install, but can save up to €30/m²/yr in stormwater fees and energy costs combined over a 20-year lifespan.</p>
     `
   },
   corridors: {
     title: "Well‑being Corridors (Moving Arrows)",
     html: `
-        <p><strong>Description:</strong> Well‑being corridors are lines connecting parks and other green spaces that facilitate movement for wildlife, pollinators and people. Connected habitats improve gene flow and genetic diversity; studies show that plant species richness increases when gardens are linked, and corridors reduce extinction rates while boosting colonisation.</p>
-        <p>These corridors also provide walkable routes for residents, supporting recreation and mental health. Each corridor is assigned a well‑being score that combines three factors: (1) vegetation health (NDVI), (2) cooling intensity (UHI), and (3) connectivity. NDVI and UHI values are sampled at both ends of the corridor and normalised between their observed minima and maxima. The score is calculated as 40% NDVI + 40% cooling (inverted UHI) + 20% connectivity (shorter segments score higher). Thus, greener, cooler and better‑connected corridors receive higher scores.</p>
-        <p>The length shown in the popup refers to the straight‑line distance between the two connected green spaces.</p>
+      <p><strong>Description:</strong> Well‑being corridors are lines connecting parks and other green spaces that facilitate movement for wildlife, pollinators and people. Connected habitats improve gene flow and genetic diversity; studies show plant species richness increases in connected corridors, reducing extinction rates while boosting colonisation.</p>
+      <p>These corridors also provide walkable routes for residents, supporting recreation and mental health. Each corridor has a well‑being score based on its length and connectivity; shorter links yield higher scores.</p>
+      <p><strong>Biodiversity benefit:</strong> Establishing 10 m wide green corridors between habitat patches can increase pollinator diversity by 15–30 % within 3 years, directly supporting urban food security and ecosystem resilience.</p>
+      <p><strong>🇳🇱 Policy context:</strong> The Dutch <em>Nationale Omgevingsvisie</em> (NOVI) promotes ecological networks in urban areas. Enschede's spatial plan integrates corridor planning with its ambition to be a climate-adaptive city by 2030.</p>
+      <p><strong>💡 Did you know?</strong> Even a 3 m wide strip of native planting between buildings can support up to 50 invertebrate species — providing pest control services worth hundreds of euros per hectare annually.</p>
     `
   },
   growthProjection: {
     title: "Growth Projection",
     html: `
-      <p><strong>Description:</strong> The growth projection panel shows simulated changes in tree diameter at breast height (DBH), above‑ground biomass (AGB) and carbon sequestration over future years. These projections are calculated from allometric equations that relate biomass to wood density (ρ), DBH (D) and tree height (H), such as AGB = 0.0673 × (ρ × D² × H)<sup>0.96</sup>. By comparing low, medium and high growth scenarios, the projection helps to estimate future biomass and CO₂ sequestration.</p>
-      <p>Ecosystem services provided by trees—such as carbon storage, shade and habitat—contribute to multiple components of human well‑being, including health, security, social relations and freedom of choice. Growth projections therefore inform planning decisions that maximise ecological and human benefits.</p>
+      <p><strong>Description:</strong> The growth projection panel shows simulated changes in tree diameter at breast height (DBH), above‑ground biomass (AGB) and carbon sequestration over future years. Projections use allometric equations: AGB = 0.0673 × (ρ × D² × H)<sup>0.96</sup>. Low, medium and high growth scenarios estimate future biomass and annual CO₂ sequestration.</p>
+      <p>Ecosystem services from trees — carbon storage, shade, habitat and well‑being — all increase as trees mature. Growth projections help planners decide when and where to plant to maximise long-term impact.</p>
+      <p><strong>CO₂ context:</strong> A mature urban oak (50+ years) can sequester 20–50 kg CO₂/year and store over 1 000 kg of carbon in its biomass — making long-term tree preservation far more valuable than replanting young trees.</p>
+      <p><strong>💡 Did you know?</strong> The carbon sequestration rate of a tree doubles between ages 10 and 30. Protecting existing large trees delivers far greater climate value per euro than planting new saplings.</p>
     `
   },
   heatmap: {
     title: "Heatmap (UHI)",
     html: `
-        <p><strong>Description:</strong> Raster overlay representing the urban heat island (UHI) intensity. It is derived from land surface temperature (LST) imagery captured on 7 Aug 2022 by the Sentinel‑2 satellite. The values approximate surface temperature and do not represent air temperature.</p>
-        <p>Each pixel contains a °C value interpolated from the LST raster (<code>${UHI_PNG}</code>). This heatmap illustrates relative temperature across the city, with cooler areas appearing green and hotter areas trending toward browns. The selected date represents a worst‑case baseline day, so use this layer as a qualitative guide rather than precise, current conditions.</p>
+      <p><strong>Description:</strong> Raster overlay representing the urban heat island (UHI) intensity based on surface temperature proxies, interpolated from a georeferenced PNG (${UHI_PNG}).</p>
+      <p>Urban surfaces (asphalt, concrete, dark roofs) absorb and re-radiate heat, creating local temperature hotspots of 2–5 °C above surrounding rural areas.</p>
+      <p><strong>Health impact:</strong> UHI hotspots above 35 °C significantly increase heat-related mortality risk among elderly residents. Urban greening and cool roofs are the two most cost-effective interventions, reducing surface temperatures by up to 3 °C per implementation.</p>
+      <p><strong>🇪🇺 Policy context:</strong> The EU Adaptation Strategy and Dutch <em>Deltaplan Ruimtelijke Adaptatie</em> require urban heat stress mapping as part of climate risk assessments. This layer directly supports that obligation.</p>
+      <p><strong>💡 Did you know?</strong> Replacing 20 % of impervious urban surface with green cover can reduce peak summer UHI intensity by 0.5–1.5 °C at neighbourhood scale.</p>
     `
   }
 };
@@ -3190,42 +3729,39 @@ function updateAllGauges(netCo2, netWater, netUhi, netCost){
     if(el) el.innerText = display;
   }
 }
-  try {
-    const ctx = document.getElementById("tradeoffChart").getContext("2d");
-    tradeoffChart = new Chart(ctx, {
-      type: "bar",
-      data: {
-        // Use descriptive labels with units so users understand what each axis measures
-        labels: ["Cost (€)", "CO₂ (t)", "Cooling (°C)", "Biodiversity (index)"],
-        datasets: [{
-          label: "Scenario Impact",
-          data: [0, 0, 0, 0],
-          backgroundColor: ["#fb7185", "#2dd4bf", "#60a5fa", "#c084fc"]
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            max: 100,
-            grid: { color: "rgba(255,255,255,0.15)" },
-            ticks: { color: "rgba(255,255,255,0.7)" }
-          },
-          x: {
-            grid: { color: "rgba(255,255,255,0.15)" },
-            ticks: { color: "rgba(255,255,255,0.85)" }
-          }
+try {
+  const ctx = document.getElementById("tradeoffChart").getContext("2d");
+  tradeoffChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      // Use descriptive labels with units so users understand what each axis measures
+      labels: ["Cost (€)", "CO₂ (t)", "Cooling (°C)", "Biodiversity (index)"],
+      datasets: [{
+        label: "Scenario Impact",
+        data: [0, 0, 0, 0],
+        backgroundColor: ["#fb7185", "#2dd4bf", "#60a5fa", "#c084fc"]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          grid: { color: "rgba(255,255,255,0.1)" },
+          ticks: { color: "rgba(255,255,255,0.7)" }
         },
-        plugins: {
-          legend: { display: false }
+        x: {
+          ticks: { color: "rgba(255,255,255,0.7)" }
         }
-      }
-    });
-  } catch(e) {
-    console.warn("Chart init failed", e);
-  }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+} catch(e) {
+  console.warn("Chart init failed", e);
+}
 
 /* ==============================
    MODES
@@ -3257,8 +3793,6 @@ function togglePlanting(){
     btn.innerHTML = `<i class="fas fa-plus-circle"></i> Plant ${spec.name} (€${spec.cost})`;
     viewer.canvas.style.cursor = "default";
     showToast("Planting mode OFF");
-    // Restore camera controls when exiting planting mode
-    resetCameraControls();
     return;
   }
 
@@ -3271,8 +3805,6 @@ function togglePlanting(){
   viewer.canvas.style.cursor = "crosshair";
   closePopup();
   showToast("Planting mode ON");
-  // During planting mode we still allow panning/rotation; ensure controls remain
-  resetCameraControls();
 }
 
 /* ==============
@@ -3303,8 +3835,6 @@ function toggleFacading(silent=false){
     btn.innerHTML = `<i class="fa-solid fa-square-plus"></i> Apply ${f.name} Facade (click a building)`;
     viewer.canvas.style.cursor = "default";
     if(!silent) showToast("Facade mode OFF");
-    // Restore camera controls when exiting facade mode
-    resetCameraControls();
     return;
   }
 
@@ -3317,8 +3847,6 @@ function toggleFacading(silent=false){
   viewer.canvas.style.cursor = "crosshair";
   closePopup();
   if(!silent) showToast("Facade mode ON");
-  // Ensure camera controls remain consistent in facade mode
-  resetCameraControls();
 }
 
 /* ==============================
@@ -3562,17 +4090,7 @@ function cancelPolygonDraw(silent=false){
   drawState.pencil.lastPos = null;
   drawState.usedFreehand = false;
 
-  // After cancelling a draw session restore the camera controls.  Without this
-  // explicit reset the default Cesium handler may continue to treat left
-  // drags as rotation (the library’s default), causing the map to spin
-  // rather than pan on some deployments.  This matches the behaviour when
-  // exiting planting or facade modes.
-  resetCameraControls();
-
   if(!silent) showToast("Drawing cancelled");
-
-  // Ensure camera controls are restored when exiting draw mode
-  resetCameraControls();
 }
 
 /* ---- Smooth helpers (Chaikin + simplification) ---- */
@@ -3751,12 +4269,6 @@ function finalizeScenarioPolygon(){
   drawState.active = false;
   interactionMode = "idle";
   viewer.canvas.style.cursor = "default";
-
-  // After finalising a scenario polygon reset camera controls to ensure
-  // intuitive panning.  Without this the screen‑space controller may retain
-  // mode‑specific event mappings causing the globe to rotate when attempting
-  // to pan.
-  resetCameraControls();
 
   updateScenarioList();
   updateSim();
@@ -4232,12 +4744,19 @@ function runMCDA(){
     }
   } catch (e) { customWeights = null; }
   if (!customWeights) {
+    // Apply preset weights based on the selected objective.  These presets
+    // reflect typical trade‑offs between urban cooling, biodiversity,
+    // stormwater retention and a balanced approach.
     if(obj === 'cooling'){      wU = 0.55; wN = 0.20; wC = 0.10; wA = 0.05; wR = 0.10; }
     if(obj === 'biodiversity'){ wU = 0.32; wN = 0.42; wC = 0.14; wA = 0.06; wR = 0.06; }
     if(obj === 'stormwater'){   wU = 0.38; wN = 0.26; wC = 0.12; wA = 0.06; wR = 0.18; }
     if(obj === 'balanced'){     wU = 0.46; wN = 0.28; wC = 0.10; wA = 0.08; wR = 0.08; }
+    // Corridor emphasis: if the user selects a high corridor weight, we
+    // slightly increase the corridor weight and reduce the UHI/NDVI weights.
     if(corr === 'high'){ wC += 0.06; wU -= 0.03; wN -= 0.03; }
   } else {
+    // Override with custom weights defined in ECO_SETTINGS.  We fall back
+    // to the defaults if any field is missing.
     wU = (customWeights.uhi      !== undefined) ? customWeights.uhi      : wU;
     wN = (customWeights.ndvi     !== undefined) ? customWeights.ndvi     : wN;
     wC = (customWeights.corridor !== undefined) ? customWeights.corridor : wC;
@@ -4337,9 +4856,7 @@ function runMCDA(){
   let areaSum = 0;
   for(const c of candidates){
     if(chosen.length >= finalLimit) break;
-    // compute area for budget constraint
     const areaVal = (c.entity && c.entity._areaM2) ? Number(c.entity._areaM2) : 0;
-    // skip if adding this candidate would exceed area budget
     if(areaSum + areaVal > maxArea) continue;
     const cp = Cesium.Cartesian3.fromDegrees(c.lon, c.lat, 0);
     let ok = true;
@@ -4528,6 +5045,376 @@ function sensitivityTest(){
   let changed = false;
   for(let i=0; i<Math.min(5, newOrder.length); i++){
     if(newOrder[i] !== i){
+      changed = true;
+      break;
+    }
+  }
+  showToast(changed ? 'Top 5 priorities change under ±20% weight variation' : 'Top 5 priorities stable under ±20% weight variation');
+}
+
+/* TASK 1 — TREE REMOVAL TRACKING
+================================ */
+// Sets to track removed trees and support undo functionality
+const removedTreeIds = new Set();
+const removedTreeStack = [];
+let totalRemovedCO2 = 0;
+let totalRemovedShade = 0;
+let totalRemovedCount = 0;
+
+// Update the tree impact panel when removals change
+function updateImpactCounter() {
+  const panel = document.getElementById('treeImpactCounter');
+  if (!panel) return;
+  if (totalRemovedCount === 0) {
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = 'flex';
+  document.getElementById('ticCount').innerText  = totalRemovedCount;
+  document.getElementById('ticCO2').innerText    = Math.round(totalRemovedCO2).toLocaleString() + ' kg';
+  document.getElementById('ticShade').innerText  = Math.round(totalRemovedShade).toLocaleString() + ' m²';
+  document.getElementById('ticUHI').innerText    = '+' + (0.05 * totalRemovedCount).toFixed(2) + '°C';
+}
+
+// Remove the currently selected tree and record its impact
+function removeTreeEntity() {
+  const entity = window._pendingRemoveEntity;
+  if (!entity) {
+    showToast('No tree selected');
+    return;
+  }
+  const co2   = window._pendingRemoveCO2 || 0;
+  const shade = window._pendingRemoveShade || 0;
+  // Hide entity instead of deletion to allow undo
+  entity.show = false;
+  removedTreeIds.add(entity.id);
+  removedTreeStack.push({ entity: entity, co2: co2, shade: shade });
+  totalRemovedCO2   += co2;
+  totalRemovedShade += shade;
+  totalRemovedCount += 1;
+  updateImpactCounter();
+  closePopup();
+  showToast('🌳 Tree removed — −' + Math.round(co2).toLocaleString() + ' kg CO₂/yr');
+  window._pendingRemoveEntity = null;
+  viewer.scene.requestRender();
+}
+
+// Undo the last removal action
+function undoLastRemoval() {
+  if (removedTreeStack.length === 0) {
+    showToast('Nothing to undo');
+    return;
+  }
+  const last = removedTreeStack.pop();
+  if (last && last.entity) {
+    last.entity.show = true;
+    removedTreeIds.delete(last.entity.id);
+    totalRemovedCO2   = Math.max(0, totalRemovedCO2 - last.co2);
+    totalRemovedShade = Math.max(0, totalRemovedShade - last.shade);
+    totalRemovedCount = Math.max(0, totalRemovedCount - 1);
+    updateImpactCounter();
+    showToast('↩ Tree restored');
+    viewer.scene.requestRender();
+  }
+}
+
+// Reset all removals at once
+function resetAllRemovals() {
+  while (removedTreeStack.length) {
+    const { entity } = removedTreeStack.pop();
+    if (entity) {
+      entity.show = true;
+      removedTreeIds.delete(entity.id);
+    }
+  }
+  totalRemovedCO2   = 0;
+  totalRemovedShade = 0;
+  totalRemovedCount = 0;
+  updateImpactCounter();
+  showToast('All removals reset');
+  viewer.scene.requestRender();
+}
+
+/* TASK 2 — MCDA WIZARD JS
+========================== */
+// Track the current wizard step (1..3) and which criteria are active
+let mcdaCurrentStep = 1;
+const mcdaCritActive = { U: true, N: true, C: true, A: true, R: true };
+
+// Toggle a criterion card on or off
+function toggleCritCard(key, el) {
+  mcdaCritActive[key] = !mcdaCritActive[key];
+  if (el) el.classList.toggle('selected', mcdaCritActive[key]);
+  const wrow = document.getElementById('wrow_' + key);
+  if (wrow) wrow.style.display = mcdaCritActive[key] ? 'flex' : 'none';
+  onMcdaSlider();
+}
+
+// Update weight sliders and percentage labels
+function onMcdaSlider() {
+  // In this revised weighting system each slider (or numeric input) directly
+  // represents a percentage (0–100).  We no longer normalise by the sum of
+  // active criteria.  Instead we treat the raw value as the final weight
+  // percentage and simply divide by 100 when passing values to the MCDA
+  // calculation.  A running total is displayed so the user can ensure the
+  // weights add up to 100.  If the sum differs from 100 the total number
+  // turns red to alert the user.
+  const keys = ['U','N','C','A','R'];
+  let rawTotal = 0;
+  keys.forEach(k => {
+    if (!mcdaCritActive[k]) return;
+    const sl = document.getElementById('mcdaWeight' + k);
+    const v  = sl ? Number(sl.value) : 0;
+    rawTotal += v;
+  });
+  // Update each criterion with its own raw percentage
+  keys.forEach(k => {
+    const slEl  = document.getElementById('mcdaWeight' + k);
+    const pctEl = document.getElementById('mcdaWeight' + k + 'Pct');
+    const valEl = document.getElementById('mcdaWeight' + k + 'Val');
+    const segEl = document.getElementById('bseg_' + k);
+    const numEl = document.getElementById('mcdaWeight' + k + 'Num');
+    const raw   = (slEl && mcdaCritActive[k]) ? Number(slEl.value) : 0;
+    // Percentage label shows the raw value directly
+    if (pctEl) pctEl.textContent = Math.round(raw) + '%';
+    // Hidden value stores the fraction (0–1) of the raw percentage
+    if (valEl) valEl.value = (raw / 100).toFixed(4);
+    // Balance bar segment width equals the raw percent (clamped 0–100)
+    if (segEl) segEl.style.width = Math.min(Math.max(raw, 0), 100).toFixed(1) + '%';
+    // Keep numeric input in sync with slider
+    if (numEl && slEl) {
+      if (String(numEl.value) !== String(raw)) numEl.value = raw;
+    }
+  });
+  // Update total display to show raw sum; colour indicates whether it equals 100
+  const totalEl = document.getElementById('mcdaWeightTotalPct');
+  if (totalEl) {
+    totalEl.textContent = Math.round(rawTotal) + '%';
+    totalEl.style.color = (Math.round(rawTotal) === 100 ? '#2dd4bf' : '#fb7185');
+  }
+}
+
+// Called when the user edits the numeric weight value. This function
+// updates the associated slider and re-runs the normalisation logic.
+function onMcdaNumChange(key) {
+  const numEl = document.getElementById('mcdaWeight' + key + 'Num');
+  const slEl  = document.getElementById('mcdaWeight' + key);
+  if (!numEl || !slEl) return;
+  let val = Number(numEl.value);
+  if (!Number.isFinite(val)) val = 0;
+  // Clamp between 0 and 100
+  val = Math.max(0, Math.min(100, val));
+  slEl.value = val;
+  // Trigger update of percentages and totals
+  onMcdaSlider();
+}
+
+// Go to a specific step in the wizard
+function goMcdaStep(step) {
+  mcdaCurrentStep = step;
+  for (let i = 1; i <= 3; i++) {
+    const panel = document.getElementById('mcdaPanel' + i);
+    const item  = document.getElementById('mcdaStepItem' + i);
+    if (panel) panel.classList.toggle('active', i === step);
+    if (item) {
+      item.classList.toggle('active', i === step);
+      item.classList.toggle('done', i < step);
+    }
+  }
+  const back = document.getElementById('mcdaBtnBack');
+  const next = document.getElementById('mcdaBtnNext');
+  const run  = document.getElementById('mcdaBtnRun');
+  if (back) back.style.display = step > 1 ? 'block' : 'none';
+  if (next) next.style.display = step < 3 ? 'flex' : 'none';
+  if (run)  run.style.display  = step === 3 ? 'flex' : 'none';
+}
+
+// Move to next or previous steps
+function mcdaStepNext() { if (mcdaCurrentStep < 3) goMcdaStep(mcdaCurrentStep + 1); }
+function mcdaStepPrev() { if (mcdaCurrentStep > 1) goMcdaStep(mcdaCurrentStep - 1); }
+
+// Override the existing openMCDA to reset the wizard
+const _origOpenMCDA = window.openMCDA || function(){};
+window.openMCDA = function() {
+  const modal = document.getElementById('mcdaModal');
+  if (!modal) {
+    console.error('MCDA panel (#mcdaModal) not found');
+    return;
+  }
+  modal.style.display = 'flex';
+  goMcdaStep(1);
+  onMcdaSlider();
+};
+
+// Render recommendations into the results area
+function renderMcdaResultsTable() {
+  const area = document.getElementById('mcdaResultsArea');
+  const recs = window.recommendations;
+  if (!area) return;
+  if (!recs || !recs.length) {
+    area.innerHTML = '<div style="color:#ef4444; font-size:12px; padding:10px;">No results found. Check that layers are loaded.</div>';
+    return;
+  }
+  const maxScore = recs[0].score || 1;
+  const rows = recs.map((r, i) => {
+    const pct   = Math.round((r.score / maxScore) * 100);
+    const hue   = Math.round((1 - r.score / maxScore) * 120);
+    const color = `hsl(${hue},70%,45%)`;
+    return `<tr>
+      <td style="font-weight:700; color:#1a535c;">${i + 1}</td>
+      <td>${r.lat ? r.lat.toFixed(5) : '—'}, ${r.lon ? r.lon.toFixed(5) : '—'}</td>
+      <td>
+        <div class="mcda-score-bar-wrap">
+          <div class="mcda-score-bar" style="width:${pct}%; background:${color};"></div>
+        </div>
+        <span style="font-size:10px; color:${color}; font-weight:700;">${r.score.toFixed(3)}</span>
+      </td>
+      <td style="font-size:10px; color:#6b7280;">
+        UHI:${r.breakdown && r.breakdown.uhi !== undefined ? r.breakdown.uhi.toFixed(2) : '—'}
+        NDVI:${r.breakdown && r.breakdown.ndvi !== undefined ? r.breakdown.ndvi.toFixed(2) : '—'}
+      </td>
+    </tr>`;
+  }).join('');
+  area.innerHTML = `
+    <table class="mcda-results-table">
+      <thead><tr>
+        <th>#</th><th>Location</th><th>Score</th><th>Breakdown</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  try {
+    colorMapByMCDA();
+  } catch(e) {
+    console.warn('Map colouring failed:', e);
+  }
+}
+
+// Hook into existing runMCDA: run original then update results
+(function patchRunMCDA(){
+  const orig = window.runMCDA;
+  if (!orig) return;
+  window.runMCDA = function() {
+    orig();
+    setTimeout(renderMcdaResultsTable, 200);
+  };
+}());
+
+// Reset MCDA weight sliders back to default percentages
+function resetMcdaDefaults() {
+  const defaults = { U: 46, N: 28, C: 10, A: 8, R: 8 };
+  ['U','N','C','A','R'].forEach(k => {
+    const sl = document.getElementById('mcdaWeight' + k);
+    if (sl) sl.value = defaults[k];
+  });
+  onMcdaSlider();
+}
+
+// Colour map polygons based on MCDA scores (green = higher priority)
+function colorMapByMCDA() {
+  const recs = window.recommendations;
+  if (!recs || !recs.length) return;
+  const scoreMap = new Map();
+  recs.forEach(r => {
+    if (r.id) scoreMap.set(String(r.id), r.score);
+  });
+  const maxScore = recs[0].score || 1;
+  const minScore = recs[recs.length - 1].score || 0;
+  if (window.lod1Ds && lod1Ds.entities) {
+    lod1Ds.entities.values.forEach(ent => {
+      if (!ent.polygon) return;
+      const time = viewer.clock.currentTime;
+      const id = String(ent.properties?.identificatie?.getValue(time) || ent.properties?.bag_id?.getValue(time) || '');
+      const score = scoreMap.has(id) ? scoreMap.get(id) : null;
+      if (score !== null) {
+        const ratio = maxScore > minScore ? (score - minScore) / (maxScore - minScore) : 0.5;
+        let r, g, b;
+        if (ratio < 0.5) {
+          const t2 = ratio * 2;
+          r = 220; g = Math.round(20 + t2 * 200); b = 20;
+        } else {
+          const t2 = (ratio - 0.5) * 2;
+          r = Math.round(220 - t2 * 180); g = 220; b = 20;
+        }
+        ent.polygon.material = new Cesium.ColorMaterialProperty(
+          new Cesium.Color(r / 255, g / 255, b / 255, 0.8)
+        );
+      }
+    });
+    viewer.scene.requestRender();
+  }
+}
+
+// Export MCDA recommendations to CSV or JSON
+function exportMCDA(format) {
+  if (!window.recommendations || !Array.isArray(window.recommendations) || window.recommendations.length === 0) {
+    showToast('No priorities to export');
+    return;
+  }
+  const weights = window.lastMCDAWeights || {};
+  if (format === 'json') {
+    const rows = window.recommendations.map((rec, idx) => ({
+      rank: idx + 1,
+      lat: rec.lat,
+      lon: rec.lon,
+      uhi: rec.breakdown.uhi,
+      ndvi: rec.breakdown.ndvi,
+      corridor: rec.breakdown.corr,
+      age: rec.breakdown.age,
+      area: rec.breakdown.area,
+      score: rec.score
+    }));
+    const jsonObj = { weights: weights, results: rows };
+    const jsonStr = JSON.stringify(jsonObj, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mcda_results.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('MCDA results exported as JSON');
+  } else {
+    let csv = 'weights_uhi,weights_ndvi,weights_corridor,weights_age,weights_area\n';
+    csv += `${weights.wU ?? ''},${weights.wN ?? ''},${weights.wC ?? ''},${weights.wA ?? ''},${weights.wR ?? ''}\n`;
+    csv += 'rank,lat,lon,uhi,ndvi,corridor,age,area,score\n';
+    window.recommendations.forEach((rec, idx) => {
+      csv += `${idx + 1},${rec.lat},${rec.lon},${rec.breakdown.uhi},${rec.breakdown.ndvi},${rec.breakdown.corr},${rec.breakdown.age},${rec.breakdown.area},${rec.score}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mcda_results.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('MCDA results exported as CSV');
+  }
+}
+
+// Evaluate sensitivity: randomly vary weights ±20% and test top 5 ranking stability
+function sensitivityTest() {
+  if (!window.recommendations || window.recommendations.length === 0) {
+    showToast('Run MCDA first to test sensitivity');
+    return;
+  }
+  const base = window.lastMCDAWeights || { wU: 0.46, wN: 0.28, wC: 0.10, wA: 0.08, wR: 0.08 };
+  const vary = (w) => {
+    const factor = 0.8 + Math.random() * 0.4;
+    return w * factor;
+  };
+  let wU = vary(base.wU), wN = vary(base.wN), wC = vary(base.wC), wA = vary(base.wA), wR = vary(base.wR);
+  const total = wU + wN + wC + wA + wR;
+  wU /= total; wN /= total; wC /= total; wA /= total; wR /= total;
+  const scores = window.recommendations.map(rec => rec.breakdown.uhi * wU + rec.breakdown.ndvi * wN + rec.breakdown.corr * wC + rec.breakdown.age * wA + rec.breakdown.area * wR);
+  const baselineOrder = window.recommendations.map((_, idx) => idx);
+  const newOrder = baselineOrder.slice().sort((a, b) => scores[b] - scores[a]);
+  let changed = false;
+  for (let i = 0; i < Math.min(5, newOrder.length); i++) {
+    if (newOrder[i] !== i) {
       changed = true;
       break;
     }
@@ -4772,8 +5659,8 @@ function showTreePopup(screenPos, treeEntity){
   isPinned = true;
   const t = viewer.clock.currentTime || Cesium.JulianDate.now();
 
-  // Handle Open or Municipal tree: display limited fields and update growth panel
-  if(treeEntity._type === "tree_open" || treeEntity._type === "tree_muni"){
+  // Handle Open or Municipal tree: display limited fields, impact assessment and update growth panel
+  if (treeEntity._type === "tree_open" || treeEntity._type === "tree_muni") {
     // Extract species, height, crown, AGB, size class and CO₂
     const sp    = safePropString(treeEntity, TREE_KEYS.species, t) || "Tree";
     const hVal  = safePropNumber(treeEntity, TREE_KEYS.height, t);
@@ -4788,15 +5675,55 @@ function showTreePopup(screenPos, treeEntity){
     const sizeText   = (szVal && String(szVal).trim() !== "") ? szVal : "—";
     const co2Text    = (co2Val !== null && co2Val !== undefined) ? (Math.round(co2Val).toLocaleString() + " kg") : "—";
 
+    // --- Task 1: Impact assessment block ---
+    const h   = (typeof hVal === 'number' && hVal > 0) ? hVal : 8;
+    const co2Loss  = (co2Val !== null && co2Val > 0) ? co2Val : Math.round(12 * h);
+    const crownArea= (crVal !== null && crVal > 0) ? crVal : Math.PI * Math.pow(h * 0.35, 2);
+    const shadeM2  = Math.round(crownArea);
+    let ecoScore = 2;
+    if (typeof agbVal === 'number' && agbVal > 0) {
+      ecoScore = Math.max(2, Math.round(Math.log(agbVal) / Math.log(2)));
+    }
+    const uhiInc = (0.05).toFixed(2);
+    const alreadyRemoved = typeof removedTreeIds !== 'undefined' ? removedTreeIds.has(treeEntity.id) : false;
+    const impactHtml = `
+    <div class="tree-impact-section">
+      <div class="tree-impact-title"><i class="fas fa-triangle-exclamation"></i> Impact of Removing This Tree</div>
+      <div class="tree-impact-row">
+        <span class="ti-lbl">☁️ CO₂ loss / year</span>
+        <span class="ti-val">−${Math.round(co2Loss).toLocaleString()} kg/yr</span>
+      </div>
+      <div class="tree-impact-row">
+        <span class="ti-lbl">🌡️ UHI temperature increase</span>
+        <span class="ti-val">+${uhiInc}°C</span>
+      </div>
+      <div class="tree-impact-row">
+        <span class="ti-lbl">☂️ Shade area lost</span>
+        <span class="ti-val">−${shadeM2.toLocaleString()} m²</span>
+      </div>
+      <div class="tree-impact-row">
+        <span class="ti-lbl">🦋 Ecological score impact</span>
+        <span class="ti-val">−${ecoScore} pts</span>
+      </div>
+      <button class="btn-remove-tree" id="btnRemoveTree" onclick="removeTreeEntity()" ${alreadyRemoved ? 'disabled' : ''}>
+        ${alreadyRemoved ? '<i class="fas fa-check"></i> Already Removed' : '<i class="fas fa-trash"></i> Remove This Tree'}
+      </button>
+    </div>`;
+    // Store current entity and metrics for removal action
+    window._pendingRemoveEntity = alreadyRemoved ? null : treeEntity;
+    window._pendingRemoveCO2    = co2Loss;
+    window._pendingRemoveShade  = shadeM2;
+
     document.getElementById("popType").innerText =
-      (treeEntity._type === "tree_muni") ? "Tree (Municipality)" : "Tree (Open Data)";
+      (treeEntity._type === "tree_muni") ? "🌿 Tree (Municipality)" : "🌿 Tree (Open Data)";
     document.getElementById("popContent").innerHTML =
       row("Species", sp) +
       row("Height", heightText) +
-      row("Crown", crownText) +
+      row("Crown area", crownText) +
       row("AGB", agbText) +
       row("Size class", sizeText) +
-      row("CO₂ stored", co2Text);
+      row("CO₂ stored", co2Text) +
+      impactHtml;
     // Show growth projection only for municipal trees
     updateGrowthInfo(treeEntity._type === "tree_muni" ? treeEntity : null);
     return;
@@ -4862,36 +5789,30 @@ function showCorridorPopup(screenPos, corridorEntity){
   try{
     if(window.assistantUpdateChips) window.assistantUpdateChips('corridor');
   }catch(e){}
-    // Position and show the popup
-    popup.style.left = (screenPos.x + 15) + "px";
-    popup.style.top  = (screenPos.y + 15) + "px";
-    popup.style.display = "block";
-    isPinned = true;
-    // Hide growth panel when clicking corridors
-    updateGrowthInfo(null);
-    // Read stored properties for the popup.  We include average NDVI and UHI values if they exist.
-    const length = corridorEntity && corridorEntity._lengthMeters ? corridorEntity._lengthMeters : 0;
-    const score  = corridorEntity && corridorEntity._wellBeingScore ? corridorEntity._wellBeingScore : 0;
-    const ndviAvg = corridorEntity && corridorEntity._ndviAvg !== undefined ? corridorEntity._ndviAvg : null;
-    const uhiAvg  = corridorEntity && corridorEntity._uhiAvg !== undefined ? corridorEntity._uhiAvg : null;
-    document.getElementById("popType").innerText = "Well‑being Corridor";
-    // Craft an explanatory sentence based on the multi‑criteria score.  High scores come from green (high NDVI), cool (low UHI) and short corridors.
-    let expl;
-    if(score >= 70){
-      expl = "High score: this corridor is short, green and cool, supporting wildlife movement and comfortable walking conditions.";
-    } else if(score >= 40){
-      expl = "Moderate score: improve greenery or add shade to reduce temperature, or create additional connections to shorten the route.";
-    } else {
-      expl = "Low score: this corridor is long, lacks vegetation or is heat‑stressed. Planting trees and reducing surface temperatures can improve well‑being.";
-    }
-    // Build the popup content: show segment length and average NDVI/UHI where available
-    let html = "";
-    html += row("Segment length", Math.round(length).toLocaleString() + " m");
-    if(ndviAvg !== null){ html += row("NDVI (avg)", ndviAvg.toFixed(2)); }
-    if(uhiAvg !== null){ html += row("UHI (avg)", uhiAvg.toFixed(1) + "°C"); }
-    html += row("Well‑being score", Math.round(score).toLocaleString() + " / 100");
-    html += `<div style="font-size:10px; margin-top:6px; color:rgba(226,232,240,0.80);">${expl}<br/>Score formula: 40% NDVI + 40% cooling (UHI) + 20% connectivity.</div>`;
-    document.getElementById("popContent").innerHTML = html;
+  // Position and show the popup
+  popup.style.left = (screenPos.x + 15) + "px";
+  popup.style.top  = (screenPos.y + 15) + "px";
+  popup.style.display = "block";
+  isPinned = true;
+  // Hide growth panel when clicking corridors
+  updateGrowthInfo(null);
+  // Read stored properties
+  const length = corridorEntity && corridorEntity._lengthMeters ? corridorEntity._lengthMeters : 0;
+  const score  = corridorEntity && corridorEntity._wellBeingScore ? corridorEntity._wellBeingScore : 0;
+  document.getElementById("popType").innerText = "Well‑being Corridor";
+  // Craft an explanatory sentence based on the well‑being score.  Shorter, well‑connected corridors score higher and support both wildlife and human movement.
+  let expl;
+  if(score >= 70){
+    expl = "High score: this corridor is short and well‑connected, making it easy for wildlife and pedestrians to move and enhancing well‑being.";
+  } else if(score >= 40){
+    expl = "Moderate score: consider improving connectivity or reducing its length by adding green links to boost ecological and human benefits.";
+  } else {
+    expl = "Low score: this corridor is long or poorly connected. Creating new green spaces or linking existing ones can improve accessibility and ecological flow.";
+  }
+  document.getElementById("popContent").innerHTML =
+    row("Length", Math.round(length).toLocaleString() + " m") +
+    row("Well‑being score", Math.round(score).toLocaleString() + " / 100") +
+    `<div style="font-size:10px; margin-top:6px; color:rgba(226,232,240,0.80);">${expl}</div>`;
 }
 
 /* ==============================
@@ -5527,11 +6448,11 @@ function clearBudgetPlanner(){
       related: ['ecosystem services','species richness','habitats'],
       suggestions: ['How to improve biodiversity?','Effect of well‑being corridors on biodiversity','Biodiversity in urban environments','What are biodiversity benefits?']
     },
-      'green corridor': {
-        definition: 'Well‑being corridors (sometimes called green corridors) are continuous strips of natural vegetation connecting isolated green spaces. They enable wildlife movement, ecological connectivity and provide walkable routes for people. In this digital twin, each corridor receives a well‑being score that combines vegetation health (NDVI), cooling intensity (UHI) and connectivity; greener, cooler and shorter corridors score higher.',
-        related: ['ecological connectivity','wildlife movement','habitat fragmentation','well-being'],
-        suggestions: ['Benefits of well‑being corridors?','How to design corridors','Impact of corridors on species and people','How do corridors enhance biodiversity benefit?']
-      },
+    'green corridor': {
+      definition: 'Well‑being corridors (sometimes called green corridors) are continuous strips of natural vegetation connecting isolated green spaces. They enable wildlife movement, ecological connectivity and provide walkable routes for people, helping to preserve biodiversity and improve human well-being.',
+      related: ['ecological connectivity','wildlife movement','habitat fragmentation','well-being'],
+      suggestions: ['Benefits of well‑being corridors?','How to design corridors','Impact of corridors on species and people','How do corridors enhance biodiversity benefit?']
+    },
     'scenario polygon': {
       definition: 'A scenario polygon is a user‑drawn shape representing planned vegetation interventions such as grass, shrubs, trees or mixed planting. Each type affects NDVI, cooling, stormwater infiltration and biodiversity.',
       related: ['urban planning','vegetation types','ecology scenarios'],
@@ -6353,210 +7274,6 @@ function clearBudgetPlanner(){
   });
 })();
 </script>
-
-<!-- Weather update script: fetch real‑time weather and update the widget -->
-<script>
-// Coordinates for Enschede, Netherlands
-const WEATHER_LAT = 52.221;
-const WEATHER_LON = 6.893;
-async function updateWeather(){
-  try {
-    // Fetch combined current weather, daily extremes and humidity
-    const wResp = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,snowfall_sum&hourly=relative_humidity_2m&forecast_hours=1&timezone=Europe/Amsterdam`);
-    const wData = await wResp.json();
-    // Save the latest weather response so we can compute UHI statistics when showing details.  This
-    // ensures that the digital twin analysis has access to the daily min/max temperatures.
-    window.latestWeather = wData;
-    const tempEl = document.getElementById('weatherTemp');
-    const eventEl = document.getElementById('weatherEvent');
-    const barEl = document.getElementById('weatherBarFill');
-    if(!wData || !tempEl || !eventEl || !barEl) return;
-    // Update current temperature
-    if(wData.current_weather && typeof wData.current_weather.temperature === 'number'){
-      tempEl.innerText = wData.current_weather.temperature.toFixed(1) + '°C';
-    }
-    // Save current humidity if available (take the first hour)
-    if(wData.hourly && Array.isArray(wData.hourly.relative_humidity_2m) && wData.hourly.relative_humidity_2m.length > 0){
-      window.currentHumidity = wData.hourly.relative_humidity_2m[0];
-    } else {
-      window.currentHumidity = null;
-    }
-    // Determine next snow or heat event within 7 days using daily values
-    let nextDays = null;
-    let type = '';
-    if(wData.daily && Array.isArray(wData.daily.time)){
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      for(let idx = 0; idx < wData.daily.time.length; idx++){
-        const dt = new Date(wData.daily.time[idx]);
-        const diffDays = Math.round((dt.getTime() - today.getTime()) / (1000*60*60*24));
-        if(diffDays < 0) continue;
-        const snow = wData.daily.snowfall_sum && wData.daily.snowfall_sum[idx] ? wData.daily.snowfall_sum[idx] : 0;
-        const tmax = wData.daily.temperature_2m_max && typeof wData.daily.temperature_2m_max[idx] === 'number' ? wData.daily.temperature_2m_max[idx] : null;
-        if(snow > 0){
-          nextDays = diffDays;
-          type = 'Snowfall';
-          break;
-        } else if(tmax !== null && tmax >= 30){
-          nextDays = diffDays;
-          type = 'Heat';
-          break;
-        }
-      }
-    }
-    if(nextDays !== null && nextDays <= 7){
-      const frac = nextDays / 7;
-      barEl.style.width = Math.max(0, Math.min(1, frac)) * 100 + '%';
-      eventEl.innerText = (type === 'Snowfall' ? 'Next snowfall in ' : 'Next heat in ') + nextDays + ' day' + (nextDays === 1 ? '' : 's');
-    } else {
-      // No extreme event within 7 days
-      barEl.style.width = '0%';
-      eventEl.innerText = 'No extreme weather in 7 days';
-    }
-    // Fetch current air quality values (European AQI and pollutants)
-    try{
-      const aqResp = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}&current=european_aqi,pm2_5,pm10,ozone,nitrogen_dioxide&timezone=Europe/Amsterdam`);
-      const aqData = await aqResp.json();
-      if(aqData && aqData.current && typeof aqData.current.european_aqi === 'number'){
-        window.currentAQI = aqData.current.european_aqi;
-      } else {
-        window.currentAQI = null;
-      }
-    }catch(aqErr){
-      console.warn('Air quality fetch failed', aqErr);
-      window.currentAQI = null;
-    }
-  }catch(err){
-    console.warn('Weather fetch failed', err);
-  }
-}
-// Display detailed weather information in a pop-up
-function showWeatherDetails(){
-  const modal = document.getElementById('weatherModal');
-  const content = document.getElementById('weatherDetailContent');
-  if(!modal || !content) return;
-  // Build rows for temperature, humidity and air quality
-  const temp = document.getElementById('weatherTemp') ? document.getElementById('weatherTemp').innerText : '--°C';
-  const humidity = (typeof window.currentHumidity === 'number') ? Math.round(window.currentHumidity) + '%' : '—';
-  const aqi = (typeof window.currentAQI === 'number') ? Math.round(window.currentAQI) : '—';
-  // European AQI ranges: 0-20 good, 20-40 fair, 40-60 moderate, 60-80 poor, 80-100 very poor【411077823428057†L400-L404】.
-  let aqiDesc = '';
-  if(typeof window.currentAQI === 'number'){
-    const val = window.currentAQI;
-    if(val < 20) aqiDesc = 'Good air quality';
-    else if(val < 40) aqiDesc = 'Fair air quality';
-    else if(val < 60) aqiDesc = 'Moderate air quality';
-    else if(val < 80) aqiDesc = 'Poor air quality';
-    else if(val <= 100) aqiDesc = 'Very poor air quality';
-    else aqiDesc = 'Extremely poor air quality';
-  }
-  let html = '';
-  html += `<div class="pop-row"><span class="pop-label">Temperature</span><span class="pop-val">${temp}</span></div>`;
-  html += `<div class="pop-row"><span class="pop-label">Humidity</span><span class="pop-val">${humidity}</span></div>`;
-  html += `<div class="pop-row"><span class="pop-label">AQI</span><span class="pop-val">${aqi}</span></div>`;
-  // Provide a note about air quality underneath the AQI value.
-  html += `<div style="font-size:10px; margin-top:6px; color:rgba(226,232,240,0.75);">${aqiDesc ? aqiDesc + '. ' : ''}Lower values indicate better air quality. Planting more trees and reducing emissions can improve local air quality.</div>`;
-
-  // --------------------------------------------------------------------
-  // UHI analysis and digital twin scenario
-  // The urban heat island (UHI) effect describes how urban areas are warmer than
-  // surrounding rural regions. We approximate the current UHI intensity by
-  // comparing the current temperature to the average of today's minimum and
-  // maximum forecast temperatures. Research summarised by the US EPA shows that
-  // urban areas are typically 0.6–3.9 °C warmer than outlying areas【27550909506927†L90-L105】.
-  // Additional greenery can help cool cities. Studies find that a 1 % increase
-  // in urban tree canopy may lower local air temperatures by around 0.04–0.57 °C【969637698235284†L145-L148】.
-  // Large–scale green roofs can also reduce ambient temperatures by roughly
-  // 0.3–3 °C, with an average reduction of about 1.34 °C【412812815950243†L70-L73】.
-  let uhiMessage = '';
-  try {
-    if (window.latestWeather && window.latestWeather.current_weather && typeof window.latestWeather.current_weather.temperature === 'number') {
-      const currentT = window.latestWeather.current_weather.temperature;
-      const daily = window.latestWeather.daily;
-      let baseline = null;
-      // Use the first day's min and max as a simple proxy for rural baseline
-      if (daily && Array.isArray(daily.temperature_2m_min) && daily.temperature_2m_min.length > 0) {
-        baseline = daily.temperature_2m_min[0];
-      }
-      if (daily && Array.isArray(daily.temperature_2m_max) && daily.temperature_2m_max.length > 0 && baseline !== null) {
-        baseline = (baseline + daily.temperature_2m_max[0]) / 2;
-      }
-      if (baseline !== null) {
-        const uhi = currentT - baseline;
-        let level = 'Moderate';
-        if (uhi < 2) level = 'Low';
-        else if (uhi >= 4) level = 'High';
-        // Compose the explanatory message
-        uhiMessage += `Urban heat island intensity: approximately ${uhi.toFixed(1)} °C (${level}).`;
-      }
-      // Suggest a simple digital twin scenario: increasing tree canopy and green roofs
-      const canopyPct = 5; // assume a 5 % increase in tree canopy
-      const canopyReduction = canopyPct * 0.2; // mid-range reduction per 1 % canopy
-      const greenRoofPct = 10; // assume 10 % roof area converted to green roofs
-      const greenReduction = 1.34; // average cooling from large-scale green roofs
-      const totalReduction = canopyReduction + greenReduction;
-      uhiMessage += ` Adding ${canopyPct}% more tree canopy could lower air temperatures by roughly ${canopyReduction.toFixed(1)} °C. `;
-      uhiMessage += `Installing green roofs on about ${greenRoofPct}% of rooftops may cool the area by another ~${greenReduction.toFixed(2)} °C. Together, these measures might reduce local temperatures by around ${totalReduction.toFixed(1)} °C and lessen heat stress.`;
-    }
-  } catch (e) {
-    console.warn('UHI analysis failed', e);
-  }
-  if (uhiMessage) {
-    // Append the UHI message as its own paragraph.  Concatenate the string to
-    // avoid nested template literal interpolation issues.
-    html += '<div style="margin-top:10px; font-size:10px; line-height:1.4; color:rgba(226,232,240,0.75);">' + uhiMessage + '</div>';
-  }
-  content.innerHTML = html;
-  modal.style.display = 'block';
-}
-function closeWeatherModal(){
-  const modal = document.getElementById('weatherModal');
-  if(modal) modal.style.display = 'none';
-}
-// Start weather updates once the page has loaded
-window.addEventListener('load', () => {
-  updateWeather();
-  setInterval(updateWeather, 3600 * 1000);
-});
-
-// -----------------------------------------------------------------------------
-// Messaging bridge to parent page (see ecology.html for details)
-window.addEventListener('message', (event) => {
-  const msg = event.data;
-  if (!msg || typeof msg.type !== 'string') return;
-  if (msg.type === 'SETTINGS_UPDATE' || msg.type === 'ECO_SETTINGS_UPDATE') {
-    const payload = msg.payload || {};
-    window.GLOBAL_SETTINGS = payload;
-    window.ECO_SETTINGS = payload;
-    try { localStorage.setItem('GLOBAL_ECO_SETTINGS', JSON.stringify(payload)); } catch(e) {}
-    // Apply incoming weights to MCDA sliders when provided and re-run MCDA
-    try {
-      if (payload && payload.weights) {
-        const w = payload.weights;
-        const setSlider = (id, val, labelId) => {
-          const elem = document.getElementById(id);
-          const lab  = document.getElementById(labelId);
-          if (elem && Number.isFinite(val)) {
-            elem.value = val;
-            if (lab) lab.textContent = Number(val).toFixed(2);
-          }
-        };
-        setSlider('mcdaWeightU',   w.uhi,      'mcdaWeightUVal');
-        setSlider('mcdaWeightN',   w.ndvi,     'mcdaWeightNVal');
-        setSlider('mcdaWeightC',   w.corridor, 'mcdaWeightCVal');
-        setSlider('mcdaWeightA',   w.age,      'mcdaWeightAVal');
-        setSlider('mcdaWeightR',   w.area,     'mcdaWeightRVal');
-      }
-      if (typeof runMCDA === 'function') {
-        runMCDA();
-      }
-    } catch(e){}
-  } else if (msg.type === 'SCENARIO_UPDATE') {
-    // No scenario toggling implemented for ecology at this time
-  }
-});
-</script>
-
 <!-- Standalone ecology settings management -->
 <script>
 // -------------------------------------------------------------------------
@@ -6571,13 +7288,28 @@ window.addEventListener('message', (event) => {
 // updates or recomputations can be triggered.  The settings button is
 // automatically hidden when the page is embedded inside the Nexus.
 (function(){
+  // Default settings for ecology twin
   let ecologySettings = {
-    weights: { uhi: 0.46, ndvi: 0.28, corridor: 0.10, age: 0.08, area: 0.08 },
-    costs: { tree: 150, greenRoofPerM2: 80, infiltrationPerM2: 50 },
+    weights: {
+      uhi: 0.46,
+      ndvi: 0.28,
+      corridor: 0.10,
+      age: 0.08,
+      area: 0.08
+    },
+    costs: {
+      tree: 150,
+      greenRoofPerM2: 80,
+      infiltrationPerM2: 50
+    },
     discountRate: 0.04,
     horizonYears: 30,
-    budgets: { maxRoofPercent: 20, maxTreeArea: 1000 }
+    budgets: {
+      maxRoofPercent: 20,
+      maxTreeArea: 1000
+    }
   };
+  // Load stored settings from localStorage if available
   try {
     const stored = localStorage.getItem('GLOBAL_ECO_SETTINGS');
     if (stored) {
@@ -6590,6 +7322,74 @@ window.addEventListener('message', (event) => {
       }
     }
   } catch(e) {}
+  // Keep a globally readable copy of the current ecology settings
+  try { window.ECO_SETTINGS = JSON.parse(JSON.stringify(ecologySettings)); } catch(e) { window.ECO_SETTINGS = ecologySettings; }
+
+  function syncMcdaUiFromSettings(){
+    try {
+      const w = ecologySettings.weights || {};
+      const setSlider = (id, val, labelId) => {
+        const elem = document.getElementById(id);
+        const lab  = document.getElementById(labelId);
+        if (elem && Number.isFinite(val)) {
+          elem.value = val;
+          if (lab) lab.textContent = Number(val).toFixed(2);
+        }
+      };
+      setSlider('mcdaWeightU', w.uhi, 'mcdaWeightUVal');
+      setSlider('mcdaWeightN', w.ndvi, 'mcdaWeightNVal');
+      setSlider('mcdaWeightC', w.corridor, 'mcdaWeightCVal');
+      setSlider('mcdaWeightA', w.age, 'mcdaWeightAVal');
+      setSlider('mcdaWeightR', w.area, 'mcdaWeightRVal');
+    } catch(e) {}
+  }
+
+  function applyIncomingEcologySettings(payload){
+    if (!payload || typeof payload !== 'object') return;
+
+    if (payload.weights && typeof payload.weights === 'object') {
+      const w = payload.weights;
+      if (Number.isFinite(w.uhi)) ecologySettings.weights.uhi = w.uhi;
+      if (Number.isFinite(w.ndvi)) ecologySettings.weights.ndvi = w.ndvi;
+      if (Number.isFinite(w.corridor)) ecologySettings.weights.corridor = w.corridor;
+      if (Number.isFinite(w.age)) ecologySettings.weights.age = w.age;
+      if (Number.isFinite(w.area)) ecologySettings.weights.area = w.area;
+      else if (Number.isFinite(w.water)) ecologySettings.weights.area = w.water;
+    }
+
+    if (payload.costs && typeof payload.costs === 'object') {
+      const c = payload.costs;
+      if (Number.isFinite(c.tree)) ecologySettings.costs.tree = c.tree;
+      if (Number.isFinite(c.greenRoofPerM2)) ecologySettings.costs.greenRoofPerM2 = c.greenRoofPerM2;
+      else if (Number.isFinite(c.greenRoof)) ecologySettings.costs.greenRoofPerM2 = c.greenRoof;
+      if (Number.isFinite(c.infiltrationPerM2)) ecologySettings.costs.infiltrationPerM2 = c.infiltrationPerM2;
+      else if (Number.isFinite(c.infiltration)) ecologySettings.costs.infiltrationPerM2 = c.infiltration;
+    }
+
+    if (Number.isFinite(payload.discountRate)) ecologySettings.discountRate = payload.discountRate;
+    if (Number.isFinite(payload.horizonYears)) ecologySettings.horizonYears = payload.horizonYears;
+
+    if (payload.budgets && typeof payload.budgets === 'object') {
+      const b = payload.budgets;
+      if (Number.isFinite(b.maxRoofPercent)) ecologySettings.budgets.maxRoofPercent = b.maxRoofPercent;
+      if (Number.isFinite(b.maxTreeArea)) ecologySettings.budgets.maxTreeArea = b.maxTreeArea;
+    }
+    if (payload.limits && typeof payload.limits === 'object') {
+      const l = payload.limits;
+      if (Number.isFinite(l.maxGreenRoofPct)) ecologySettings.budgets.maxRoofPercent = l.maxGreenRoofPct;
+      if (Number.isFinite(l.maxTreeArea)) ecologySettings.budgets.maxTreeArea = l.maxTreeArea;
+    }
+
+    try { localStorage.setItem('GLOBAL_ECO_SETTINGS', JSON.stringify(ecologySettings)); } catch(e) {}
+    try { window.ECO_SETTINGS = JSON.parse(JSON.stringify(ecologySettings)); } catch(e) { window.ECO_SETTINGS = ecologySettings; }
+
+    syncMcdaUiFromSettings();
+    try {
+      if (typeof updateLeftPanel === 'function') updateLeftPanel();
+      if (typeof runMCDA === 'function') runMCDA();
+    } catch(e) {}
+  }
+
   function openEcoSettings(){
     const s = ecologySettings;
     document.getElementById('eco_weight_u').value   = s.weights.uhi ?? '';
@@ -6635,31 +7435,21 @@ window.addEventListener('message', (event) => {
     if(Number.isFinite(cRoof)) s.costs.greenRoofPerM2 = cRoof;
     const cInfil = parseFloat(document.getElementById('eco_cost_infil').value);
     if(Number.isFinite(cInfil)) s.costs.infiltrationPerM2 = cInfil;
+    // Persist settings to localStorage
     try { localStorage.setItem('GLOBAL_ECO_SETTINGS', JSON.stringify(ecologySettings)); } catch(e) {}
+    // Make a deep copy onto a global variable so other scripts can read the current settings
     try { window.ECO_SETTINGS = JSON.parse(JSON.stringify(ecologySettings)); } catch(e) { window.ECO_SETTINGS = ecologySettings; }
+    // Close modal
     closeEcoSettings();
+    // Trigger any visual or MCDA refreshes if available
     try {
       if (typeof updateLeftPanel === 'function') updateLeftPanel();
       if (typeof runMCDA === 'function') runMCDA();
     } catch(e) {}
     // Synchronise weight sliders to new settings
-    try {
-      const w = ecologySettings.weights || {};
-      const setSlider = (id, val, labelId) => {
-        const elem = document.getElementById(id);
-        const lab  = document.getElementById(labelId);
-        if (elem && Number.isFinite(val)) {
-          elem.value = val;
-          if (lab) lab.textContent = Number(val).toFixed(2);
-        }
-      };
-      setSlider('mcdaWeightU',   w.uhi,      'mcdaWeightUVal');
-      setSlider('mcdaWeightN',   w.ndvi,     'mcdaWeightNVal');
-      setSlider('mcdaWeightC',   w.corridor, 'mcdaWeightCVal');
-      setSlider('mcdaWeightA',   w.age,      'mcdaWeightAVal');
-      setSlider('mcdaWeightR',   w.area,     'mcdaWeightRVal');
-    } catch(e){}
+    syncMcdaUiFromSettings();
   }
+  // Event handlers
   document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('ecoSettingsBtn');
     if (btn) btn.addEventListener('click', (ev) => { ev.stopPropagation(); openEcoSettings(); });
@@ -6668,6 +7458,7 @@ window.addEventListener('message', (event) => {
     if (applyBtn)  applyBtn.addEventListener('click', applyEcoSettingsStandalone);
     if (cancelBtn) cancelBtn.addEventListener('click', closeEcoSettings);
   });
+  // Hide settings button when embedded in an iframe
   window.addEventListener('load', () => {
     try {
       if (window.self !== window.top) {
@@ -6676,15 +7467,101 @@ window.addEventListener('message', (event) => {
       }
     } catch (e) {}
   });
+
+  // Allow the parent Nexus page to push ecology settings into the iframe
+  window.addEventListener('message', (event) => {
+    const msg = event.data;
+    if (!msg || typeof msg.type !== 'string') return;
+    if (msg.type === 'ECO_SETTINGS_UPDATE') {
+      applyIncomingEcologySettings(msg.payload || {});
+    } else if (msg.type === 'SETTINGS_UPDATE') {
+      // The Nexus also broadcasts general energy settings to all iframes.
+      // Keep them available globally, but do not overwrite ecology settings.
+      window.GLOBAL_SETTINGS = msg.payload || {};
+    }
+  });
+
+  // Expose functions globally for potential parent calls
   window.openEcoSettings = openEcoSettings;
   window.closeEcoSettings = closeEcoSettings;
   window.applyEcoSettings = applyEcoSettingsStandalone;
 })();
 </script>
 
-<!-- Small on‑screen hint summarising the camera controls. This helps users understand how to pan, zoom and rotate. -->
-<div id="controlsHint" class="hint-pill" style="position: fixed; bottom: 80px; left: 20px; z-index: 600;">
-  Left‑drag: rotate | Scroll: zoom | Right‑drag: pan
-</div>
+<!-- Weather update script: fetch real‑time weather and update the widget -->
+<script>
+// Coordinates for Enschede, Netherlands
+const WEATHER_LAT = 52.221;
+const WEATHER_LON = 6.893;
+async function updateWeather(){
+  try {
+    // Fetch combined current weather, daily extremes and humidity
+    const wResp = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&hourly=relativehumidity_2m&timezone=Europe%2FAmsterdam`);
+    if (!wResp.ok) throw new Error('weather fetch failed');
+    const wData = await wResp.json();
+    const cw = wData.current_weather || {};
+    const temp = typeof cw.temperature === 'number' ? cw.temperature : null;
+    const windspeed = typeof cw.windspeed === 'number' ? cw.windspeed : null;
+    const wcode = cw.weathercode || 0;
+
+    // Get humidity from hourly (first available value)
+    let humidity = null;
+    if (wData.hourly && wData.hourly.relativehumidity_2m) {
+      const vals = wData.hourly.relativehumidity_2m.filter(v => v !== null);
+      if (vals.length > 0) humidity = vals[0];
+    }
+
+    // Get daily min/max
+    let tempMax = null, tempMin = null;
+    if (wData.daily) {
+      if (wData.daily.temperature_2m_max && wData.daily.temperature_2m_max.length > 0)
+        tempMax = wData.daily.temperature_2m_max[0];
+      if (wData.daily.temperature_2m_min && wData.daily.temperature_2m_min.length > 0)
+        tempMin = wData.daily.temperature_2m_min[0];
+    }
+
+    // WMO weather code descriptions
+    const WMO_CODES = {
+      0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+      45: 'Fog', 48: 'Fog', 51: 'Light drizzle', 53: 'Drizzle', 55: 'Heavy drizzle',
+      61: 'Light rain', 63: 'Rain', 65: 'Heavy rain', 71: 'Light snow', 73: 'Snow', 75: 'Heavy snow',
+      77: 'Snow grains', 80: 'Showers', 81: 'Showers', 82: 'Heavy showers',
+      85: 'Snow showers', 86: 'Heavy snow showers', 95: 'Thunderstorm', 96: 'Thunderstorm', 99: 'Thunderstorm'
+    };
+    const wDesc = WMO_CODES[wcode] || 'Unknown';
+
+    // Update weather widget elements
+    const tempEl = document.getElementById('weatherTemp');
+    if (tempEl && temp !== null) tempEl.textContent = Math.round(temp) + '°C';
+
+    const barFill = document.getElementById('weatherBarFill');
+    if (barFill && humidity !== null) {
+      barFill.style.width = Math.min(humidity, 100) + '%';
+    }
+
+    const eventEl = document.getElementById('weatherEvent');
+    if (eventEl) eventEl.textContent = wDesc;
+
+    // Update detail modal content if present
+    const detailEl = document.getElementById('weatherDetailContent');
+    if (detailEl) {
+      detailEl.innerHTML = `
+        <p><strong>Temperature:</strong> ${temp !== null ? Math.round(temp) + '°C' : 'N/A'}
+          ${tempMax !== null && tempMin !== null ? ` (${Math.round(tempMin)}–${Math.round(tempMax)}°C)` : ''}</p>
+        <p><strong>Conditions:</strong> ${wDesc}</p>
+        <p><strong>Wind:</strong> ${windspeed !== null ? Math.round(windspeed) + ' km/h' : 'N/A'}</p>
+        <p><strong>Humidity:</strong> ${humidity !== null ? Math.round(humidity) + '%' : 'N/A'}</p>
+        <p style="font-size:10px;color:#888;margin-top:8px;">Source: Open-Meteo · Updated ${new Date().toLocaleTimeString('nl-NL')}</p>
+      `;
+    }
+  } catch (e) {
+    console.warn('Weather update failed:', e);
+  }
+}
+
+// Run on page load and refresh every 10 minutes
+updateWeather();
+setInterval(updateWeather, 10 * 60 * 1000);
+</script>
 </body>
 </html>
