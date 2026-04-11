@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Permissions-Policy" content="unload=()">
 <title>Twekkelerveld Smart Energy Twin</title>
 
-    <!-- Cloudflare/R2 config (optional). If missing, the app falls back to local files. -->
-    <script src="config.js"></script>
+<!-- Cloudflare/R2 config (optional). If missing, the app falls back to local files. -->
+<script src="config.js"></script>
 
 <!-- CesiumJS -->
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/Cesium.js"></script>
@@ -498,6 +499,48 @@
     text-decoration: underline;
   }
 
+  /* =======================================
+     TASK 5 — Scenario Relevance Locking
+  ======================================= */
+  /* Greyed out (irrelevant) scenario */
+  .mode-btn.scen-locked {
+    opacity: 0.38;
+    cursor: not-allowed;
+    pointer-events: none;
+    position: relative;
+  }
+  .mode-btn.scen-locked::after {
+    content: attr(data-lock-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15,23,42,0.95);
+    color: #e2e8f0;
+    font-size: 10px;
+    padding: 5px 9px;
+    border-radius: 7px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 3000;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    display: none;
+  }
+  /* Relevant scenario highlight */
+  .mode-btn.scen-relevant {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 2px rgba(16,185,129,0.25);
+  }
+  /* Tooltip icon next to scenario */
+  .scen-tooltip-wrap {
+    font-size: 13px;
+    cursor: help;
+    opacity: 0.65;
+    transition: opacity 0.18s;
+    position: relative;
+  }
+  .scen-tooltip-wrap:hover { opacity: 1; }
 
   /*
    * Collapsed panels: simplify the styling for a cleaner, professional look.  When either the
@@ -692,51 +735,231 @@
     color: var(--text-main);
   }
 
-  /* ------------------------------------------------------------------
-     Settings & Stakeholders buttons styling
-     We expose the advanced settings outside of the info panel. Both the
-     settings and stakeholders buttons are positioned in the top right
-     area underneath the existing "Energy Overview" button. These
-     buttons adopt the same glassy appearance and interaction as
-     other controls. Labels in the settings modal inherit the main
-     text colour for legibility on dark backgrounds.
-  ------------------------------------------------------------------ */
-  #settingsBtn,
-  #stakeBtn {
-    position: absolute;
-    right: 20px;
-    z-index: 1000;
-    background: var(--glass-bg);
-    color: var(--text-muted);
-    border: 1px solid var(--glass-border);
-    padding: 8px 16px;
-    border-radius: 12px;
+  /* ═══════ INTERVENTIONS & RETROFIT TOOLS ═══════ */
+  .rt-type {
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
     cursor: pointer;
+    border: 1px solid rgba(148,163,184,0.22);
+    color: rgba(226,232,240,0.7);
+    transition: 0.18s;
+  }
+  .rt-type:hover { border-color: rgba(45,212,191,0.45); color: white; }
+  .rt-type.selected {
+    border-color: rgba(45,212,191,0.75);
+    color: white;
+    background: rgba(45,212,191,0.18);
+  }
+
+  .retro-config-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: rgba(226,232,240,0.9);
+  }
+  .retro-config-row select {
+    background: rgba(255,255,255,0.06);
+    color: rgba(226,232,240,0.95);
+    border: 1px solid rgba(148,163,184,0.3);
+    border-radius: 6px;
+    padding: 3px 6px;
+    font-size: 11px;
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.12);
+    transition: 0.2s;
+    border-radius: 20px;
+  }
+  .toggle-slider:before {
+    content: "";
+    position: absolute;
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    transition: 0.2s;
+    border-radius: 50%;
+  }
+  .toggle-switch input:checked + .toggle-slider {
+    background: var(--accent-primary);
+  }
+  .toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(16px);
+  }
+
+  .compare-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .compare-label { color: rgba(226,232,240,0.7); }
+  .compare-val { color: white; font-weight: 600; }
+
+  .zone-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 6px;
+    border-left: 3px solid var(--accent-primary);
+    font-size: 11px;
+  }
+  .zone-item .zone-name { color: white; font-weight: 600; }
+  .zone-item .zone-meta { color: rgba(226,232,240,0.6); }
+  .zone-item .zone-del {
+    background: none;
+    border: none;
+    color: rgba(239,68,68,0.7);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 4px;
+  }
+  .zone-item .zone-del:hover { color: #ef4444; }
+
+  /* Energy flow particles */
+  @keyframes flowPulse {
+    0% { opacity: 0.3; }
+    50% { opacity: 1; }
+    100% { opacity: 0.3; }
+  }
+
+  /* ── FIX 1: Flow canvas overlay ── */
+  #energyFlowCanvas {
+    position: absolute; top: 0; left: 0;
+    pointer-events: none;
+    z-index: 750;
+    width: 100%; height: 100%;
+  }
+
+  /* ── FIX 2: Sun-dot solar array markers ── */
+  #solarMarkersOverlay {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 800;
+    overflow: hidden;
+  }
+  .solar-sun-marker {
+    position: absolute;
+    pointer-events: auto;
+    transform: translate(-50%, -62%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: default;
+    z-index: 6;
+  }
+  .sun-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #FFE45C 0%, #FFD600 42%, #FFB000 72%, #FF8C00 100%);
+    border: 2px solid rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-sizing: border-box;
+    overflow: visible;
+    animation: sunGlowPulse 3s ease-in-out infinite;
+  }
+  .sun-kwp-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    user-select: none;
+    pointer-events: none;
+    text-align: center;
+  }
+  .sun-kwp-readout {
+    min-width: 34px;
+    padding: 4px 6px 3px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.34);
+    border: 1px solid rgba(255,255,255,0.22);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.28);
+    backdrop-filter: blur(1px);
+  }
+  .sun-kwp-value {
+    display: block;
+    font-size: 16px;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.98), 0 0 2px rgba(0,0,0,0.85);
+    letter-spacing: -0.3px;
+    line-height: 1;
+  }
+  .sun-kwp-unit {
+    display: block;
+    margin-top: 2px;
+    font-size: 8px;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.98), 0 0 2px rgba(0,0,0,0.85);
+    letter-spacing: 0.35px;
+    text-transform: none;
+    line-height: 1;
+  }
+  .sun-badge {
+    background: rgba(0,0,0,0.6);
+    color: white;
+    font-size: 11px;
     font-weight: 500;
-    font-size: 13px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    white-space: nowrap;
     transition: all 0.2s;
-    backdrop-filter: blur(12px);
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
     user-select: none;
   }
-  #settingsBtn:hover,
-  #stakeBtn:hover {
-    background: rgba(255,255,255,0.1);
-    color: white;
-    border-color: white;
+  .solar-sun-marker:hover .sun-badge {
+    max-width: 220px;
+    background: rgba(0,0,0,0.82);
   }
-  /* Vertical placement for stacked controls: settings below energy overview, stakeholders below settings */
-  #settingsBtn { top: 60px; }
-  #stakeBtn    { top: 100px; }
+  @keyframes sunGlowPulse {
+    /* Radiant golden pulse to subtly emphasise the marker. The glow intensifies mid‑cycle. */
+    0%   { box-shadow: 0 0 6px 2px rgba(255,214,0,0.35); }
+    50%  { box-shadow: 0 0 14px 6px rgba(255,214,0,0.60); }
+    100% { box-shadow: 0 0 6px 2px rgba(255,214,0,0.35); }
+  }
 
-  /* Ensure labels inside the settings modal are visible on dark backgrounds */
-  #settingsModal label {
-    color: var(--text-main);
-  }
+  /* ── FIX 3: General CesiumJS label pill style applied via JS ── */
 </style>
 </head>
 
 <body>
 <div id="cesiumContainer"></div>
+<div id="solarMarkersOverlay"></div>
 
 <div id="overviewModal" class="modal-overlay" style="display:flex;">
   <div class="modal-content" style="text-align:center; max-width:560px;">
@@ -758,38 +981,6 @@
       solar panels at the individual building level, supported by certified label information where available.
     </p>
     <button class="modal-btn" onclick="document.getElementById('overviewModal').style.display='none'">Start Exploring</button>
-  </div>
-</div>
-
-<!-- Stakeholders vs Users Modal -->
-<div id="stakeholdersModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) this.style.display='none'">
-  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:600px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-      <h1 style="margin:0;"><span style="color:var(--accent-primary)">👥</span> Stakeholders vs Users</h1>
-      <button onclick="document.getElementById('stakeholdersModal').style.display='none'"
-        style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">×</button>
-    </div>
-    <div style="overflow-y:auto; max-height:70vh;">
-      <h3 style="margin-top:0;">Stakeholders and Users</h3>
-      <table style="width:100%; font-size:12px; color:var(--text-main); border-collapse:collapse; margin-bottom:10px;">
-        <tr style="color:var(--accent-primary); text-transform:uppercase; font-size:11px;">
-          <th style="text-align:left; padding:4px 6px;">Stakeholders</th>
-          <th style="text-align:left; padding:4px 6px;">Users</th>
-        </tr>
-        <tr><td style="padding:4px 6px;">Residents</td><td style="padding:4px 6px;">Municipal planners</td></tr>
-        <tr><td style="padding:4px 6px;">Local businesses</td><td style="padding:4px 6px;">Sustainability officers</td></tr>
-        <tr><td style="padding:4px 6px;">Schools</td><td style="padding:4px 6px;">Housing association asset managers</td></tr>
-        <tr><td style="padding:4px 6px;">NGOs</td><td style="padding:4px 6px;">Consultants/researchers</td></tr>
-        <tr><td style="padding:4px 6px;">Municipality</td><td style="padding:4px 6px;"></td></tr>
-        <tr><td style="padding:4px 6px;">Utilities</td><td style="padding:4px 6px;"></td></tr>
-      </table>
-      <h3>User Stories</h3>
-      <ul style="list-style:disc; margin-left:20px; font-size:12px; color:var(--text-main); line-height:1.5;">
-        <li>Municipal planner compares scenarios under a budget cap.</li>
-        <li>Housing corporation prioritizes buildings for retrofit and PV.</li>
-        <li>Community group explores greening options and trade-offs.</li>
-      </ul>
-    </div>
   </div>
 </div>
 
@@ -917,64 +1108,6 @@
   </div>
 </div>
 
-<!-- Advanced Settings Modal -->
-<div id="settingsModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) this.style.display='none'">
-  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:600px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-      <h1 style="margin:0;"><span style="color:var(--accent-primary)">⚙️</span> Advanced Settings</h1>
-      <button onclick="document.getElementById('settingsModal').style.display='none'"
-        style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">×</button>
-    </div>
-    <div style="overflow-y:auto; max-height:70vh;">
-      <h3 style="margin-top:0;">Prices (€/unit)</h3>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-        <label style="font-size:11px;">Electricity import €/kWh<br><input id="paramPriceElecImport" type="number" step="0.01" class="tiny-input"></label>
-        <label style="font-size:11px;">Gas € per m³<br><input id="paramPriceGas" type="number" step="0.01" class="tiny-input"></label>
-        <label style="font-size:11px;">Feed‑in €/kWh<br><input id="paramPriceFeedIn" type="number" step="0.01" class="tiny-input"></label>
-        <label style="font-size:11px;">P2P €/kWh<br><input id="paramPriceP2P" type="number" step="0.01" class="tiny-input"></label>
-      </div>
-      <h3>Costs</h3>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-        <label style="font-size:11px;">PV cost €/Wp<br><input id="paramCostPvPerWp" type="number" step="0.01" class="tiny-input"></label>
-        <label style="font-size:11px;">Insulation €/m²<br><input id="paramCostInsul" type="number" step="0.1" class="tiny-input"></label>
-        <label style="font-size:11px;">Hybrid heat pump €<br><input id="paramCostHybridHp" type="number" step="100" class="tiny-input"></label>
-        <label style="font-size:11px;">All‑electric heat pump €<br><input id="paramCostAllHp" type="number" step="100" class="tiny-input"></label>
-      </div>
-      <h3>CO₂ factors (kg CO₂ per unit)</h3>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-        <label style="font-size:11px;">Electricity kgCO₂/kWh<br><input id="paramCo2Elec" type="number" step="0.001" class="tiny-input"></label>
-        <label style="font-size:11px;">Gas kgCO₂/m³<br><input id="paramCo2Gas" type="number" step="0.001" class="tiny-input"></label>
-      </div>
-      <h3>CBA parameters</h3>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-        <label style="font-size:11px;">Discount rate (%)<br><input id="cbaDiscountRate" type="number" step="0.1" class="tiny-input"></label>
-        <label style="font-size:11px;">Horizon (years)<br><input id="cbaHorizon" type="number" step="1" class="tiny-input"></label>
-      </div>
-      <h3>Budget cap</h3>
-      <div style="margin-bottom:10px;">
-        <label style="font-size:11px;">Max investment €<br><input id="budgetCap" type="number" step="100" class="tiny-input"></label>
-      </div>
-      <details style="margin-top:12px; font-size:12px; color:var(--text-main);">
-        <summary style="cursor:pointer; font-size:13px; font-weight:600; color:var(--accent-primary);">Show equations &amp; assumptions</summary>
-        <div style="margin-top:10px; font-size:12px; color:var(--text-main); line-height:1.4;">
-          <ul style="list-style:disc; margin-left:18px;">
-            <li><b>Energy cost:</b> (gas × price<sub>gas</sub>) + (imported electricity × price<sub>elec</sub>) − (exported electricity × feed‑in tariff)</li>
-            <li><b>CO₂ savings:</b> (baseline energy − new energy) × emission factor</li>
-            <li><b>Cost assumptions:</b> PV cost per Wp (costs.pvPerWp), insulation per m² (costs.insulationSqM), heat pump costs (costs.hybridPump/allElectric)</li>
-            <li><b>NPV:</b> ∑<sub>t=1</sub><sup>T</sup> (Annual savings)/(1 + r)<sup>t</sup> − Capex</li>
-            <li><b>BCR:</b> Present value of benefits ÷ Capex</li>
-            <li><b>Defaults:</b> values drawn from the PARAMS object (units as indicated)</li>
-          </ul>
-        </div>
-      </details>
-      <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="action-btn" style="flex:1; background:var(--accent-primary); color:white;" onclick="applySettings()">Apply</button>
-        <button class="action-btn" style="flex:1; background:rgba(255,255,255,0.1); color:white;" onclick="document.getElementById('settingsModal').style.display='none'">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div id="titleBar" onclick="document.getElementById('overviewModal').style.display='flex'">
   Twekkelerveld Smart Energy Twin
   <!-- Added reset view button to recenter the map when users get lost -->
@@ -982,11 +1115,10 @@
           onclick="event.stopPropagation(); resetCameraView();">↺</button>
 </div>
 <div id="methodBtn" onclick="document.getElementById('methodologyModal').style.display='flex'">Energy Overview</div>
-<!-- Exposed settings button (outside of info panel) -->
-<div id="settingsBtn" onclick="showSettings()">⚙️ Settings</div>
-<!-- New Stakeholders vs Users button -->
-<div id="stakeBtn" onclick="document.getElementById('stakeholdersModal').style.display='flex'">👥 Stakeholders vs Users</div>
 <div id="hoverTooltip"></div>
+
+<!-- Added advanced settings button -->
+<div id="settingsBtn">Settings</div>
 
 <div id="searchBar">
   <input id="searchInput" type="text" placeholder="Search BAG ID or Year..." />
@@ -1111,29 +1243,42 @@
     <span class="section-label">1. Current Status</span>
     <div class="section-group">
       <button id="scenBase" class="mode-btn active" onclick="setScenario('baseline')">
-        <span>Current (Baseline)</span>
-        <div class="layer-right"><div class="layer-info" onclick="openLayerInfo(event,'scen_baseline')">i</div></div>
+        <span>📊 Current (Baseline)</span>
+        <div class="layer-right">
+          <span class="scen-tooltip-wrap" title="Shows current measured energy use — no interventions applied.">ℹ️</span>
+          <div class="layer-info" onclick="openLayerInfo(event,'scen_baseline')">i</div>
+        </div>
       </button>
     </div>
 
     <span class="section-label">2. Future Simulations</span>
     <div class="section-group">
       <button id="scenPV" class="mode-btn" onclick="setScenario('addPV')">
-        <span>More solar panels (+50%)</span>
-        <div class="layer-right"><div class="layer-info" onclick="openLayerInfo(event,'scen_addpv')">i</div></div>
+        <span>☀️ More solar panels (+50%)</span>
+        <div class="layer-right">
+          <span class="scen-tooltip-wrap" title="Simulates adding 50% more rooftop PV — affects Solar &amp; CO₂ layers.">ℹ️</span>
+          <div class="layer-info" onclick="openLayerInfo(event,'scen_addpv')">i</div>
+        </div>
       </button>
       <button id="scenIns" class="mode-btn" onclick="setScenario('insulate')">
-        <span>Better insulation</span>
-        <div class="layer-right"><div class="layer-info" onclick="openLayerInfo(event,'scen_insulate')">i</div></div>
+        <span>🏠 Better insulation</span>
+        <div class="layer-right">
+          <span class="scen-tooltip-wrap" title="Reduces gas demand via improved insulation — affects Energy Use &amp; CO₂ layers.">ℹ️</span>
+          <div class="layer-info" onclick="openLayerInfo(event,'scen_insulate')">i</div>
+        </div>
       </button>
       <button id="scenHP" class="mode-btn" onclick="setScenario('heatPump')">
-        <span>Heat pump transition</span>
-        <div class="layer-right"><div class="layer-info" onclick="openLayerInfo(event,'scen_hp')">i</div></div>
+        <span>⚡ Heat pump transition</span>
+        <div class="layer-right">
+          <span class="scen-tooltip-wrap" title="Replaces gas with electric heat pumps — affects Energy Use &amp; CO₂ layers.">ℹ️</span>
+          <div class="layer-info" onclick="openLayerInfo(event,'scen_hp')">i</div>
+        </div>
       </button>
       <button id="scenP2P" class="mode-btn" onclick="setScenario('p2p')">
-        <span>Local energy sharing</span>
+        <span>🔄 Local energy sharing</span>
         <div class="layer-right">
           <div class="indicator-icon" style="background:linear-gradient(90deg, #f87171, #60a5fa)"></div>
+          <span class="scen-tooltip-wrap" title="Peer-to-peer energy trading between buildings — affects Solar &amp; CO₂ layers.">ℹ️</span>
           <div class="layer-info" onclick="openLayerInfo(event,'scen_p2p')">i</div>
         </div>
       </button>
@@ -1265,6 +1410,99 @@
   <div class="flex-between" style="display:none;">
     <span id="legendMin">Low</span> <span id="legendMax">High</span>
   </div>
+
+  <!-- ═══════ INTERVENTIONS SECTION ═══════ -->
+  <h3 style="margin-top:18px;">Interventions</h3>
+  <div class="section-group">
+
+    <!-- Zone Drawing Tool -->
+    <!-- Combine indicator, label and info icon in a flex container.  The info icon shows how the retrofit zone calculations work. -->
+    <button class="mode-btn" id="btnDrawZone" onclick="toggleRetrofitZoneDraw()">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span class="indicator-icon" style="background:#f59e0b;"></span>
+        <span>Draw Retrofit Zone</span>
+      </div>
+      <span class="layer-info" onclick="openLayerInfo(null,'interv_retrofit_zone')" title="How does the retrofit zone tool calculate impacts?">i</span>
+    </button>
+    <div id="zoneDrawControls" style="display:none; margin-top:8px;">
+      <div style="font-size:11px; color:rgba(226,232,240,0.8); margin-bottom:8px;">
+        Click to place vertices. Right-click to close polygon.
+      </div>
+      <div class="section-label">Retrofit Package</div>
+      <div class="retrofit-types" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
+        <div class="rt-type selected" id="rt-basic" onclick="selectRetrofitType('basic',this)">Basic</div>
+        <div class="rt-type" id="rt-standard" onclick="selectRetrofitType('standard',this)">Standard</div>
+        <div class="rt-type" id="rt-deep" onclick="selectRetrofitType('deep',this)">Deep Retrofit</div>
+        <div class="rt-type" id="rt-solar" onclick="selectRetrofitType('solar',this)">Solar-Only</div>
+      </div>
+      <button class="mode-btn" style="background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.4); color:#fca5a5;" onclick="cancelRetrofitZoneDraw()">
+        Cancel Drawing
+      </button>
+    </div>
+
+    <!-- Solar Placement Tool -->
+    <button class="mode-btn" id="btnSolarPlace" onclick="toggleSolarPlacement()">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span class="indicator-icon" style="background:#facc15;"></span>
+        <span>Place Solar Array</span>
+      </div>
+      <span class="layer-info" onclick="openLayerInfo(null,'interv_solar')" title="How is the solar array potential estimated?">i</span>
+    </button>
+
+    <!-- Energy Flow Animation -->
+    <button class="mode-btn" id="btnEnergyFlow" onclick="toggleEnergyFlows()">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span class="indicator-icon" style="background:#22d3ee;"></span>
+        <span>Show Energy Flows</span>
+      </div>
+      <span class="layer-info" onclick="openLayerInfo(null,'interv_flow')" title="What does the energy flow animation represent?">i</span>
+    </button>
+    <!-- Undo retrofit zone button allows the user to remove the most recently drawn zone -->
+    <button class="mode-btn" id="btnUndoZone" onclick="undoRetrofitZone()" style="margin-top:8px; background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.4); color:#fca5a5; display:none;">
+      Undo Last Zone
+    </button>
+  </div>
+
+  <!-- Scenario Comparison Panel -->
+  <h3 style="margin-top:18px;">Scenario Comparison</h3>
+  <div id="scenarioComparePanel" class="section-group" style="padding:8px;">
+    <div id="scenarioCompareContent">
+      <div style="font-size:11px; color:rgba(226,232,240,0.7);">
+        Apply a retrofit scenario above or use the zone drawing tool to see comparison metrics.
+      </div>
+    </div>
+    <div id="retroZoneList" style="margin-top:10px;"></div>
+    <div id="scenarioAggregates" style="display:none; margin-top:10px;">
+      <div class="section-label">Aggregate Impact</div>
+      <div class="compare-row">
+        <span class="compare-label">Buildings affected</span>
+        <span class="compare-val" id="aggBuildingCount">0</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-label">Total investment</span>
+        <span class="compare-val" id="aggInvestment">€0</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-label">Annual savings</span>
+        <span class="compare-val" id="aggSavings" style="color:#2dd4bf;">0 kWh</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-label">CO₂ reduction</span>
+        <span class="compare-val" id="aggCO2" style="color:#22c55e;">0 kg/yr</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-label">Avg payback</span>
+        <span class="compare-val" id="aggPayback">— yrs</span>
+      </div>
+    </div>
+    <button class="mode-btn" id="btnExportScenario" onclick="exportEnergyScenario()" style="margin-top:10px; display:none;">
+      Export Scenario to Nexus
+    </button>
+    <button class="mode-btn" id="btnDownloadScenario" onclick="generateScenarioSummaryPDF()" style="margin-top:10px;">
+      📄 Download Summary PDF
+    </button>
+  </div>
+
 </div>
 
 <div id="infoPanel">
@@ -1281,6 +1519,55 @@
     <button id="btnIndivRetro" class="indiv-btn" onclick="toggleIndividualUpgrade('Retrofit')">+ Add insulation</button>
   </div>
 
+  <!-- Enhanced Retrofit Configurator -->
+  <div id="retrofitConfigurator" style="display:none; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px; margin-top:10px;">
+    <div class="section-label" style="margin-bottom:8px;">Retrofit Configurator</div>
+
+    <div class="retro-config-row">
+      <span>Solar Panels</span>
+      <input type="range" id="cfgSolarPct" min="0" max="100" value="0" step="5"
+             oninput="onRetrofitConfigChange()" style="width:80px;" />
+      <span id="cfgSolarPctVal" style="width:35px; text-align:right; color:var(--accent-primary);">0%</span>
+    </div>
+    <div class="retro-config-row">
+      <span>Wall Insulation</span>
+      <select id="cfgWallIns" onchange="onRetrofitConfigChange()" style="width:100px;">
+        <option value="none">None</option>
+        <option value="basic">Basic</option>
+        <option value="advanced">Advanced</option>
+      </select>
+    </div>
+    <div class="retro-config-row">
+      <span>Roof Insulation</span>
+      <select id="cfgRoofIns" onchange="onRetrofitConfigChange()" style="width:100px;">
+        <option value="none">None</option>
+        <option value="basic">Basic</option>
+        <option value="advanced">Advanced</option>
+      </select>
+    </div>
+    <div class="retro-config-row">
+      <span>Heat Pump</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="cfgHeatPump" onchange="onRetrofitConfigChange()" />
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div id="cfgResults" style="margin-top:10px; display:none;">
+      <div class="trade-row"><span>New energy label</span><span id="cfgNewLabel" style="font-weight:700; color:#2dd4bf;">—</span></div>
+      <div class="trade-row"><span>Annual savings</span><span id="cfgSavingsKwh" class="trade-good">0 kWh</span></div>
+      <div class="trade-row"><span>CO₂ reduction</span><span id="cfgCO2Red" class="trade-good">0 kg/yr</span></div>
+      <div class="trade-row"><span>Investment cost</span><span id="cfgCost" class="trade-bad">€0</span></div>
+      <div class="trade-row"><span>Payback period</span><span id="cfgPayback" style="color:white; font-weight:600;">— yrs</span></div>
+    </div>
+
+    <div style="display:flex; gap:6px; margin-top:10px;">
+      <button class="indiv-btn" style="flex:1;" onclick="applyRetrofitToBuilding()">Apply to Building</button>
+      <button class="indiv-btn" style="flex:1; font-size:10px;" onclick="applyRetrofitToSimilar()">Apply to All Similar</button>
+    </div>
+    <button class="indiv-btn" style="width:100%; margin-top:6px; border-color:rgba(148,163,184,0.3);" onclick="resetRetrofitConfig()">Reset to defaults</button>
+  </div>
+
   <div id="dynamicStats"></div>
 
   <div id="tradeoffBox" style="display:none;">
@@ -1290,8 +1577,6 @@
     <div class="trade-row"><span>Opex new (annual)</span> <span id="tradeOpexNew" class="trade-good">-</span></div>
     <div class="trade-row"><span>Annual savings</span> <span id="tradeSave" class="trade-good">-</span></div>
     <div class="trade-row"><span>Break-even time</span> <span id="tradePay" style="color:white; font-weight:600;">-</span></div>
-    <div class="trade-row"><span>NPV (discounted)</span> <span id="tradeNPV" class="trade-good">-</span></div>
-    <div class="trade-row"><span>Benefit-cost ratio</span> <span id="tradeBCR" class="trade-good">-</span></div>
     <div id="tradeNote" style="margin-top:8px; font-size:11px; color:#93c5fd; font-style:italic; border-top:1px solid rgba(255,255,255,0.1); padding-top:6px;"></div>
   </div>
 
@@ -1301,8 +1586,6 @@
 
   <div id="downloadRow">
     <button id="btnDownloadPdf" class="action-btn" onclick="generatePDF()">📄 Download PDF Report</button>
-    <button id="btnExportJson" class="action-btn" onclick="exportJSON()">🗄️ Export JSON</button>
-    <button id="btnOpenSettings" class="action-btn" onclick="showSettings()" style="display:none;">⚙️ Settings</button>
   </div>
 </div>
 
@@ -1325,16 +1608,98 @@
 </div>
 
 <script>
+/* ============================================================
+   TASK 6 — Canvas-based color ramp for raster imagery
+   Replaces flat greyscale PNGs with semantically colored renders.
+   For a true COG, run convert_to_cog.py in the project folder.
+============================================================ */
+/**
+ * @param {string} url  - URL of the source greyscale PNG
+ * @param {string} mode - 'solar' (yellow→red) | 'shadow' (white→black) | 'uhi' (blue→red)
+ * @returns {Promise<string>} data URL of the colorized canvas
+ */
+function applyRasterColorRamp(url, mode) {
+  const RAMPS = {
+    solar: [
+      { v: 0,   r: 255, g: 255, b: 0   },  // Yellow (#FFFF00) - Low kWh
+      { v: 128, r: 255, g: 165, b: 0   },  // Orange (#FFA500)
+      { v: 255, r: 139, g: 0,   b: 0   }   // Dark Red (#8B0000) - High Solar
+    ],
+    shadow: [
+      { v: 0,   r: 255, g: 255, b: 255 },  // White - No shadow
+      { v: 85,  r: 200, g: 200, b: 200 },  // Light Grey
+      { v: 170, r: 100, g: 100, b: 100 },  // Dark Grey
+      { v: 255, r: 26,  g: 26,  b: 26  }   // Near Black (#1a1a1a) - Full shadow
+    ],
+    uhi: [
+      { v: 0,   r: 255, g: 255, b: 204 },  // Light Yellow (#FFFFCC) - Cool
+      { v: 85,  r: 255, g: 165, b: 0   },  // Orange
+      { v: 170, r: 204, g: 0,   b: 0   },  // Deep Red (#CC0000) - Hot
+      { v: 255, r: 75,  g: 0,   b: 130 }   // Dark Purple (#4B0082) - Extreme
+    ]
+  };
+
+  function lerpRamp(ramp, v) {
+    for (let i = 0; i < ramp.length - 1; i++) {
+      const lo = ramp[i], hi = ramp[i + 1];
+      if (v >= lo.v && v <= hi.v) {
+        const t = (v - lo.v) / (hi.v - lo.v);
+        return [
+          Math.round(lo.r + t * (hi.r - lo.r)),
+          Math.round(lo.g + t * (hi.g - lo.g)),
+          Math.round(lo.b + t * (hi.b - lo.b))
+        ];
+      }
+    }
+    const last = ramp[ramp.length - 1];
+    return [last.r, last.g, last.b];
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      const ctx = c.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0);
+      const idata = ctx.getImageData(0, 0, c.width, c.height);
+      const d = idata.data;
+      const ramp = RAMPS[mode] || RAMPS.uhi;
+
+      for (let i = 0; i < d.length; i += 4) {
+        if (d[i + 3] < 10) continue;
+        const grey = Math.round(0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]);
+        // Make near-white pixels (background/nodata) fully transparent
+        if (grey >= 252 && d[i] > 248 && d[i+1] > 248 && d[i+2] > 248) {
+          d[i+3] = 0; // fully transparent - these are background pixels
+          continue;
+        }
+        const [r, g, b] = lerpRamp(ramp, grey);
+        d[i]     = r;
+        d[i + 1] = g;
+        d[i + 2] = b;
+        d[i + 3] = Math.max(d[i + 3], 160); // ensure visibility
+      }
+      ctx.putImageData(idata, 0, 0);
+      resolve(c.toDataURL('image/png'));
+    };
+    img.onerror = () => resolve(url); // fallback to raw PNG
+    img.src = url;
+  });
+}
+
 /* ------------------------------------------------------------
   Run via local server (Live Server).
 ------------------------------------------------------------ */
 
 // ------------------------------------------------------------
-// R2 config helper. Defines a dataUrl helper that prepends any
-// base/prefix provided via DT_CONFIG (injected via config.js). When
-// R2_BASE is empty the helper returns the original filename. This
-// mirrors the behaviour in the local prototype so that asset paths
-// work both locally and on Cloudflare.
+// Cloudflare Pages + R2 support
+// If config.js defines window.DT_CONFIG.R2_BASE, all data assets
+// are loaded from that public R2 bucket. If empty, local relative
+// paths are used (works on localhost / Live Server).
+// ------------------------------------------------------------
 const R2_BASE   = (window.DT_CONFIG?.R2_BASE || "").replace(/\/+$/, "");
 const R2_PREFIX = (window.DT_CONFIG?.R2_PREFIX || "").replace(/^\/+|\/+$/g, "");
 function dataUrl(name){
@@ -1348,40 +1713,30 @@ function dataUrl(name){
 // =============================
 // 0) FILES 
 // =============================
-// Shadow raster (ground plane). We map candidate filenames through
-// dataUrl() so that R2 prefixes are applied when configured. Filenames can be
-// easy to mismatch (spaces/case/"updated"); using an array of options
-// improves robustness.
-const SHADOW_PNG_CANDIDATES = [
-  "Aggregated Shadow Raster_updated.png",
-  "Aggregated Shadow Raster updated.png",
-  "Aggregated Shadow Raster.png"
-].map(dataUrl);
-const SHADOW_PGW_CANDIDATES = [
-  "Aggregated Shadow Raster_updated.pgw",
-  "Aggregated Shadow Raster updated.pgw",
-  "Aggregated Shadow Raster.pgw"
-].map(dataUrl);
-const LOCAL_SHADOW_PNG = SHADOW_PNG_CANDIDATES[0];
-const LOCAL_SHADOW_PGW = SHADOW_PGW_CANDIDATES[0];
+// Updated shadow raster filenames to use the new dataset. Changing these names
+// ensures the application loads the updated ground‑plane shadow raster when toggled.
+const LOCAL_SHADOW_PNG = dataUrl("Aggregated Shadow Raster_updated.png");
+const LOCAL_SHADOW_PGW = dataUrl("Aggregated Shadow Raster_updated.pgw");
 
-// Irradiance raster. Use dataUrl() to handle R2 prefixes. These names
-// correspond to the roof irradiance PNG and its world file.
 const LOCAL_IRR_PNG    = dataUrl("Roof Irradiance Raster(kWh).png");
 const LOCAL_IRR_PGW    = dataUrl("Roof Irradiance Raster(kWh).pgw");
 
+// Hardcoded fallback bounds computed from PGW files
+const SHADOW_BOUNDS = Cesium.Rectangle.fromDegrees(6.840033, 52.224755, 6.871443, 52.236762);
+const IRR_BOUNDS    = Cesium.Rectangle.fromDegrees(6.832624, 52.215689, 6.878580, 52.244339);
 
 const IRR_SCALE_JSON   = null;
 
 // ✅ EnergyEst MUST be loaded from your BAG-PAND fixed table (EnergyEst column)
 const CSV_CANDIDATES = [
+  dataUrl("Twekklerveld_bag_pand_FIXED.csv"),
+  dataUrl("twekkelerveld_buildings_energy_master.csv"),
   dataUrl("Twekkelerveld_bag_pand_FIXED.csv"),
-  dataUrl("twekkelerveld_bag_pand_FIXED.csv"),
-  dataUrl("Twekkelerveld_bag_pand_Fixed.csv")
+  dataUrl("twekkelerveld_bag_pand_FIXED.csv")
 ];
 let CSV_FILE_ACTUAL = null;
 
-// LOD 1 footprint file (GeoJSON). Use dataUrl() to resolve correct location.
+// LOD 1 footprint file
 const GEOJSON_FILE = dataUrl("twekkelerveld_buildings_energy_ageEUI_wgs84_201225.geojson");
 
 // =============================
@@ -1409,14 +1764,43 @@ const bounds = {
 // =============================
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1NmE1ZGMwYy0xNTQxLTRmMzgtYWM3NS0wYWUzMjk3MjNmYTAiLCJpZCI6MzYwODkxLCJpYXQiOjE3NjM0ODU3MTF9.D_qofjwKf6t1mnUO06Hkz-t7xr2UrPHklhG3a5Lfz8E";
 
+// Initialise the terrain provider. If Cesium or Terrain modules are
+// unavailable (e.g. due to network failures) fall back to the default
+// ellipsoid. The optional chaining guards against undefined modules.
+let terrainOption;
+try {
+  if (Cesium && Cesium.Terrain && typeof Cesium.Terrain.fromWorldTerrain === 'function') {
+    terrainOption = Cesium.Terrain.fromWorldTerrain();
+  }
+} catch (e) {
+  console.warn('CesiumWorldTerrain unavailable, using ellipsoid:', e);
+}
+
 const viewer = new Cesium.Viewer("cesiumContainer", {
-  terrain: Cesium.Terrain.fromWorldTerrain(),
+  terrain: terrainOption,
   animation: false, timeline: false, baseLayerPicker: false,
   selectionIndicator: true, infoBox: false, navigationHelpButton: false,
   sceneModePicker: false, homeButton: false,
   shadows: true,
   contextOptions: { webgl: { alpha: true, antialias: true, preserveDrawingBuffer: true } }
 });
+
+// Fallback if terrain loading fails (e.g. 401 expired token)
+// If the terrain provider is defined, hook into its ready promise to fall back
+// to an ellipsoid when the provider fails (e.g. expired token). Guard the
+// chain so undefined values do not throw.  Older browsers may not support
+// optional chaining so we use explicit checks instead.
+{
+  const globe = viewer.scene && viewer.scene.globe;
+  const tp = globe && globe.terrainProvider;
+  if (tp && tp.readyPromise && typeof tp.readyPromise.then === 'function') {
+    tp.readyPromise.then(null, function () {
+      console.warn('Terrain provider failed (401?), falling back to EllipsoidTerrainProvider');
+      viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider();
+    });
+  }
+}
+
 viewer.scene.requestRenderMode = true;
 viewer.scene.maximumRenderTimeChange = Infinity;
 viewer.scene.globe.enableLighting = true;
@@ -1435,11 +1819,9 @@ viewer.camera.setView({
 
 // Reset camera to the initial study area view when the reset button is clicked.
 function resetCameraView(){
-  // Fly the camera back to the original neighbourhood location.  Use a brief duration
-  // for a smooth transition rather than an instant jump.
   // Fly the camera back to the study area.  When entity data has loaded, reuse the
   // bounding extent of those entities for a more accurate reset.  Otherwise fall back
-  // to the original coordinates.
+  // to the original coordinates.  Use a brief duration for a smooth transition.
   if (Array.isArray(myEntities) && myEntities.length > 0) {
     viewer.flyTo(myEntities, {
       duration: 1.5,
@@ -1510,27 +1892,15 @@ const LABEL_COLOR_MAP = {
 // candidate defines both a URL (relative to this HTML file) and the
 // expected type.
 const LABEL_SOURCES = [
-  { url: "energy_labels_meta.json",       type: "json" },
-  { url: "energy_labels_meta",            type: "json" },
-  { url: "energy_labels_twekkelerveld.csv", type: "csv" },
-  { url: "energy_labels_twekkelerveld.xlsx", type: "xlsx" },
-  { url: "energy_labels_twekkelerveld",    type: "csv" }
+  { url: dataUrl("energy_labels_meta.json"),         type: "json" },
+  { url: dataUrl("energy_labels_twekkelerveld.csv"), type: "csv" },
+  { url: dataUrl("energy_labels_twekkelerveld.xlsx"), type: "xlsx" }
 ];
 let labelMap = new Map();
 let labelCoverageCount = 0;
 let labelTotalCount = 0;
 let labelLastRefreshed = null;
 let showCertifiedOnly = false;
-// --------------------------------------------------------------------
-// Twekkelerveld contains approximately 1 465 buildings (see intro).
-// In some deployments a GeoJSON dataset may not be available at run‑time.
-// When no entities have been loaded the label integration should still
-// report the total number of buildings so that coverage displays "0 / 1465"
-// instead of "0 / 0".  Define a constant for the approximate building
-// count and fall back to this value when myEntities is empty.  If your
-// dataset contains a different number of buildings you can adjust the
-// constant below accordingly.
-const TOTAL_BUILDINGS_APPROX = 1465;
 
 async function loadEnergyLabels(){
   // Reset any existing state before loading.  This ensures that repeated
@@ -1550,12 +1920,7 @@ async function loadEnergyLabels(){
       // Skip meta candidates during data pass
       if (/meta/i.test(cand.url)) continue;
       try {
-        // Use dataUrl() to construct a fully qualified URL with any Cloudflare R2
-        // prefix.  Without this labels stored on remote storage (e.g. R2) will not
-        // be resolved correctly.  Fall back to the raw filename when no R2
-        // configuration is present.
-        const urlToFetch = dataUrl(cand.url);
-        const res = await fetch(encodeURI(urlToFetch), { cache: "no-store" });
+        const res = await fetch(encodeURI(cand.url), { cache: "no-store" });
         if (!res.ok) continue;
         const ext = (cand.url.split('.').pop() || cand.type || '').toLowerCase();
         const type = cand.type || (ext === 'json' ? 'json' : (ext === 'csv' ? 'csv' : ((ext === 'xlsx' || ext === 'xls') ? 'xlsx' : 'text')));
@@ -1653,8 +2018,7 @@ async function loadEnergyLabels(){
     for (const cand of LABEL_SOURCES) {
       if (!/meta/i.test(cand.url)) continue;
       try {
-        const urlToFetchMeta = dataUrl(cand.url);
-        const res = await fetch(encodeURI(urlToFetchMeta), { cache: "no-store" });
+        const res = await fetch(encodeURI(cand.url), { cache: "no-store" });
         if (!res.ok) continue;
         const text = await res.text();
         let obj;
@@ -1679,13 +2043,7 @@ async function loadEnergyLabels(){
     // building gets a LabelLetter, LabelGroup (AB / CD / EG) and ProvSource
     // annotation.  Buildings without a matching ID are marked as proxies.
     let matchedCount = 0;
-    // Determine the total number of buildings.  Prefer the number of loaded
-    // entities if available; otherwise fall back to the approximate constant.
-    if (Array.isArray(myEntities) && myEntities.length > 0) {
-      labelTotalCount = myEntities.length;
-    } else {
-      labelTotalCount = TOTAL_BUILDINGS_APPROX;
-    }
+    labelTotalCount = myEntities ? myEntities.length : 0;
     if (myEntities) {
       for (const e of myEntities) {
         const b = e._b;
@@ -1925,8 +2283,49 @@ const LAYER_INFO = {
       <div class="calc-step"><span class="calc-label">Value range</span><span class="calc-val">0–255 (higher = more shade)</span></div>
       <div class="calc-step"><span class="calc-label">Solar impact</span><span class="calc-val">Shade reduction controls how shade affects solar output.</span></div>
     `
-  }
-};
+  },
+  interv_retrofit_zone: {
+    sub: "Intervention • Retrofit zones",
+    html: `
+      <div class="calc-step"><span class="calc-label">What it does</span><span class="calc-val">Draw a polygon on the map to retrofit all buildings inside the zone using a selected package.</span></div>
+      <div class="calc-step"><span class="calc-label">Input data</span><span class="calc-val">Building footprints, floor area and energy intensity from the LOD 1 dataset.</span></div>
+      <div class="calc-step"><span class="calc-label">Retrofit packages</span><span class="calc-val">Choose Basic, Standard, Deep or Solar‑Only. Each package defines insulation levels, solar fraction and cost per m².</span></div>
+      <div class="calc-step"><span class="calc-label">Calculations</span><span class="calc-val">For each building, annual energy use (EUI × area) is reduced by the package savings percentage plus extra solar generation (roof area × solar percentage × 180 kWh/m²). Cost = package cost × area. A new energy label is estimated from the reduced EUI.</span></div>
+      <div class="calc-step"><span class="calc-label">Outputs</span><span class="calc-val">Number of affected buildings, total investment cost, annual energy savings, CO₂ reduction and payback period.</span></div>
+      <div class="calc-step"><span class="calc-label">Energy savings</span><span class="calc-val">Basic: ~15 % reduction; Standard: ~30 %; Deep retrofit: ~55 %. Dutch homes retrofitted to label A+ typically cut heating demand by 40–70 % compared to pre-1992 stock.</span></div>
+      <div class="calc-step"><span class="calc-label">CO₂ context</span><span class="calc-val">A standard package on a 120 m² label-F dwelling saves roughly 1 200–1 800 kg CO₂/yr — equivalent to eliminating one car from the road annually.</span></div>
+      <div class="calc-step"><span class="calc-label">Cost range</span><span class="calc-val">Basic: €85/m²; Standard: €150/m²; Deep: €280/m²; Solar-Only: €65/m². Dutch national subsidy schemes (ISDE, Investeringssubsidie) can cover 15–40 % of eligible costs.</span></div>
+      <div class="calc-step"><span class="calc-label">🇬🇳 Policy</span><span class="calc-val">The Dutch <em>Programma Aardgasvrije Wijken</em> (PAW) targets natural-gas-free neighbourhoods by 2050. Deep retrofits achieving label A++ are eligible for mortgage tax benefits under the <em>Energiebespaarhypotheek</em>.</span></div>
+      <div class="calc-step"><span class="calc-label">💡 Did you know?</span><span class="calc-val">The Netherlands has one of the oldest housing stocks in Europe — ~40 % of dwellings were built before 1975. Pre-1970s homes without cavity wall insulation can lose up to 35 % of heat through walls alone.</span></div>
+    `
+  },
+  interv_solar: {
+    sub: "Intervention • Solar arrays",
+    html: `
+      <div class="calc-step"><span class="calc-label">What it does</span><span class="calc-val">Place a solar array on a building by clicking its roof. Each click installs one array.</span></div>
+      <div class="calc-step"><span class="calc-label">Input data</span><span class="calc-val">Building footprint and floor area; roof area is estimated as 60 % of floor area if no specific field exists.</span></div>
+      <div class="calc-step"><span class="calc-label">Assumptions</span><span class="calc-val">70 % of the roof is usable. Panels deliver approximately 200 Wp/m² and 180 kWh/m² per year. 35 % of generated electricity is self‑consumed; the remainder is exported. Installation cost is about €200/m².</span></div>
+      <div class="calc-step"><span class="calc-label">Calculations</span><span class="calc-val">Usable roof area × 0.2 kW/m² gives peak power (kWp). Annual yield = usable roof area × 180 kWh. Payback = cost / annual revenue, where revenue = self-consumed yield × €0.25/kWh + exported yield × €0.07/kWh.</span></div>
+      <div class="calc-step"><span class="calc-label">Outputs</span><span class="calc-val">Peak power (kWp), annual yield (kWh), investment cost (€), self‑consumption vs export proportions, and payback period.</span></div>
+      <div class="calc-step"><span class="calc-label">Energy savings</span><span class="calc-val">A typical Dutch row house can generate 3 000–5 000 kWh/yr with rooftop solar, covering 60–90 % of average annual household electricity demand.</span></div>
+      <div class="calc-step"><span class="calc-label">CO₂ reduction</span><span class="calc-val">Each kWp of solar avoids ~0.42 kg CO₂ per kWh generated (Dutch grid, 2023 avg). A 5 kWp rooftop system saves approximately 650–800 kg CO₂/yr.</span></div>
+      <div class="calc-step"><span class="calc-label">Cost range</span><span class="calc-val">Residential solar in the Netherlands costs €1 000–1 500 per kWp installed (2024). Payback periods range from 7–12 years depending on self-consumption rate and feed-in tariff.</span></div>
+      <div class="calc-step"><span class="calc-label">🇬🇳 Policy</span><span class="calc-val">The Dutch <em>Klimaatakkoord</em> targets 70 TWh of solar generation by 2030. Owners benefit from the <em>salderingsregeling</em> (net metering) and SDE++ subsidies for larger installations.</span></div>
+      <div class="calc-step"><span class="calc-label">💡 Did you know?</span><span class="calc-val">The Netherlands added 4.3 GWp of solar capacity in 2023 alone, becoming one of the fastest-growing solar markets per capita in Europe. Enschede’s flat roof typology is highly suitable for maximising yield.</span></div>
+    `
+  },
+  interv_flow: {
+    sub: "Intervention • Energy flows",
+    html: `
+      <div class="calc-step"><span class="calc-label">What it does</span><span class="calc-val">Visualises energy exchange between buildings with solar panels and their neighbours, with flow indicators anchored to actual building locations.</span></div>
+      <div class="calc-step"><span class="calc-label">Visual encoding</span><span class="calc-val">🟡 Yellow pulsing = high solar exporter (&gt;50 % surplus to grid); 🟢 Green = self-sufficient (&gt;50 % self-consumed); 🔵 Blue = grid-dependent. Animated dashed lines show flow direction from producer toward grid or consumer.</span></div>
+      <div class="calc-step"><span class="calc-label">Input data</span><span class="calc-val">PV potential for each building and the self‑sufficiency ratio (share of demand met by on‑site PV).</span></div>
+      <div class="calc-step"><span class="calc-label">Assumptions</span><span class="calc-val">Samples up to 30 PV‑equipped buildings. Polylines connect producers to nearby demand centres. This is a qualitative demonstration of neighbourhood energy dynamics.</span></div>
+      <div class="calc-step"><span class="calc-label">P2P energy trading</span><span class="calc-val">In peer-to-peer (P2P) scenarios, surplus solar can be traded at ~€0.15/kWh between neighbours — higher than grid export tariffs (~€0.07/kWh) but lower than import rates, creating economic incentive for local energy sharing.</span></div>
+      <div class="calc-step"><span class="calc-label">🇬🇳 Policy</span><span class="calc-val">The Dutch <em>Energiewet</em> (Energy Act, 2024) creates a legal framework for local energy communities (<em>energiegemeenschappen</em>) to share locally generated renewable power within a neighbourhood.</span></div>
+      <div class="calc-step"><span class="calc-label">💡 Did you know?</span><span class="calc-val">If all suitable roofs in Twekkelerveld installed solar panels, the neighbourhood could collectively cover ~40 % of its total annual electricity demand — potentially becoming a net exporter in summer months.</span></div>
+    `
+  }};
 
 function openDynamicHelp(){
   const inLod2View = document.getElementById('viewReal').classList.contains('active');
@@ -2276,12 +2675,20 @@ class RasterSampler {
       );
     }
 
+    // ---- TASK 6: Apply color ramp to raster imagery before displaying ----
+    // For irradiance (solar): yellow → orange → red  (low → high kWh)
+    // For shadow/shade:       white → dark grey → black  (low → high shadow hours)
+    const colorizedUrl = await applyRasterColorRamp(
+      encodeURI(this.pngUrl),
+      this.name === 'Sunlight' ? 'solar' : 'shadow'
+    );
+
     const provider = new Cesium.SingleTileImageryProvider({
-      url: encodeURI(this.pngUrl),
+      url: colorizedUrl,
       rectangle: this.rectangleDegrees
     });
     this.imageryLayer = viewer.imageryLayers.addImageryProvider(provider);
-    this.imageryLayer.alpha = 0.65;
+    this.imageryLayer.alpha = 0.70;
     this.imageryLayer.show = false;
 
     viewer.imageryLayers.raiseToTop(this.imageryLayer);
@@ -2328,66 +2735,50 @@ class RasterSampler {
 }
 
 async function loadLocalRasters(){
-  // Load irradiance first (needed for bounds + fallback rectangle).
+  // Attempt to load both rasters in parallel.  If the shadow raster fails
+  // (for example, because its .pgw file is missing), fall back to a simple
+  // single‑tile overlay that uses the irradiance raster's bounds.  This ensures
+  // the shade overlay remains visible even when georeference data is unavailable.
   try {
-    irrRaster = new RasterSampler("Sunlight", LOCAL_IRR_PNG, LOCAL_IRR_PGW);
-    await irrRaster.load();
+    shadowRaster = new RasterSampler("Shade", LOCAL_SHADOW_PNG, LOCAL_SHADOW_PGW);
+    irrRaster    = new RasterSampler("Sunlight", LOCAL_IRR_PNG, LOCAL_IRR_PGW);
+    await Promise.all([shadowRaster.load(), irrRaster.load()]);
   } catch(err) {
-    console.error("Irradiance raster load failed:", err);
-    return;
-  }
-
-  // Try to load the shade raster with its world file. If it fails (missing/CRS mismatch),
-  // fall back to a simple single‑tile overlay using the irradiance bounds.
-  let lastErr = null;
-  let loadedShadow = false;
-  for(let i = 0; i < SHADOW_PNG_CANDIDATES.length; i++){
-    const png = SHADOW_PNG_CANDIDATES[i];
-    const pgw = SHADOW_PGW_CANDIDATES[Math.min(i, SHADOW_PGW_CANDIDATES.length - 1)];
+    console.error("Raster load failed:", err);
+    // Ensure the irradiance raster is loaded; if it fails, we bail out.
     try {
-      shadowRaster = new RasterSampler("Shade", png, pgw);
-      await shadowRaster.load();
-      loadedShadow = true;
-      lastErr = null;
-      console.log("Shade raster loaded:", png, pgw);
-      break;
-    } catch(e) {
-      lastErr = e;
-    }
-  }
-
-  if(!loadedShadow){
-    console.warn("Shade raster georeferenced load failed; using fallback overlay.", lastErr);
-    for(const png of SHADOW_PNG_CANDIDATES){
-      try {
-        const provider = new Cesium.SingleTileImageryProvider({
-          url: encodeURI(png),
-          rectangle: irrRaster.rectangleDegrees
-        });
-        const layer = viewer.imageryLayers.addImageryProvider(provider);
-        layer.alpha = 0.65;
-        layer.show = false;
-        viewer.imageryLayers.raiseToTop(layer);
-        shadowRaster = {
-          name: "Shade (fallback)",
-          pngUrl: png,
-          pgwUrl: null,
-          ready: true,
-          imageryLayer: layer,
-          sampleFromCartographic: () => null
-        };
-        console.log("Shade fallback overlay loaded:", png);
-        loadedShadow = true;
-        break;
-      } catch(fallbackErr) {
-        console.error("Fallback shade overlay failed for", png, fallbackErr);
+      if (!irrRaster) {
+        irrRaster = new RasterSampler("Sunlight", LOCAL_IRR_PNG, LOCAL_IRR_PGW);
       }
+      await irrRaster.load();
+    } catch(subErr) {
+      console.error("Irradiance raster load also failed:", subErr);
+      return;
+    }
+    // Create a color-ramped imagery layer using the shadow PNG and the irradiance bounds
+    try {
+      const colorShadowUrl = await applyRasterColorRamp(encodeURI(LOCAL_SHADOW_PNG), 'shadow');
+      const provider = new Cesium.SingleTileImageryProvider({
+        url: colorShadowUrl,
+        rectangle: (irrRaster && irrRaster.rectangleDegrees) ? irrRaster.rectangleDegrees : IRR_BOUNDS
+      });
+      const layer = viewer.imageryLayers.addImageryProvider(provider);
+      layer.alpha = 0.65;
+      layer.show = false;
+      viewer.imageryLayers.raiseToTop(layer);
+      // Replace shadowRaster with a stub so subsequent code can enable/disable the layer
+      shadowRaster = {
+        name: "Shade (fallback)",
+        pngUrl: LOCAL_SHADOW_PNG,
+        pgwUrl: null,
+        ready: true,
+        imageryLayer: layer,
+        sampleFromCartographic: () => null
+      };
+    } catch(fallbackErr) {
+      console.error("Fallback shadow overlay failed:", fallbackErr);
     }
   }
-
-  // If the user toggled the overlay before rasters finished loading, sync visibility now.
-  if(typeof applyLod2Overlays === 'function') applyLod2Overlays();
-  viewer.scene.requestRender();
 }
 
 // =============================
@@ -2880,22 +3271,7 @@ function applyLod2Overlays(){
 }
 
 // -----------------------------------------------------------------------------
-// Messaging bridge to parent page
-//
-// When this energy twin is embedded inside a parent page via an iframe, we want
-// to keep its economic parameters (prices, costs, CO₂ factors, discount
-// rate, horizon and budget cap) in sync with a single source of truth.  The
-// parent page can send updates via postMessage with a payload describing the
-// new settings.  We also support simple scenario switching via postMessage.
-//
-// Message types:
-// - SETTINGS_UPDATE: payload is an object with optional `prices`, `costs`,
-//   `co2`, `discountRate`, `horizonYears` and `budgetCap` properties.  Each
-//   sub‑object is merged into the corresponding section of PARAMS.  Scalar
-//   values are assigned directly.
-// - SCENARIO_UPDATE: payload is a string identifier (e.g. 'baseline', 'addPV',
-//   'insulate', 'heatPump', 'p2p').  Calls setScenario() if available.
-
+// Messaging bridge to parent page (see energy.html for details)
 window.addEventListener('message', (event) => {
   const msg = event.data;
   if (!msg || typeof msg.type !== 'string') return;
@@ -2920,9 +3296,9 @@ window.addEventListener('message', (event) => {
       if (s.budgetCap !== undefined) {
         budgetCap = (s.budgetCap === null || isNaN(s.budgetCap)) ? null : s.budgetCap;
       }
-      // Persist the merged settings into localStorage so that the energy
-      // twin remembers the latest values even after a reload.  This mirrors
-      // the behaviour of the settings modal.
+      // Persist the updated settings into localStorage to mirror the local
+      // settings modal behaviour.  This allows the energy twin to remember
+      // incoming values across reloads.
       try {
         const globalObj = {
           prices: Object.assign({}, PARAMS.prices),
@@ -2936,9 +3312,6 @@ window.addEventListener('message', (event) => {
       } catch (err) {
         console.warn('Failed to persist GLOBAL_ENERGY_SETTINGS', err);
       }
-      // Refresh UI to reflect new parameters.  We re‑render the selected
-      // building (if any), update the legend, refresh the visualisation and
-      // redraw the energy segmentation chart.
       if (typeof selectedEnt !== 'undefined' && selectedEnt && selectedEnt._b) {
         renderInfo(selectedEnt);
       }
@@ -2956,8 +3329,7 @@ window.addEventListener('message', (event) => {
   }
 });
 
-// Hide the internal Settings button when embedded in an iframe.  The parent
-// page exposes its own unified settings UI, so this avoids duplicate panels.
+// Hide Settings button when embedded in iframe
 window.addEventListener('load', () => {
   try {
     if (window.self !== window.top) {
@@ -2966,145 +3338,6 @@ window.addEventListener('load', () => {
     }
   } catch (e) {}
 });
-
-// ------------------------------------------------------------
-// Advanced settings & cost‑benefit analysis
-// ------------------------------------------------------------
-// Default economic parameters. These can be updated via the settings modal.
-let discountRate = 0.04;
-let horizonYears = 20;
-let budgetCap = null;
-
-// Display the settings modal and fill in current parameter values
-function showSettings() {
-  const m = document.getElementById('settingsModal');
-  document.getElementById('paramPriceElecImport').value = PARAMS.prices.elecImport ?? '';
-  document.getElementById('paramPriceGas').value = PARAMS.prices.gas ?? '';
-  document.getElementById('paramPriceFeedIn').value = PARAMS.prices.feedIn ?? '';
-  document.getElementById('paramPriceP2P').value = PARAMS.prices.p2p ?? '';
-  document.getElementById('paramCostPvPerWp').value = PARAMS.costs.pvPerWp ?? '';
-  document.getElementById('paramCostInsul').value = PARAMS.costs.insulationSqM ?? '';
-  document.getElementById('paramCostHybridHp').value = PARAMS.costs.hybridPump ?? '';
-  document.getElementById('paramCostAllHp').value = PARAMS.costs.allElectric ?? '';
-  document.getElementById('paramCo2Elec').value = PARAMS.co2.elec ?? '';
-  document.getElementById('paramCo2Gas').value = PARAMS.co2.gas ?? '';
-  document.getElementById('cbaDiscountRate').value = ((discountRate || 0) * 100).toFixed(2);
-  document.getElementById('cbaHorizon').value = horizonYears ?? '';
-  document.getElementById('budgetCap').value = budgetCap ?? '';
-  m.style.display = 'flex';
-}
-
-// Apply settings from the modal back into the PARAMS object and refresh the UI
-function applySettings() {
-  const pEI = parseFloat(document.getElementById('paramPriceElecImport').value);
-  if(Number.isFinite(pEI)) PARAMS.prices.elecImport = pEI;
-  const pG = parseFloat(document.getElementById('paramPriceGas').value);
-  if(Number.isFinite(pG)) PARAMS.prices.gas = pG;
-  const pF = parseFloat(document.getElementById('paramPriceFeedIn').value);
-  if(Number.isFinite(pF)) PARAMS.prices.feedIn = pF;
-  const pP = parseFloat(document.getElementById('paramPriceP2P').value);
-  if(Number.isFinite(pP)) PARAMS.prices.p2p = pP;
-  const cPV = parseFloat(document.getElementById('paramCostPvPerWp').value);
-  if(Number.isFinite(cPV)) PARAMS.costs.pvPerWp = cPV;
-  const cI = parseFloat(document.getElementById('paramCostInsul').value);
-  if(Number.isFinite(cI)) PARAMS.costs.insulationSqM = cI;
-  const cH = parseFloat(document.getElementById('paramCostHybridHp').value);
-  if(Number.isFinite(cH)) PARAMS.costs.hybridPump = cH;
-  const cA = parseFloat(document.getElementById('paramCostAllHp').value);
-  if(Number.isFinite(cA)) PARAMS.costs.allElectric = cA;
-  const coE = parseFloat(document.getElementById('paramCo2Elec').value);
-  if(Number.isFinite(coE)) PARAMS.co2.elec = coE;
-  const coG = parseFloat(document.getElementById('paramCo2Gas').value);
-  if(Number.isFinite(coG)) PARAMS.co2.gas = coG;
-  const rIn = parseFloat(document.getElementById('cbaDiscountRate').value);
-  if(Number.isFinite(rIn)) discountRate = rIn / 100;
-  const tIn = parseFloat(document.getElementById('cbaHorizon').value);
-  if(Number.isFinite(tIn)) horizonYears = tIn;
-  const bIn = parseFloat(document.getElementById('budgetCap').value);
-  budgetCap = Number.isFinite(bIn) ? bIn : null;
-  // Hide the settings modal
-  document.getElementById('settingsModal').style.display = 'none';
-  // Persist updated parameters into a global object and store them in localStorage so the
-  // energy twin remembers the user’s choices across reloads.  We collect the current
-  // price, cost and CO₂ factors, along with the discount rate, horizon and budget cap.
-  try {
-    const globalObj = {
-      prices: Object.assign({}, PARAMS.prices),
-      costs: Object.assign({}, PARAMS.costs),
-      co2: Object.assign({}, PARAMS.co2),
-      discountRate: discountRate,
-      horizonYears: horizonYears,
-      budgetCap: budgetCap
-    };
-    localStorage.setItem('GLOBAL_ENERGY_SETTINGS', JSON.stringify(globalObj));
-  } catch (e) {
-    console.warn('Failed to persist GLOBAL_ENERGY_SETTINGS', e);
-  }
-  // Update the UI to reflect new parameters.  We re-render the selected building,
-  // update the legend, refresh the visualisation and redraw the energy segmentation chart.
-  if (typeof selectedEnt !== 'undefined' && selectedEnt && selectedEnt._b) { renderInfo(selectedEnt); }
-  if (typeof updateLeftLegend === 'function') updateLeftLegend();
-  if (typeof updateVis === 'function') updateVis();
-  if (typeof updateEnergySegChart === 'function') updateEnergySegChart();
-}
-
-// Calculate the NPV and benefit‑cost ratio for a given economic summary
-function computeCBA(eco) {
-  const A = eco.savings || 0;
-  const C = eco.cost || 0;
-  let pvBenefits = 0;
-  if(discountRate > 0 && horizonYears > 0) {
-    pvBenefits = (A / discountRate) * (1 - Math.pow(1 + discountRate, -horizonYears));
-  } else {
-    pvBenefits = A * horizonYears;
-  }
-  const npvVal = pvBenefits - C;
-  const bcrVal = (C > 0) ? (pvBenefits / C) : null;
-  return { npv: npvVal, bcr: bcrVal };
-}
-
-// Export a JSON file containing the current parameters and selected scenario/building context
-function exportJSON() {
-  const out = {};
-  if(typeof selectedEnt !== 'undefined' && selectedEnt && selectedEnt._b) {
-    const b = selectedEnt._b;
-    const eco = calculateTradeoffs(selectedEnt);
-    const cba = computeCBA(eco);
-    out.building = {
-      id: b.ID || null,
-      year: b.Year,
-      area: b.Area,
-      upgrades: {
-        pv: !!b.customPV || activeScen === 'addPV' || activeScen === 'p2p',
-        insulation: !!b.customRetro || activeScen === 'insulate',
-        heatPump: activeScen === 'heatPump'
-      }
-    };
-    out.economics = {
-      cost: eco.cost,
-      savings: eco.savings,
-      payback: eco.payback,
-      npv: cba.npv,
-      bcr: cba.bcr,
-      discountRate: discountRate,
-      horizonYears: horizonYears,
-      budgetCap: budgetCap
-    };
-    out.scenario = activeScen;
-    out.indicator = activeInd;
-  }
-  out.params = JSON.parse(JSON.stringify(PARAMS));
-  const jsonStr = JSON.stringify(out, null, 2);
-  const blob = new Blob([jsonStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'energy_settings.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
 
 // =======================================
 //  Energy segment chart (dynamic)
@@ -4260,6 +4493,15 @@ function setupInteraction() {
   handler.setInputAction(c => {
     const inLod2View = document.getElementById('viewReal').classList.contains('active');
     const carto = getClickCartographic(c.position);
+    const pickedAny = viewer.scene.pick(c.position);
+
+    if (pickedAny && pickedAny.id && pickedAny.id._solarPlacementData) {
+      _showSolarPlacementLabel(pickedAny.id);
+      closeInfo();
+      return;
+    }
+
+    _hideAllSolarPlacementLabels(null);
 
     if(inLod2View){
       lastPrototypeCarto = carto;
@@ -4479,6 +4721,52 @@ window.updateEnvironment = function() {
 // =============================
 // 18) LOD1 CONTROLS
 // =============================
+/* =======================================
+   TASK 5 — LAYER-SCENARIO RELEVANCE MATRIX
+   Maps each layer indicator to the scenarios that are relevant for it.
+   Irrelevant scenarios are greyed out and disabled when a layer is active.
+======================================= */
+const SCENARIO_RELEVANCE = {
+  //  layer key → array of relevant scenario IDs
+  'EUI':   ['baseline', 'insulate', 'heatPump'],
+  'PV':    ['baseline', 'addPV', 'p2p'],
+  'CO2':   ['baseline', 'addPV', 'insulate', 'heatPump', 'p2p'],
+  'Label': ['baseline']
+};
+
+// Map scenario ID → button element ID
+const SCEN_BTN_MAP = {
+  baseline: 'scenBase',
+  addPV:    'scenPV',
+  insulate: 'scenIns',
+  heatPump: 'scenHP',
+  p2p:      'scenP2P'
+};
+
+function applyScenarioRelevance(layerKey) {
+  const relevant = SCENARIO_RELEVANCE[layerKey] || Object.keys(SCEN_BTN_MAP);
+  Object.entries(SCEN_BTN_MAP).forEach(([scenId, btnId]) => {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    const isRelevant = relevant.includes(scenId);
+    btn.classList.toggle('scen-locked',    !isRelevant);
+    btn.classList.toggle('scen-relevant',   isRelevant);
+    if (!isRelevant) {
+      btn.setAttribute('data-lock-tip', 'Not applicable for this layer');
+      btn.setAttribute('title', 'Not applicable for this layer');
+    } else {
+      btn.removeAttribute('data-lock-tip');
+      btn.removeAttribute('title');
+    }
+    // If currently selected scenario is now irrelevant, switch to baseline
+    if (!isRelevant && activeScen === scenId) {
+      if (relevant.includes('baseline')) {
+        window.setScenario('baseline');
+      }
+    }
+  });
+}
+
 window.setIndicator = function(i) {
   // Update the active indicator (layer) and toggle button states.  Accepts
   // 'EUI', 'PV', 'CO2' and the new 'Label' indicator.  All other values are
@@ -4490,6 +4778,8 @@ window.setIndicator = function(i) {
   });
   const activeBtn = document.getElementById('btn' + i);
   if(activeBtn) activeBtn.classList.add('active');
+  // Task 5: update scenario relevance whenever layer changes
+  applyScenarioRelevance(i);
   updateVis();
   updateLeftLegend();
 };
@@ -4517,49 +4807,415 @@ window.setScenario = function(s) {
 // =============================
 // 19) PDF
 // =============================
-window.generatePDF = function() {
+window.generatePDF = async function() {
   if(document.getElementById('viewReal').classList.contains('active')){
     alert("Switch to LOD 1 to export report.");
     return;
   }
-  if(!selectedEnt) return;
+  if(!selectedEnt) { alert("Please click a building first."); return; }
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const b = selectedEnt._b;
   const eco = calculateTradeoffs(selectedEnt);
+  const today = new Date().toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' });
+  const W = 210; const H = 297;
 
-  // Header bar
-  doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 40, 'F');
-  doc.setTextColor(255, 255, 255); doc.setFontSize(22); doc.text("Twekkelerveld Energy Report", 15, 25);
+  // ---- PAGE 1: COVER ----
+  doc.setFillColor(15, 23, 42);
+  doc.rect(0, 0, W, 50, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(18); doc.setFont('helvetica', 'bold');
+  doc.text("Building Energy Assessment", 15, 22);
+  doc.setFontSize(12); doc.setFont('helvetica', 'normal');
+  doc.text("Twekkelerveld Smart Energy Twin", 15, 32);
+  doc.setFontSize(9); doc.setTextColor(148, 163, 184);
+  doc.text("MSc Thesis — University of Twente", 15, 40);
+  doc.text(`Generated: ${today}`, 15, 46);
 
-  // Building profile section
-  doc.setTextColor(0, 0, 0); doc.setFontSize(14); doc.text("Building Profile", 15, 55);
+  // Cover body
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+  doc.text("Building Profile", 15, 70);
+  doc.setLineWidth(0.5); doc.setDrawColor(59, 130, 246);
+  doc.line(15, 72, 195, 72);
+
+  const profileData = [
+    ['BAG ID', b.ID || 'N/A'],
+    ['Year Built', String(b.Year || 'N/A')],
+    ['Floor Area', `${Math.round(b.Area || 0).toLocaleString()} m²`],
+    ['Energy Label', b.LabelLetter || b.ClusterLabel || 'N/A'],
+    ['Label Source', b.ProvSource || 'Proxy estimate'],
+    ['Scenario', activeScen || 'baseline']
+  ];
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+  profileData.forEach(([k, v], i) => {
+    const y = 82 + i * 8;
+    doc.setTextColor(100, 116, 139); doc.text(k + ':', 15, y);
+    doc.setTextColor(15, 23, 42); doc.text(v, 80, y);
+  });
+
+  // ---- PAGE 2: ENERGY ANALYSIS ----
+  doc.addPage();
+  doc.setFillColor(15, 23, 42); doc.rect(0, 0, W, 14, 'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(11); doc.setFont('helvetica','bold');
+  doc.text("Energy & Financial Analysis", 15, 10);
+
+  doc.setTextColor(15,23,42); doc.setFontSize(12); doc.setFont('helvetica','bold');
+  doc.text("Cost-Benefit Summary", 15, 28);
+  doc.setLineWidth(0.3); doc.setDrawColor(200,200,200); doc.line(15, 30, 195, 30);
+
+  const costData = [
+    ['Investment Cost (Capex)', `€${Math.round(eco.cost || 0).toLocaleString()}`],
+    ['Baseline Annual Cost', `€${Math.round(eco.baseTotal || 0).toLocaleString()} /yr`],
+    ['New Annual Cost', `€${Math.round(eco.newTotal || 0).toLocaleString()} /yr`],
+    ['Annual Savings', `€${Math.round(eco.savings || 0).toLocaleString()} /yr`],
+    ['Simple Payback Period', `${eco.payback || 'N/A'} years`],
+    ['CO₂ Reduction', `${Math.round(eco.co2Saving || 0).toLocaleString()} kg/yr`],
+    ['Solar Generation', `${Math.round(getVal(selectedEnt,'Generation',activeScen||'baseline')).toLocaleString()} kWh/yr`]
+  ];
   doc.setFontSize(10);
-  doc.text(`BAG ID: ${b.ID}`, 15, 65);
-  doc.text(`Year Built: ${b.Year}`, 15, 70);
-  doc.text(`Floor Area: ${b.Area} m²`, 15, 75);
+  costData.forEach(([k, v], i) => {
+    const y = 40 + i * 9;
+    const isPos = v.includes('Savings') || v.includes('Solar');
+    doc.setFillColor(i % 2 === 0 ? 248 : 255, i % 2 === 0 ? 250 : 255, i % 2 === 0 ? 252 : 255);
+    doc.rect(15, y-5, 180, 8, 'F');
+    doc.setTextColor(71, 85, 105); doc.setFont('helvetica','normal');
+    doc.text(k, 18, y);
+    doc.setTextColor(15, 23, 42); doc.setFont('helvetica','bold');
+    doc.text(v, 145, y, { align: 'right' });
+  });
 
-  // Energy segment and financial details
-  const seg = b.ClusterLabel || "N/A";
-  doc.text(`Energy segment: ${seg}`, 15, 80);
-  doc.text(`Capex (upfront): €${Math.round(eco.cost).toLocaleString()}`, 15, 85);
-  doc.text(`Opex baseline: €${Math.round(eco.baseTotal).toLocaleString()} /yr`, 15, 90);
-  doc.text(`Opex new: €${Math.round(eco.newTotal).toLocaleString()} /yr`, 15, 95);
-  doc.text(`Annual savings: €${Math.round(eco.savings).toLocaleString()} /yr`, 15, 100);
-  doc.text(`Break-even time: ${eco.payback} yrs`, 15, 105);
-  // Cost‑benefit results (NPV and benefit‑cost ratio) based on discount rate & horizon
-  const cbaRes = computeCBA(eco);
-  const npvDispPdf = (cbaRes && Number.isFinite(cbaRes.npv)) ? `€${Math.round(cbaRes.npv).toLocaleString()}` : 'N/A';
-  const bcrDispPdf = (cbaRes && cbaRes.bcr !== null) ? cbaRes.bcr.toFixed(2) : 'N/A';
-  doc.text(`NPV: ${npvDispPdf}`, 15, 110);
-  doc.text(`Benefit-cost ratio: ${bcrDispPdf}`, 15, 115);
-  // Include building chart image lower down (shifted down to avoid overlap)
-  const canvas = document.getElementById('buildingChart');
-  const imgData = canvas.toDataURL("image/png", 1.0);
-  doc.addImage(imgData, 'PNG', 15, 120, 180, 90);
+  // Chart
+  try {
+    const canvas = document.getElementById('buildingChart');
+    if (canvas && canvas.width > 0) {
+      const imgData = canvas.toDataURL("image/png", 1.0);
+      doc.addImage(imgData, 'PNG', 15, 108, 180, 70);
+      doc.setFontSize(9); doc.setTextColor(100,116,139); doc.setFont('helvetica','normal');
+      doc.text("Fig 1: Monthly energy profile (kWh) — baseline vs scenario", 15, 182);
+    }
+  } catch(e) { console.warn('Chart capture failed:', e); }
 
-  // Save the PDF
-  doc.save(`EnergyReport_${b.ID}.pdf`);
+  // ---- PAGE 3: SCENARIO SUMMARY ----
+  try {
+    // Compute aggregate metrics from retrofit zones and solar placements
+    let scenBuildings = 0;
+    let scenInvestment = 0;
+    let scenSavingsKwh = 0;
+    let scenCO2 = 0;
+    retrofitZones.forEach(z => {
+      scenBuildings += z.buildingCount;
+      scenInvestment += z.investment;
+      scenSavingsKwh += z.savings;
+      scenCO2 += z.co2;
+    });
+    // Aggregate solar placements (peak power, yield, cost, payback)
+    let totalPeak = 0, totalYield = 0, totalCost = 0, totalRev = 0;
+    solarPlacements.forEach(p => {
+      totalPeak += p.peakPower;
+      totalYield += p.annualYield;
+      totalCost += p.cost;
+      totalRev += p.annualRevenue;
+    });
+    const scenPayback = (scenInvestment > 0 && (scenSavingsKwh * 0.25) > 0) ? scenInvestment / (scenSavingsKwh * 0.25) : Infinity;
+    const solarPayback = totalRev > 0 ? totalCost / totalRev : Infinity;
+
+    // Add a new page for the scenario summary if any interventions were applied
+    if (retrofitZones.length > 0 || solarPlacements.length > 0) {
+      doc.addPage();
+      // Header
+      doc.setFillColor(15, 23, 42); doc.rect(0, 0, W, 14, 'F');
+      doc.setTextColor(255,255,255); doc.setFontSize(11); doc.setFont('helvetica','bold');
+      doc.text("Scenario Summary", 15, 10);
+
+      let yOff = 22;
+      doc.setTextColor(15,23,42); doc.setFontSize(12); doc.setFont('helvetica','bold');
+      doc.text("Aggregate Metrics", 15, yOff);
+      doc.setLineWidth(0.3); doc.setDrawColor(200,200,200); doc.line(15, yOff+2, 195, yOff+2);
+      yOff += 6;
+      const scenRows = [
+        ['Retrofit zones', retrofitZones.length.toString()],
+        ['Solar arrays placed', solarPlacements.length.toString()],
+        ['Buildings affected', scenBuildings.toLocaleString()],
+        ['Total investment', '€' + Math.round(scenInvestment).toLocaleString()],
+        ['Annual energy savings', Math.round(scenSavingsKwh).toLocaleString() + ' kWh/yr'],
+        ['CO₂ reduction', Math.round(scenCO2).toLocaleString() + ' kg/yr'],
+        ['Avg payback (retrofit)', scenPayback < 100 ? scenPayback.toFixed(1) + ' yrs' : '> 100 yrs'],
+        ['Total PV peak power', totalPeak.toFixed(1) + ' kWp'],
+        ['Annual PV yield', Math.round(totalYield).toLocaleString() + ' kWh/yr'],
+        ['Solar capex', '€' + Math.round(totalCost).toLocaleString()],
+        ['Avg payback (solar)', solarPayback < 100 ? solarPayback.toFixed(1) + ' yrs' : '> 100 yrs']
+      ];
+      doc.setFontSize(9);
+      scenRows.forEach(([k,v], i) => {
+        const yy = yOff + i * 8;
+        doc.setFillColor(i % 2 === 0 ? 248 : 255, i % 2 === 0 ? 250 : 255, i % 2 === 0 ? 252 : 255);
+        doc.rect(15, yy-4, 180, 7, 'F');
+        doc.setTextColor(71,85,105); doc.setFont('helvetica','normal'); doc.text(k, 18, yy);
+        doc.setTextColor(15,23,42); doc.setFont('helvetica','bold'); doc.text(v, 145, yy, { align:'right' });
+      });
+      yOff += scenRows.length * 8 + 4;
+
+      // List individual retrofit zones
+      if (retrofitZones.length > 0) {
+        doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(15,23,42);
+        doc.text('Retrofit Zones', 15, yOff);
+        doc.setLineWidth(0.3); doc.setDrawColor(200,200,200); doc.line(15, yOff+2, 195, yOff+2);
+        yOff += 6;
+        doc.setFontSize(9);
+        retrofitZones.forEach((z, idx) => {
+          // Derive a user-friendly label for the retrofit type.  If the
+          // RETROFIT_PACKAGES variable is available (defined in another
+          // script), use its label; otherwise fall back to the raw type name.
+          let lbl;
+          try {
+            if (typeof RETROFIT_PACKAGES !== 'undefined' && RETROFIT_PACKAGES[z.type]) {
+              lbl = RETROFIT_PACKAGES[z.type].label;
+            } else {
+              lbl = z.type;
+            }
+          } catch(e) {
+            lbl = z.type;
+          }
+          const lineY = yOff + idx * 7;
+          doc.setFillColor(idx % 2 === 0 ? 248 : 255, idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 252 : 255);
+          doc.rect(15, lineY-3, 180, 6, 'F');
+          doc.setTextColor(71,85,105); doc.setFont('helvetica','normal'); doc.text(`#${z.id} ${lbl}`, 18, lineY);
+          doc.setTextColor(15,23,42); doc.setFont('helvetica','bold'); doc.text(`${z.buildingCount} bldgs | €${Math.round(z.investment).toLocaleString()} | ${Math.round(z.savings).toLocaleString()} kWh | ${Math.round(z.co2).toLocaleString()} kg`, 145, lineY, { align:'right' });
+        });
+        yOff += retrofitZones.length * 7 + 4;
+      }
+
+      // List individual solar placements
+      if (solarPlacements.length > 0) {
+        doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(15,23,42);
+        doc.text('Solar Arrays', 15, yOff);
+        doc.setLineWidth(0.3); doc.setDrawColor(200,200,200); doc.line(15, yOff+2, 195, yOff+2);
+        yOff += 6;
+        doc.setFontSize(9);
+        solarPlacements.forEach((p, idx) => {
+          const lineY = yOff + idx * 7;
+          doc.setFillColor(idx % 2 === 0 ? 248 : 255, idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 252 : 255);
+          doc.rect(15, lineY-3, 180, 6, 'F');
+          doc.setTextColor(71,85,105); doc.setFont('helvetica','normal'); doc.text(`Building ${p.buildingId}`, 18, lineY);
+          doc.setTextColor(15,23,42); doc.setFont('helvetica','bold'); doc.text(`${p.peakPower.toFixed(1)} kWp | ${Math.round(p.annualYield).toLocaleString()} kWh/yr | €${Math.round(p.cost).toLocaleString()} | ${p.payback.toFixed(1)} yrs`, 145, lineY, { align:'right' });
+        });
+        yOff += solarPlacements.length * 7 + 4;
+      }
+      // Attempt to embed a map snapshot at the bottom of the summary page
+      try {
+        if (viewer && viewer.canvas) {
+          // Force a render before capturing the canvas
+          viewer.scene.requestRender();
+          const mapImg = viewer.canvas.toDataURL('image/png');
+          const imgHeight = 60;
+          doc.addImage(mapImg, 'PNG', 15, H - imgHeight - 20, 180, imgHeight);
+          doc.setFontSize(8); doc.setTextColor(100,116,139); doc.setFont('helvetica','italic');
+          doc.text('Map snapshot: interventions highlighted', 15, H - 20 + imgHeight, { maxWidth: 180 });
+        }
+      } catch(err) {
+        console.warn('Map snapshot failed:', err);
+      }
+    }
+  } catch (ex) {
+    console.warn('Scenario summary generation failed:', ex);
+  }
+
+  // ---- FOOTER on each page ----
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let pg = 1; pg <= pageCount; pg++) {
+    doc.setPage(pg);
+    doc.setFillColor(240, 240, 240); doc.rect(0, H-10, W, 10, 'F');
+    doc.setFontSize(8); doc.setTextColor(100, 116, 139); doc.setFont('helvetica','normal');
+    doc.text(`Page ${pg} of ${pageCount}`, W/2, H-4, { align: 'center' });
+    doc.text("Twekkelerveld Smart Energy Twin | MSc Thesis, University of Twente", 15, H-4);
+  }
+
+  // Save the report.  Include both the selected building ID and a timestamp to avoid overwrites
+  const ts = new Date().toISOString().replace(/[:.]/g, '').slice(0,15);
+  const fileName = `EnergyReport_${b.ID || 'building'}_${ts}.pdf`;
+  doc.save(fileName);
+};
+
+// =============================
+// 21) SCENARIO SUMMARY PDF
+// =============================
+// Generate a high‑level PDF summary of all retrofit zones and solar
+// placements currently applied in the energy twin.  This report can be
+// generated without selecting a specific building.  It uses jsPDF to
+// assemble tables of aggregate metrics and lists of interventions.
+window.generateScenarioSummaryPDF = async function() {
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const W = 210;
+    const H = 297;
+    const today = new Date().toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' });
+
+    // Header bar
+    doc.setFillColor(15, 23, 42);
+    doc.rect(0, 0, W, 14, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Scenario Summary Report', 15, 9);
+    doc.setFontSize(9);
+    doc.setTextColor(148, 163, 184);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generated: ${today}`, 15, 13);
+
+    // Compute aggregated retrofit zone metrics
+    let scenBuildings = 0;
+    let scenInvestment = 0;
+    let scenSavingsKwh = 0;
+    let scenCO2 = 0;
+    retrofitZones.forEach(z => {
+      scenBuildings += z.buildingCount;
+      scenInvestment += z.investment;
+      scenSavingsKwh += z.savings;
+      scenCO2 += z.co2;
+    });
+    // Compute aggregated solar metrics
+    let totalPeak = 0;
+    let totalYield = 0;
+    let totalCost = 0;
+    let totalRev = 0;
+    solarPlacements.forEach(p => {
+      totalPeak += p.peakPower;
+      totalYield += p.annualYield;
+      totalCost += p.cost;
+      totalRev += p.annualRevenue;
+    });
+    const scenPayback = (scenInvestment > 0 && scenSavingsKwh > 0) ? (scenInvestment / (scenSavingsKwh * 0.25)) : Infinity;
+    const solarPayback = (totalCost > 0 && totalRev > 0) ? (totalCost / totalRev) : Infinity;
+
+    // Write aggregate metrics table
+    let yOff = 20;
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text('Aggregate Metrics', 15, yOff);
+    doc.setLineWidth(0.3);
+    doc.setDrawColor(200, 200, 200);
+    doc.line(15, yOff + 2, 195, yOff + 2);
+    yOff += 6;
+    const rows = [
+      ['Retrofit zones applied', retrofitZones.length.toString()],
+      ['Solar arrays placed', solarPlacements.length.toString()],
+      ['Buildings affected', scenBuildings.toLocaleString()],
+      ['Total investment', '€' + Math.round(scenInvestment).toLocaleString()],
+      ['Annual energy savings', Math.round(scenSavingsKwh).toLocaleString() + ' kWh/yr'],
+      ['CO₂ reduction', Math.round(scenCO2).toLocaleString() + ' kg/yr'],
+      ['Average retrofit payback', scenPayback < 100 ? scenPayback.toFixed(1) + ' yrs' : '> 100 yrs'],
+      ['Total PV peak power', totalPeak.toFixed(1) + ' kWp'],
+      ['Annual PV yield', Math.round(totalYield).toLocaleString() + ' kWh/yr'],
+      ['Solar capex', '€' + Math.round(totalCost).toLocaleString()],
+      ['Average solar payback', solarPayback < 100 ? solarPayback.toFixed(1) + ' yrs' : '> 100 yrs']
+    ];
+    doc.setFontSize(9);
+    rows.forEach(([k, v], i) => {
+      const yy = yOff + i * 7;
+      doc.setFillColor(i % 2 === 0 ? 248 : 255, i % 2 === 0 ? 250 : 255, i % 2 === 0 ? 252 : 255);
+      doc.rect(15, yy - 4, 180, 6, 'F');
+      doc.setTextColor(71, 85, 105);
+      doc.setFont('helvetica', 'normal');
+      doc.text(k, 18, yy);
+      doc.setTextColor(15, 23, 42);
+      doc.setFont('helvetica', 'bold');
+      doc.text(v, 145, yy, { align: 'right' });
+    });
+    yOff += rows.length * 7 + 4;
+
+    // Check vertical space; add a page if necessary
+    if (yOff > 200) {
+      doc.addPage();
+      yOff = 20;
+    }
+
+    // List retrofit zones
+    if (retrofitZones.length > 0) {
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(15, 23, 42);
+      doc.text('Retrofit Zones', 15, yOff);
+      doc.setLineWidth(0.3);
+      doc.setDrawColor(200, 200, 200);
+      doc.line(15, yOff + 2, 195, yOff + 2);
+      yOff += 6;
+      doc.setFontSize(9);
+      retrofitZones.forEach((z, idx) => {
+        if (yOff > 280) { doc.addPage(); yOff = 20; }
+        let lbl;
+        try {
+          if (typeof RETROFIT_PACKAGES !== 'undefined' && RETROFIT_PACKAGES[z.type]) {
+            lbl = RETROFIT_PACKAGES[z.type].label;
+          } else {
+            lbl = z.type;
+          }
+        } catch (e) { lbl = z.type; }
+        const yy = yOff;
+        doc.setFillColor(idx % 2 === 0 ? 248 : 255, idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 252 : 255);
+        doc.rect(15, yy - 3, 180, 5, 'F');
+        doc.setTextColor(71, 85, 105);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`#${z.id} ${lbl}`, 18, yy);
+        doc.setTextColor(15, 23, 42);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${z.buildingCount} bldgs | €${Math.round(z.investment).toLocaleString()} | ${Math.round(z.savings).toLocaleString()} kWh | ${Math.round(z.co2).toLocaleString()} kg`, 145, yy, { align: 'right' });
+        yOff += 6;
+      });
+      yOff += 4;
+    }
+
+    // List solar arrays
+    if (solarPlacements.length > 0) {
+      if (yOff > 280) { doc.addPage(); yOff = 20; }
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(15, 23, 42);
+      doc.text('Solar Arrays', 15, yOff);
+      doc.setLineWidth(0.3);
+      doc.setDrawColor(200, 200, 200);
+      doc.line(15, yOff + 2, 195, yOff + 2);
+      yOff += 6;
+      doc.setFontSize(9);
+      solarPlacements.forEach((p, idx) => {
+        if (yOff > 280) { doc.addPage(); yOff = 20; }
+        const yy = yOff;
+        doc.setFillColor(idx % 2 === 0 ? 248 : 255, idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 252 : 255);
+        doc.rect(15, yy - 3, 180, 5, 'F');
+        doc.setTextColor(71, 85, 105);
+        doc.setFont('helvetica', 'normal');
+        const bId = p.buildingId || '—';
+        doc.text(bId.toString(), 18, yy);
+        doc.setTextColor(15, 23, 42);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${p.peakPower.toFixed(1)} kWp | ${Math.round(p.annualYield).toLocaleString()} kWh/yr | €${Math.round(p.cost).toLocaleString()}`, 145, yy, { align: 'right' });
+        yOff += 6;
+      });
+      yOff += 4;
+    }
+
+    // Add simple footer with page numbers
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let pg = 1; pg <= pageCount; pg++) {
+      doc.setPage(pg);
+      doc.setFillColor(240, 240, 240);
+      doc.rect(0, H - 10, W, 10, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Page ${pg} of ${pageCount}`, W / 2, H - 4, { align: 'center' });
+      doc.text('Twekkelerveld Smart Energy Twin | MSc Thesis, University of Twente', 15, H - 4);
+    }
+
+    // Save the file with timestamp to avoid overwriting
+    const ts2 = new Date().toISOString().replace(/[:.]/g, '').slice(0, 15);
+    doc.save(`ScenarioSummary_${ts2}.pdf`);
+  } catch (err) {
+    console.error('Error generating scenario summary PDF:', err);
+    alert('Failed to generate scenario summary PDF. Please try again.');
+  }
 };
 
 // =============================
@@ -4951,14 +5607,34 @@ window.updateVis = function() {
       const denom = (maxV - minV);
       const ratio = denom > 0 ? (valVisual - minV) / denom : 0;
       const r = Cesium.Math.clamp(ratio, 0, 1);
-      const colors = {
-        EUI: { l: Cesium.Color.fromCssColorString('#10b981'), h: Cesium.Color.fromCssColorString('#ef4444') },
-        PV:  { l: Cesium.Color.fromCssColorString('#ef4444'), h: Cesium.Color.fromCssColorString('#10b981') },
-        CO2: { l: Cesium.Color.fromCssColorString('#2dd4bf'), h: Cesium.Color.fromCssColorString('#d946ef') }
-      };
-      const range = colors[activeInd] || colors.EUI;
-      const c = Cesium.Color.lerp(range.l, range.h, r, new Cesium.Color());
-      e.polygon.material = new Cesium.ColorMaterialProperty(c);
+      let c;
+      if (activeInd === 'PV') {
+        // 5-class RdYlBu reversed palette for Solar Electricity Potential
+        const pvClasses = [
+          '#313695', // Class 1 - Deep blue (lowest)
+          '#74ADD1', // Class 2 - Light blue
+          '#FEE090', // Class 3 - Pale yellow
+          '#F46D43', // Class 4 - Orange
+          '#A50026'  // Class 5 - Dark red (highest)
+        ];
+        const classIdx = Math.min(4, Math.floor(r * 5));
+        c = Cesium.Color.fromCssColorString(pvClasses[classIdx]);
+      } else {
+        const colors = {
+          EUI: { l: Cesium.Color.fromCssColorString('#10b981'), h: Cesium.Color.fromCssColorString('#ef4444') },
+          CO2: { l: Cesium.Color.fromCssColorString('#2dd4bf'), h: Cesium.Color.fromCssColorString('#d946ef') }
+        };
+        const range = colors[activeInd] || colors.EUI;
+        c = Cesium.Color.lerp(range.l, range.h, r, new Cesium.Color());
+      }
+      e.polygon.material = new Cesium.ColorMaterialProperty(c.withAlpha(0.85));
+      // Add white building outline for PV layer
+      if (activeInd === 'PV') {
+        e.polygon.outlineColor = new Cesium.ConstantProperty(Cesium.Color.WHITE.withAlpha(0.5));
+        e.polygon.outline = new Cesium.ConstantProperty(true);
+      } else {
+        e.polygon.outline = new Cesium.ConstantProperty(false);
+      }
     } else {
       e.show = true;
       const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 1);
@@ -5111,42 +5787,30 @@ function renderInfo(e) {
     if(labelInfo){
       container.innerHTML += `<div class="stat-row" style="border-bottom:none;"><span class="stat-label">Energy label</span><span class="stat-val">${labelInfo}</span></div>`;
     }
+    // append PV-specific fields when showing PV indicator
+    if(activeInd === 'PV'){
+      const solarYield = Math.round(getVal(e, 'Generation', activeScen));
+      const roofArea = Math.round(b.Area);
+      const co2Savings = Math.round(solarYield * 0.268);
+      container.innerHTML += `<div class="stat-row"><span class="stat-label">Solar Yield</span><span class="stat-val">${solarYield.toLocaleString()} <small style="font-size:12px;color:#64748b;">kWh/yr</small></span></div>`;
+      container.innerHTML += `<div class="stat-row"><span class="stat-label">Roof Area</span><span class="stat-val">${roofArea.toLocaleString()} <small style="font-size:12px;color:#64748b;">m²</small></span></div>`;
+      container.innerHTML += `<div class="stat-row" style="border-bottom:none;"><span class="stat-label">CO₂ Savings</span><span class="stat-val">${co2Savings.toLocaleString()} <small style="font-size:12px;color:#64748b;">kg/yr</small></span></div>`;
+    }
   }
 
   const tradeBox = document.getElementById('tradeoffBox');
   if(activeScen !== 'baseline' || b.customPV || b.customRetro) {
     tradeBox.style.display = 'block';
     const eco = calculateTradeoffs(e);
-    const cbaRes = computeCBA(eco);
     const pColor = (parseFloat(eco.payback) > 15 || eco.payback === "N/A") ? "#f87171" : "#10b981";
-    // populate capex/opex and savings
+    // populate capex/opex and savings, include time units
     document.getElementById('tradeCost').innerText = "€" + Math.round(eco.cost).toLocaleString();
     document.getElementById('tradeOpexBase').innerText = "€" + Math.round(eco.baseTotal).toLocaleString() + " /yr";
     document.getElementById('tradeOpexNew').innerText = "€" + Math.round(eco.newTotal).toLocaleString() + " /yr";
     document.getElementById('tradeSave').innerText = "€" + Math.round(eco.savings).toLocaleString() + " /yr";
     document.getElementById('tradePay').innerText = eco.payback + " yrs";
     document.getElementById('tradePay').style.color = pColor;
-    // update NPV and BCR
-    const npvDisp = (cbaRes && Number.isFinite(cbaRes.npv)) ? "€" + Math.round(cbaRes.npv).toLocaleString() : "N/A";
-    const bcrDisp = (cbaRes && cbaRes.bcr !== null) ? cbaRes.bcr.toFixed(2) : "N/A";
-    document.getElementById('tradeNPV').innerText = npvDisp;
-    document.getElementById('tradeBCR').innerText = bcrDisp;
-    // build note and handle budget cap
-    let noteTxt = eco.note || "";
-    const btnPV = document.getElementById('btnIndivPV');
-    const btnRet = document.getElementById('btnIndivRetro');
-    if(budgetCap !== null && eco.cost > budgetCap) {
-      noteTxt = noteTxt ? noteTxt + " • " : "";
-      noteTxt += "Capex exceeds budget cap";
-      document.getElementById('tradeCost').style.color = "var(--accent-danger)";
-      if(btnPV) { btnPV.style.pointerEvents = 'none'; btnPV.style.opacity = 0.5; }
-      if(btnRet) { btnRet.style.pointerEvents = 'none'; btnRet.style.opacity = 0.5; }
-    } else {
-      document.getElementById('tradeCost').style.color = "";
-      if(btnPV) { btnPV.style.pointerEvents = ''; btnPV.style.opacity = ''; }
-      if(btnRet) { btnRet.style.pointerEvents = ''; btnRet.style.opacity = ''; }
-    }
-    document.getElementById('tradeNote').innerText = noteTxt;
+    document.getElementById('tradeNote').innerText = eco.note;
   } else {
     tradeBox.style.display = 'none';
   }
@@ -5255,8 +5919,8 @@ function updateLeftLegend(minScenario=null, maxScenario=null){
     gradEl.style.background = "linear-gradient(90deg, #10b981, #ef4444)";
     noteEl.innerText = "Lower values mean less energy use per square meter per year.";
   } else if(activeInd === 'PV'){
-    gradEl.style.background = "linear-gradient(90deg, #ef4444, #10b981)";
-    noteEl.innerText = "Higher values mean higher expected solar electricity potential per year.";
+    gradEl.style.background = "linear-gradient(90deg, #313695 0%, #74ADD1 20%, #FEE090 40%, #F46D43 70%, #A50026 100%)";
+    noteEl.innerText = "5-class quantile scheme: Deep blue (Class 1: lowest) to Dark red (Class 5: highest solar potential).";
   } else {
     gradEl.style.background = "linear-gradient(90deg, #2dd4bf, #d946ef)";
     noteEl.innerText = "Higher values mean higher estimated operational carbon emissions per year.";
@@ -5328,46 +5992,1395 @@ function applyLod2Overlays(){
   if(irrRaster && irrRaster.imageryLayer) irrRaster.imageryLayer.show = (inLod2 && L2_SHOW_IRR_OVERLAY);
   if(shadowRaster && shadowRaster.imageryLayer) shadowRaster.imageryLayer.show = (inLod2 && L2_SHOW_SHADOW_OVERLAY);
 }
-</script>
-<!-- Load persisted energy settings from localStorage on page load -->
-<script>
-// When running the stand‑alone energy twin, load any previously saved
-// settings from localStorage and apply them to the PARAMS object and
-// economic parameters (discount rate, horizon, budget cap).  This ensures
-// that user‑defined assumptions persist across page reloads.  If no
-// stored settings exist the defaults defined in the script remain in
-// effect.  Note: this block runs immediately and does not depend on
-// DOMContentLoaded.
-(function() {
-  try {
-    const stored = localStorage.getItem('GLOBAL_ENERGY_SETTINGS');
-    if (stored) {
-      const g = JSON.parse(stored);
-      if (g && typeof g === 'object') {
-        if (g.prices && typeof g.prices === 'object') {
-          PARAMS.prices = Object.assign({}, PARAMS.prices || {}, g.prices);
+
+// ═══════════════════════════════════════════════════════════
+// FIX 3 / FIX 4 / FIX 5 — Retrofit Zone Drawing, Undo,
+// PDF Fix, Energy Flow Visualization
+// ═══════════════════════════════════════════════════════════
+
+// ── Global state arrays (Fix 4: PDF needs these defined) ──
+window.retrofitZones   = window.retrofitZones   || [];
+window.solarPlacements = window.solarPlacements || [];
+
+// ── Zone drawing state ──
+let _zoneDraw = {
+  active: false,
+  positions: [],       // Cesium.Cartesian3 vertices
+  previewEntity: null, // dotted preview polyline
+  currentType: 'basic'
+};
+
+// ── Fix 3: Save/restore original building colours for undo ──
+// Each stack entry: { zoneEntity, affectedBuildings: [{entity, origColor}], ... }
+window._zoneUndoStack = window._zoneUndoStack || [];
+
+function _getActiveRetrofitType() {
+  return _zoneDraw.currentType || 'basic';
+}
+
+window.selectRetrofitType = function(type, el) {
+  _zoneDraw.currentType = type;
+  document.querySelectorAll('.rt-type').forEach(d => d.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+};
+
+// ── showToast: lightweight notification helper ──
+function showToast(message, type = 'info') {
+  console.log('[' + type + '] ' + message);
+  // Create a visible toast notification in the UI
+  const toast = document.createElement('div');
+  toast.textContent = message;
+  toast.style.cssText = [
+    'position:fixed', 'bottom:24px', 'left:50%', 'transform:translateX(-50%)',
+    'background:rgba(30,30,30,0.9)', 'color:#fff', 'padding:10px 20px',
+    'border-radius:6px', 'font-size:13px', 'z-index:99999',
+    'pointer-events:none', 'box-shadow:0 2px 8px rgba(0,0,0,0.4)',
+    'transition:opacity 0.4s ease'
+  ].join(';');
+  if (type === 'error')   toast.style.background = 'rgba(180,30,30,0.9)';
+  if (type === 'success') toast.style.background = 'rgba(30,130,60,0.9)';
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; }, 2800);
+  setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3200);
+}
+
+window.toggleRetrofitZoneDraw = function() {
+  const btn = document.getElementById('btnDrawZone');
+  const ctrl = document.getElementById('zoneDrawControls');
+  if (_zoneDraw.active) {
+    cancelRetrofitZoneDraw();
+  } else {
+    _zoneDraw.active = true;
+    _zoneDraw.positions = [];
+    if (btn)  btn.classList.add('active');
+    if (ctrl) ctrl.style.display = 'block';
+    showToast('Click to place vertices. Right-click to close polygon.');
+    // Install click handler
+    _installZoneClickHandler();
+  }
+};
+
+window.cancelRetrofitZoneDraw = function() {
+  _zoneDraw.active = false;
+  _removeZonePreview();
+  _zoneDraw.positions = [];
+  const btn  = document.getElementById('btnDrawZone');
+  const ctrl = document.getElementById('zoneDrawControls');
+  if (btn)  btn.classList.remove('active');
+  if (ctrl) ctrl.style.display = 'none';
+  _uninstallZoneClickHandler();
+};
+
+function _removeZonePreview() {
+  if (_zoneDraw.previewEntity) {
+    try { viewer.entities.remove(_zoneDraw.previewEntity); } catch(e){}
+    _zoneDraw.previewEntity = null;
+  }
+}
+
+function _updateZonePreview() {
+  _removeZonePreview();
+  if (_zoneDraw.positions.length < 2) return;
+  const pts = [..._zoneDraw.positions];
+  if (pts.length > 2) pts.push(pts[0]); // close preview
+  _zoneDraw.previewEntity = viewer.entities.add({
+    polyline: {
+      positions: pts,
+      width: 2.5,
+      material: new Cesium.PolylineDashMaterialProperty({ color: Cesium.Color.ORANGE })
+    }
+  });
+}
+
+let _zoneHandler = null;
+function _installZoneClickHandler() {
+  _uninstallZoneClickHandler();
+  _zoneHandler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+  // Left click: add vertex
+  _zoneHandler.setInputAction(function(e) {
+    if (!_zoneDraw.active) return;
+    const ray = viewer.camera.getPickRay(e.position);
+    const pos = viewer.scene.globe.pick(ray, viewer.scene);
+    if (!pos) return;
+    _zoneDraw.positions.push(pos);
+    _updateZonePreview();
+  }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+  // Right click: close and apply
+  _zoneHandler.setInputAction(function(e) {
+    if (!_zoneDraw.active || _zoneDraw.positions.length < 3) return;
+    _applyRetrofitZone(_zoneDraw.positions.slice());
+    cancelRetrofitZoneDraw();
+  }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+  // Double-click: close and apply
+  _zoneHandler.setInputAction(function(e) {
+    if (!_zoneDraw.active || _zoneDraw.positions.length < 3) return;
+    _applyRetrofitZone(_zoneDraw.positions.slice());
+    cancelRetrofitZoneDraw();
+  }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+}
+
+function _uninstallZoneClickHandler() {
+  if (_zoneHandler) { try { _zoneHandler.destroy(); } catch(e){} _zoneHandler = null; }
+}
+
+// Check if a Cartographic point is inside a polygon of Cartographics (ray-casting)
+function _pointInPolygon(pt, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i].longitude, yi = poly[i].latitude;
+    const xj = poly[j].longitude, yj = poly[j].latitude;
+    const intersect = ((yi > pt.latitude) !== (yj > pt.latitude)) &&
+      (pt.longitude < (xj - xi) * (pt.latitude - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function _applyRetrofitZone(positions) {
+  if (positions.length < 3) return;
+  const type = _getActiveRetrofitType();
+
+  // Convert positions to Cartographic for point-in-polygon test
+  const polyCartographic = positions.map(p => Cesium.Cartographic.fromCartesian(p));
+
+  // Retrofit package colour override
+  const packageColors = {
+    basic:    '#f59e0b',
+    standard: '#3b82f6',
+    deep:     '#22c55e',
+    solar:    '#facc15'
+  };
+  const retroColor = packageColors[type] || '#f59e0b';
+  const cesiumColor = Cesium.Color.fromCssColorString(retroColor).withAlpha(0.78);
+
+  // Draw filled polygon entity
+  const closedPositions = [...positions, positions[0]];
+  const zonePolygonEntity = viewer.entities.add({
+    polygon: {
+      hierarchy: new Cesium.PolygonHierarchy(positions),
+      material: Cesium.Color.fromCssColorString(retroColor).withAlpha(0.18),
+      outline: true,
+      outlineColor: Cesium.Color.fromCssColorString(retroColor),
+      outlineWidth: 2
+    },
+    polyline: {
+      positions: closedPositions,
+      width: 2,
+      material: Cesium.Color.fromCssColorString(retroColor).withAlpha(0.9)
+    }
+  });
+
+  // Find and colour buildings inside the polygon
+  const affected = [];
+  // Use module-scoped myEntities array for accurate building lookup
+  const _entitySource = (typeof myEntities !== 'undefined' && Array.isArray(myEntities) && myEntities.length > 0) ? myEntities : Array.from(viewer.entities.values);
+  _entitySource.forEach(ent => {
+    if (!ent._b && !ent.polygon) return;
+    // Get centroid of building entity (CentroidCarto is Cesium.Cartographic with lon/lat in radians)
+    let centCart = null;
+    if (ent._b && ent._b.CentroidCarto && Number.isFinite(ent._b.CentroidCarto.longitude)) {
+      centCart = Cesium.Cartesian3.fromDegrees(
+        Cesium.Math.toDegrees(ent._b.CentroidCarto.longitude),
+        Cesium.Math.toDegrees(ent._b.CentroidCarto.latitude));
+    } else if (ent.position && ent.position.getValue) {
+      centCart = ent.position.getValue(Cesium.JulianDate.now());
+    } else if (ent.polygon && ent.polygon.hierarchy) {
+      const hier = ent.polygon.hierarchy.getValue ? ent.polygon.hierarchy.getValue(Cesium.JulianDate.now()) : ent.polygon.hierarchy;
+      if (hier && hier.positions && hier.positions.length) {
+        centCart = hier.positions[0];
+      }
+    }
+    if (!centCart) return;
+    const cartoCent = Cesium.Cartographic.fromCartesian(centCart);
+    if (!_pointInPolygon(cartoCent, polyCartographic)) return;
+
+    // FIX 3: Save original color before changing
+    let origColor = null;
+    if (ent.polygon && ent.polygon.material) {
+      try {
+        const mat = ent.polygon.material.getValue
+          ? ent.polygon.material.getValue(Cesium.JulianDate.now())
+          : ent.polygon.material;
+        if (mat && mat.color) origColor = mat.color.clone();
+      } catch(ex) {}
+      if (!origColor) {
+        origColor = Cesium.Color.GRAY.clone();
+      }
+      // Apply new retrofit color
+      ent.polygon.material = cesiumColor;
+    }
+    if (ent._b) {
+      // Mark building as retrofitted for scenario aggregation
+      ent._b._zoneRetrofitType = type;
+    }
+    affected.push({ entity: ent, origColor: origColor });
+  });
+
+  // Aggregate metrics for this zone
+  const pkgDef = (typeof RETROFIT_PACKAGES !== 'undefined' && RETROFIT_PACKAGES[type]) || { savingsPct: 20, costPerM2: 100 };
+  let investment = 0, savings = 0, co2 = 0;
+  affected.forEach(({ entity }) => {
+    const b = entity._b;
+    if (!b) return;
+    const area = Number(b.Area) || 80;
+    const eui  = Number(b.EUI_BASE) || 180;
+    investment += area * pkgDef.costPerM2;
+    const savedKwh = area * eui * (pkgDef.savingsPct / 100);
+    savings += savedKwh;
+    co2 += savedKwh * 0.42;
+  });
+  const zoneId = window.retrofitZones.length + 1;
+  const zoneRecord = {
+    id: zoneId,
+    type,
+    buildingCount: affected.length,
+    investment, savings, co2,
+    entity: zonePolygonEntity
+  };
+  window.retrofitZones.push(zoneRecord);
+
+  // Push to undo stack (Fix 3: store affected buildings with original colors)
+  window._zoneUndoStack.push({
+    zoneRecord,
+    zonePolygonEntity,
+    affectedBuildings: affected  // [{entity, origColor}]
+  });
+
+  // Show undo button
+  const undoBtn = document.getElementById('btnUndoZone');
+  if (undoBtn) undoBtn.style.display = 'block';
+
+  // Update scenario comparison panel
+  _updateScenarioPanel();
+  showToast('Retrofit zone applied: ' + affected.length + ' buildings');
+  viewer.scene.requestRender();
+}
+
+// Fix 3: Proper undo that restores original building colors
+window.undoRetrofitZone = function() {
+  if (!window._zoneUndoStack || window._zoneUndoStack.length === 0) {
+    showToast('Nothing to undo');
+    return;
+  }
+  const last = window._zoneUndoStack.pop();
+  // Remove polygon entity from map
+  if (last.zonePolygonEntity) {
+    try { viewer.entities.remove(last.zonePolygonEntity); } catch(e) {}
+  }
+  // Restore original building colors
+  if (last.affectedBuildings) {
+    last.affectedBuildings.forEach(({ entity, origColor }) => {
+      if (entity.polygon && origColor) {
+        try { entity.polygon.material = origColor; } catch(e) {}
+      }
+      if (entity._b) delete entity._b._zoneRetrofitType;
+    });
+  }
+  // Remove from retrofitZones array
+  const idx = window.retrofitZones.indexOf(last.zoneRecord);
+  if (idx !== -1) window.retrofitZones.splice(idx, 1);
+
+  // Hide undo button if stack empty
+  if (window._zoneUndoStack.length === 0) {
+    const undoBtn = document.getElementById('btnUndoZone');
+    if (undoBtn) undoBtn.style.display = 'none';
+  }
+  _updateScenarioPanel();
+  showToast('Undo: retrofit zone removed, original colors restored');
+  viewer.scene.requestRender();
+};
+
+function _updateScenarioPanel() {
+  const zones = window.retrofitZones;
+  const aggEl = document.getElementById('scenarioAggregates');
+  const listEl = document.getElementById('retroZoneList');
+  if (!aggEl) return;
+  if (zones.length === 0) {
+    aggEl.style.display = 'none';
+    if (listEl) listEl.innerHTML = '';
+    return;
+  }
+  aggEl.style.display = 'block';
+  let totalBldg = 0, totalInv = 0, totalSav = 0, totalCO2 = 0;
+  zones.forEach(z => { totalBldg += z.buildingCount; totalInv += z.investment; totalSav += z.savings; totalCO2 += z.co2; });
+  const avgPayback = (totalSav * 0.25) > 0 ? (totalInv / (totalSav * 0.25)).toFixed(1) + ' yrs' : '— yrs';
+  const el = (id, txt) => { const e = document.getElementById(id); if(e) e.textContent = txt; };
+  el('aggBuildingCount', totalBldg.toLocaleString());
+  el('aggInvestment', '€' + Math.round(totalInv).toLocaleString());
+  el('aggSavings', Math.round(totalSav).toLocaleString() + ' kWh');
+  el('aggCO2', Math.round(totalCO2).toLocaleString() + ' kg/yr');
+  el('aggPayback', avgPayback);
+  if (listEl) {
+    listEl.innerHTML = zones.map(z =>
+      `<div class="zone-item"><span class="zone-name">Zone ${z.id} — ${z.type}</span><span class="zone-meta">${z.buildingCount} bldgs | €${Math.round(z.investment).toLocaleString()}</span></div>`
+    ).join('');
+  }
+}
+
+// addRetrofitToScenario: called from applyRetrofitToBuilding (per-building configurator)
+window.addRetrofitToScenario = function(b) {
+  if (!b) return;
+  const area = Number(b.Area) || 80;
+  const cfg  = b._retrofitConfig || {};
+  const pkgType = 'custom';
+  const newEUI = Number(b._retrofitNewEUI) || 0;
+  const baseEUI = Number(b.EUI_BASE) || 180;
+  const savingsKwh = Math.max(0, (baseEUI - newEUI) * area);
+  const co2 = savingsKwh * 0.42;
+  const investment = area * 150; // standard estimate
+  const existing = window.retrofitZones.find(z => z._buildingId === (b.ID || b.id));
+  if (existing) {
+    existing.savings = savingsKwh;
+    existing.co2 = co2;
+    existing.investment = investment;
+  } else {
+    window.retrofitZones.push({
+      id: window.retrofitZones.length + 1,
+      type: 'custom',
+      _buildingId: b.ID || b.id,
+      buildingCount: 1,
+      investment, savings: savingsKwh, co2,
+      entity: null
+    });
+  }
+  _updateScenarioPanel();
+};
+
+// ── Solar Placement (v4 — native Cesium marker + click popup label) ──
+let _solarPlacementActive = false;
+let _solarClickHandler = null;
+let _solarPanelEntities = [];
+let _solarMarkerEntities = [];
+
+// Legacy HTML overlay marker variables kept for compatibility, but no longer used.
+var _solarMarkerEls = [];     // [{el, lon, lat, height}]
+var _solarMarkerRafId = null;
+
+/**
+ * Create an HTML sun-dot marker element for a solar placement.
+ * @param {number} kwp   Peak power in kWp
+ * @param {number} kwhyr Annual yield in kWh/yr
+ */
+function _createSolarSunMarker(kwp, kwhyr) {
+  var el = document.createElement('div');
+  el.className = 'solar-sun-marker';
+
+  var svgRays = '';
+  for (var ri = 0; ri < 8; ri++) {
+    var ang = ri * 45 * Math.PI / 180;
+    var x1 = (34 + Math.cos(ang) * 20).toFixed(1);
+    var y1 = (34 + Math.sin(ang) * 20).toFixed(1);
+    var x2 = (34 + Math.cos(ang) * 29).toFixed(1);
+    var y2 = (34 + Math.sin(ang) * 29).toFixed(1);
+    svgRays += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#FFE45C" stroke-width="2.2" stroke-linecap="round" opacity="0.95"/>';
+  }
+
+  var kwpNum = Number(kwp);
+  var kwhNum = Number(kwhyr);
+  var kwpValue = Number.isFinite(kwpNum) ? kwpNum.toFixed(1) : '0.0';
+  var annualYieldText = Number.isFinite(kwhNum) ? Math.round(kwhNum).toLocaleString() : '0';
+  var fullLabel = kwpValue + ' kWp · ' + annualYieldText + ' kWh/yr';
+  var shortLabel = annualYieldText + ' kWh/yr';
+
+  el.innerHTML =
+    '<div class="sun-circle">' +
+      '<svg viewBox="0 0 68 68" width="68" height="68" style="position:absolute;top:-6px;left:-6px;pointer-events:none;overflow:visible;z-index:1;">' +
+        svgRays +
+      '</svg>' +
+      '<div class="sun-kwp-wrap">' +
+        '<div class="sun-kwp-readout">' +
+          '<span class="sun-kwp-value">' + kwpValue + '</span>' +
+          '<span class="sun-kwp-unit">kWp</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="sun-badge" data-full="' + fullLabel + '" data-short="' + shortLabel + '">' + shortLabel + '</div>';
+
+  var badge = el.querySelector('.sun-badge');
+  el.setAttribute('title', fullLabel);
+  el.setAttribute('aria-label', fullLabel);
+  el.addEventListener('mouseenter', function() { if (badge) badge.textContent = badge.dataset.full; });
+  el.addEventListener('mouseleave', function() { if (badge) badge.textContent = badge.dataset.short; });
+
+  return el;
+}
+
+/**
+ * Start or keep the solar marker positioning RAF loop running.
+ */
+function _ensureSolarMarkerLoop() {
+  if (_solarMarkerRafId !== null) return;
+  function _tick() {
+    if (_solarMarkerEls.length === 0) { _solarMarkerRafId = null; return; }
+    for (var mi = 0; mi < _solarMarkerEls.length; mi++) {
+      var m = _solarMarkerEls[mi];
+      try {
+        var cart = Cesium.Cartesian3.fromDegrees(m.lon, m.lat, m.height);
+        var sc   = Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, cart);
+        if (sc) {
+          m.el.style.left    = sc.x + 'px';
+          m.el.style.top     = sc.y + 'px';
+          m.el.style.display = '';
+        } else {
+          m.el.style.display = 'none';
         }
-        if (g.costs && typeof g.costs === 'object') {
-          PARAMS.costs = Object.assign({}, PARAMS.costs || {}, g.costs);
+      } catch (ex) { /* scene not ready */ }
+    }
+    _solarMarkerRafId = requestAnimationFrame(_tick);
+  }
+  _solarMarkerRafId = requestAnimationFrame(_tick);
+}
+
+
+function _hideAllSolarPlacementLabels(exceptEntity) {
+  for (var i = 0; i < _solarMarkerEntities.length; i++) {
+    var ent = _solarMarkerEntities[i];
+    if (ent && ent.label) ent.label.show = (ent === exceptEntity);
+  }
+}
+
+function _showSolarPlacementLabel(entity) {
+  if (!entity || !entity._solarPlacementData) return;
+  _hideAllSolarPlacementLabels(entity);
+  if (entity.label) entity.label.show = true;
+  viewer.scene.requestRender();
+}
+
+window.toggleSolarPlacement = function() {
+  const btn = document.getElementById('btnSolarPlace');
+  if (_solarPlacementActive) {
+    _solarPlacementActive = false;
+    if (_solarClickHandler) { try { _solarClickHandler.destroy(); } catch(e){} _solarClickHandler = null; }
+    if (btn) btn.classList.remove('active');
+    showToast('Solar placement mode off \u2014 placed panels remain visible');
+  } else {
+    _solarPlacementActive = true;
+    if (btn) btn.classList.add('active');
+    showToast('Click a building rooftop to place a solar array');
+    _solarClickHandler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+    _solarClickHandler.setInputAction(function(e) {
+      if (!_solarPlacementActive) return;
+      const picked = viewer.scene.pick(e.position);
+      const ent = picked && picked.id;
+      if (!ent || !ent._b) return;
+      const b = ent._b;
+
+      // Place the solar marker on the clicked roof position whenever possible.
+      // This avoids using the polygon centroid, which can fall outside the house
+      // footprint for irregular buildings and place the marker in the courtyard.
+      let lon, lat, sampledRoofHeight = null;
+      try {
+        if (viewer.scene.pickPositionSupported) {
+          const pickedCartesian = viewer.scene.pickPosition(e.position);
+          if (Cesium.defined(pickedCartesian)) {
+            const pickedCarto = Cesium.Cartographic.fromCartesian(pickedCartesian);
+            lon = Cesium.Math.toDegrees(pickedCarto.longitude);
+            lat = Cesium.Math.toDegrees(pickedCarto.latitude);
+            sampledRoofHeight = Number(pickedCarto.height);
+          }
         }
-        if (g.co2 && typeof g.co2 === 'object') {
-          PARAMS.co2 = Object.assign({}, PARAMS.co2 || {}, g.co2);
+      } catch(ex) {}
+
+      // Fallback to the building centroid only if the roof click position is unavailable.
+      if (!Number.isFinite(lon) || !Number.isFinite(lat)) {
+        if (b.CentroidCarto && Number.isFinite(b.CentroidCarto.longitude)) {
+          lon = Cesium.Math.toDegrees(b.CentroidCarto.longitude);
+          lat = Cesium.Math.toDegrees(b.CentroidCarto.latitude);
+        } else if (ent._polyCartoPositions && ent._polyCartoPositions.length > 0) {
+          lon = 0; lat = 0;
+          ent._polyCartoPositions.forEach(function(c) {
+            lon += Cesium.Math.toDegrees(c.longitude);
+            lat += Cesium.Math.toDegrees(c.latitude);
+          });
+          lon /= ent._polyCartoPositions.length;
+          lat /= ent._polyCartoPositions.length;
+        } else {
+          showToast('Could not determine building location \u2014 try another building');
+          return;
         }
-        if (typeof g.discountRate === 'number' && !isNaN(g.discountRate)) {
-          discountRate = g.discountRate;
+      }
+
+      var roofH = Number.isFinite(sampledRoofHeight) ? (sampledRoofHeight + 0.25) : ((Number(b.RealHeight) || 6) + 0.4);
+      var area = Number(b.Area) || 80;
+      var roofArea = Number(b.FootprintAreaM2) || area * 0.6;
+      var usableRoof = roofArea * 0.70;
+
+      // Energy estimates
+      var peakPower = +(usableRoof * 0.20).toFixed(2);
+      var annualYield = Math.round(usableRoof * 180);
+      var cost = Math.round(usableRoof * 200);
+      var selfConsumed = annualYield * 0.35;
+      var exported = annualYield - selfConsumed;
+      var annualRevenue = selfConsumed * 0.25 + exported * 0.07;
+      var payback = annualRevenue > 0 ? +(cost / annualRevenue).toFixed(1) : 99;
+
+      // Native Cesium solar marker placed just above the roof so it stays aligned with the building.
+      var markerHeight = roofH + 1.4;
+      var popupText = [
+        'Solar array',
+        'Building: ' + (b.ID || b.id || '?'),
+        'Peak power: ' + peakPower.toFixed(1) + ' kWp',
+        'Annual yield: ' + annualYield.toLocaleString() + ' kWh/yr',
+        'Payback: ' + payback + ' yr'
+      ].join('\n');
+
+      var panelEnt = viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(lon, lat, markerHeight),
+        point: {
+          pixelSize: 16,
+          color: Cesium.Color.fromCssColorString('#FFD600'),
+          outlineColor: Cesium.Color.fromCssColorString('#5b3a00'),
+          outlineWidth: 2,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          heightReference: Cesium.HeightReference.NONE
+        },
+        label: {
+          text: popupText,
+          show: false,
+          font: '600 13px Inter, sans-serif',
+          fillColor: Cesium.Color.WHITE,
+          outlineColor: Cesium.Color.BLACK,
+          outlineWidth: 3,
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          showBackground: true,
+          backgroundColor: Cesium.Color.fromCssColorString('rgba(15,23,42,0.92)'),
+          pixelOffset: new Cesium.Cartesian2(0, -34),
+          horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY
         }
-        if (typeof g.horizonYears === 'number' && !isNaN(g.horizonYears)) {
-          horizonYears = g.horizonYears;
-        }
-        if (g.budgetCap !== undefined) {
-          budgetCap = (g.budgetCap === null || isNaN(g.budgetCap)) ? null : g.budgetCap;
+      });
+      panelEnt._solarPlacementData = {
+        buildingId: b.ID || b.id || '?',
+        peakPower: peakPower,
+        annualYield: annualYield,
+        payback: payback
+      };
+
+      _solarPanelEntities.push(panelEnt);
+      _solarMarkerEntities.push(panelEnt);
+
+      if (!Array.isArray(window.solarPlacements)) window.solarPlacements = [];
+      window.solarPlacements.push({
+        buildingId: b.ID || b.id || '?',
+        peakPower: peakPower, annualYield: annualYield, cost: cost,
+        annualRevenue: annualRevenue, payback: payback,
+        selfConsumed: selfConsumed, exported: exported,
+        entity: ent, lon: lon, lat: lat, roofH: roofH
+      });
+      b.customPV = true;
+
+      // Tint building polygon amber to show solar coverage
+      if (ent.polygon && ent.polygon.material) {
+        ent.polygon.material = Cesium.Color.fromCssColorString('#fbbf24').withAlpha(0.65);
+      }
+
+      showToast('\u2600\ufe0f Solar array: ' + peakPower.toFixed(1) + ' kWp \u00b7 ' + annualYield.toLocaleString() + ' kWh/yr \u00b7 Payback ' + payback + ' yr');
+      try { if (typeof updateVis === 'function') updateVis(); } catch(ex) {}
+      viewer.scene.requestRender();
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+  }
+};
+
+// ── Energy Flow Visualization (v3 — canvas-based animated dashed lines) ──
+let _energyFlowActive = false;
+let _energyFlowEntities = [];
+let _energyFlowInterval = null;   // kept for compat (unused in v3)
+let _flowLegendEl = null;
+let _flowBillboards = [];
+// v3 additions
+let _flowCanvas = null;
+let _flowCanvasCtx = null;
+let _flowRafId = null;
+let _flowData = [];               // [{lon, lat, roofH, color, pvPot}]
+
+// Approximate grid substation for Twekkelerveld, Enschede
+var GRID_CONNECTION = { lon: 6.8930, lat: 52.2205 };
+
+window.toggleEnergyFlows = function() {
+  var btn = document.getElementById('btnEnergyFlow');
+  if (_energyFlowActive) {
+    _stopEnergyFlows();
+    if (btn) btn.classList.remove('active');
+    showToast('Energy flow visualization off');
+  } else {
+    _startEnergyFlows();
+    if (btn) btn.classList.add('active');
+    showToast('\u2600\ufe0f yellow=exporter \u00b7 green=self-sufficient \u00b7 blue=grid-dependent');
+  }
+};
+
+function _stopEnergyFlows() {
+  _energyFlowActive = false;
+  _energyFlowEntities.forEach(function(e) { try { viewer.entities.remove(e); } catch(ex) {} });
+  _energyFlowEntities = [];
+  _flowBillboards = [];
+  if (_energyFlowInterval) { clearInterval(_energyFlowInterval); _energyFlowInterval = null; }
+  if (_flowLegendEl && _flowLegendEl.parentNode) { _flowLegendEl.parentNode.removeChild(_flowLegendEl); }
+  _flowLegendEl = null;
+  // v3: cancel canvas animation and remove canvas
+  if (_flowRafId) { cancelAnimationFrame(_flowRafId); _flowRafId = null; }
+  if (_flowCanvas && _flowCanvas.parentNode) { _flowCanvas.parentNode.removeChild(_flowCanvas); }
+  _flowCanvas = null; _flowCanvasCtx = null; _flowData = [];
+}
+
+function _startEnergyFlows() {
+  _stopEnergyFlows();
+  _energyFlowActive = true;
+
+  // FIX 1: use module-scoped myEntities (NOT window.myEntities which is undefined)
+  var entityList = (typeof myEntities !== 'undefined' && Array.isArray(myEntities) && myEntities.length > 0)
+    ? myEntities
+    : Array.from(viewer.entities.values);
+
+  var pvBuildings = [];
+  var allBuildings = [];
+
+  for (var ei = 0; ei < entityList.length; ei++) {
+    var ent = entityList[ei];
+    var b = ent._b;
+    // FIX 2: centroid is ent._b.CentroidCarto (Cesium.Cartographic with lon/lat in RADIANS)
+    if (!b || !b.CentroidCarto || !Number.isFinite(b.CentroidCarto.longitude)) continue;
+    var lon = Cesium.Math.toDegrees(b.CentroidCarto.longitude);
+    var lat = Cesium.Math.toDegrees(b.CentroidCarto.latitude);
+    var pvPot = Number(b.PV_POT) || 0;
+    var eui = Number(b.EUI_BASE) || 180;
+    var floorArea = Number(b.Area) || 80;
+    var annualDemand = eui * floorArea;
+    var selfSuf = annualDemand > 0 ? Math.min(pvPot / annualDemand, 1.5) : 0;
+    var roofH = (Number(b.RealHeight) || 6) + 1.0;
+    var rec = { ent: ent, pvPot: pvPot, selfSuf: selfSuf, lon: lon, lat: lat, roofH: roofH, annualDemand: annualDemand };
+    allBuildings.push(rec);
+    if (pvPot > 500) pvBuildings.push(rec);
+  }
+
+  if (allBuildings.length === 0) {
+    showToast('No building data loaded. Please load the LOD1 dataset first.');
+    _energyFlowActive = false;
+    var btnOff = document.getElementById('btnEnergyFlow');
+    if (btnOff) btnOff.classList.remove('active');
+    return;
+  }
+
+  // Use real PV data if available, else synthesise so flows are always shown
+  var source = pvBuildings.length > 0 ? pvBuildings
+    : allBuildings.map(function(r) {
+        return { ent: r.ent, pvPot: r.annualDemand * (0.3 + (r.lon * 1000 % 7) * 0.1),
+                 selfSuf: 0.3 + (r.lat * 100 % 5) * 0.1,
+                 lon: r.lon, lat: r.lat, roofH: r.roofH };
+      });
+
+  source.sort(function(a, b) { return b.pvPot - a.pvPot; });
+  // Select more houses for the flow visualisation.  We take up to 50 of the highest potential buildings.
+  var sampleSize = Math.min(source.length, 50);
+  var sample = source.slice(0, sampleSize);
+
+  // Grid connection substation billboard
+  var gridBill = viewer.entities.add({
+    position: Cesium.Cartesian3.fromDegrees(GRID_CONNECTION.lon, GRID_CONNECTION.lat, 25),
+    billboard: {
+      image: _createGlowDot('#ef4444', 20),
+      scale: 1.2,
+      disableDepthTestDistance: Number.POSITIVE_INFINITY
+    },
+    label: {
+      text: '\u26a1 Grid\nConnection',
+      font: '600 13px Inter,sans-serif',
+      fillColor: Cesium.Color.WHITE,
+      outlineColor: Cesium.Color.BLACK,
+      outlineWidth: 2,
+      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+      pixelOffset: new Cesium.Cartesian2(0, -34),
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      showBackground: true,
+      backgroundColor: Cesium.Color.fromCssColorString('rgba(10,15,30,0.72)'),
+      backgroundPadding: new Cesium.Cartesian2(10, 4)
+    }
+  });
+  _energyFlowEntities.push(gridBill);
+  _flowBillboards.push({ ent: gridBill, phase: 0, speed: 1.5 });
+
+  // Collect flow data for canvas + add pulsing billboard dots
+  _flowData = [];
+  for (var si = 0; si < sample.length; si++) {
+    var s = sample[si];
+    var pvPot = s.pvPot;
+    if (pvPot <= 0) continue;
+    var selfSuf = s.selfSuf;
+    var lon = s.lon;
+    var lat = s.lat;
+    var roofH = s.roofH;
+
+    var isExporter   = selfSuf > 0.8;
+    var isSufficient = selfSuf > 0.4;
+
+    // v3 colors: solar export=amber, local share=green, grid import=sky-blue
+    var hexColor;
+    if (isExporter)        { hexColor = '#f59e0b'; }   // solar export
+    else if (isSufficient) { hexColor = '#4ade80'; }   // local share
+    else                   { hexColor = '#38bdf8'; }   // grid import
+
+    var dotRadius = 12 + Math.min(pvPot / 500, 16);
+
+    // Pulsing billboard above building
+    var billEnt = viewer.entities.add({
+      position: Cesium.Cartesian3.fromDegrees(lon, lat, roofH + 6),
+      billboard: {
+        image: _createGlowDot(hexColor, dotRadius),
+        scale: 1.0,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY
+      },
+      label: {
+        text: (pvPot / 1000).toFixed(1) + ' MWh/yr',
+        font: '600 13px Inter,sans-serif',
+        fillColor: Cesium.Color.WHITE,
+        outlineColor: Cesium.Color.BLACK,
+        outlineWidth: 2,
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        pixelOffset: new Cesium.Cartesian2(0, -30),
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        show: pvPot > 3000,
+        showBackground: true,
+        backgroundColor: Cesium.Color.fromCssColorString('rgba(10,15,30,0.72)'),
+        backgroundPadding: new Cesium.Cartesian2(10, 4)
+      }
+    });
+    _energyFlowEntities.push(billEnt);
+    // Assign a random phase so dots pulse asynchronously and base the speed on self‑sufficiency (higher selfSuf → faster pulsation).
+    var randPhase = Math.random() * Math.PI * 2;
+    var randSpeed = 0.6 + (selfSuf || 0) * 1.2;
+    // Clamp speed to a sensible range [0.6, 1.8]
+    if (randSpeed < 0.6) randSpeed = 0.6;
+    if (randSpeed > 1.8) randSpeed = 1.8;
+    _flowBillboards.push({ ent: billEnt, phase: randPhase, speed: randSpeed });
+
+    // Store for canvas draw
+    _flowData.push({ lon: lon, lat: lat, roofH: roofH, color: hexColor, pvPot: pvPot });
+  }
+
+  // ── Canvas overlay for animated dashed flow lines ──
+  var cesContainer = document.getElementById('cesiumContainer');
+  _flowCanvas = document.createElement('canvas');
+  _flowCanvas.id = 'energyFlowCanvas';
+  _flowCanvas.width  = cesContainer.offsetWidth  || window.innerWidth;
+  _flowCanvas.height = cesContainer.offsetHeight || window.innerHeight;
+  _flowCanvas.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;z-index:750;';
+  document.body.appendChild(_flowCanvas);
+  _flowCanvasCtx = _flowCanvas.getContext('2d');
+
+  var _localDashOffset = 0;
+
+  function _animateFlows() {
+    if (!_energyFlowActive || !_flowCanvas) return;
+    var ctx = _flowCanvasCtx;
+
+    // Keep canvas sized to container
+    var cW = cesContainer.offsetWidth  || window.innerWidth;
+    var cH = cesContainer.offsetHeight || window.innerHeight;
+    if (_flowCanvas.width !== cW || _flowCanvas.height !== cH) {
+      _flowCanvas.width = cW; _flowCanvas.height = cH;
+    }
+    ctx.clearRect(0, 0, _flowCanvas.width, _flowCanvas.height);
+
+    _localDashOffset -= 1.2;  // dashes flow toward the grid node
+
+    // Project grid substation to 2D
+    var gridCart = Cesium.Cartesian3.fromDegrees(GRID_CONNECTION.lon, GRID_CONNECTION.lat, 25);
+    var gridSc = Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, gridCart);
+
+    if (gridSc) {
+      for (var i = 0; i < _flowData.length; i++) {
+        var d = _flowData[i];
+        if (d.pvPot <= 0) continue;
+        var bCart = Cesium.Cartesian3.fromDegrees(d.lon, d.lat, d.roofH + 2);
+        var bSc   = Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, bCart);
+        if (!bSc) continue;
+
+        // Draw the dashed flow line from building to grid node.
+        ctx.save();
+        ctx.globalAlpha  = 0.55;
+        ctx.strokeStyle  = d.color;
+        ctx.lineWidth    = 2;
+        ctx.shadowBlur   = 8;
+        ctx.shadowColor  = d.color;
+        ctx.setLineDash([12, 18]);
+        ctx.lineDashOffset = _localDashOffset;
+        ctx.beginPath();
+        ctx.moveTo(bSc.x, bSc.y);
+        ctx.lineTo(gridSc.x, gridSc.y);
+        ctx.stroke();
+        ctx.restore();
+
+        // ── Draw animated dots along the flow line ──
+        // Compute vector components and animated positions for multiple dots.
+        var dx = gridSc.x - bSc.x;
+        var dy = gridSc.y - bSc.y;
+        var tNow = performance.now() / 1000;
+        // Use the building index to offset dot phases so they don't align.
+        // Base speed is slower for clarity; adjust multiplier to tune animation speed.
+        var baseSpeed = 0.15;
+        for (var dot = 0; dot < 3; dot++) {
+          // Each dot is spaced evenly along the line; add offset based on dot index
+          var phaseOffset = dot * 0.33;
+          var tFlow = (tNow * baseSpeed + (i * 0.1) + phaseOffset) % 1.0;
+          var px = bSc.x + dx * tFlow;
+          var py = bSc.y + dy * tFlow;
+          ctx.save();
+          // Slightly increase alpha for dots for improved visibility on dark backgrounds
+          ctx.globalAlpha = 0.85;
+          ctx.fillStyle = d.color;
+          ctx.beginPath();
+          ctx.arc(px, py, 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
         }
       }
     }
-  } catch (e) {
-    console.warn('Failed to load GLOBAL_ENERGY_SETTINGS', e);
+
+    // Animate billboard dot pulse
+    var t = performance.now() / 1000;
+    for (var fi = 0; fi < _flowBillboards.length; fi++) {
+      var fd = _flowBillboards[fi];
+      if (fd.ent && fd.ent.billboard) {
+        var ph = Math.sin(t * fd.speed + fd.phase);
+        fd.ent.billboard.scale = 0.75 + 0.45 * (ph * 0.5 + 0.5);
+      }
+    }
+    viewer.scene.requestRender();
+
+    _flowRafId = requestAnimationFrame(_animateFlows);
+  }
+
+  _animateFlows();
+  _createFlowLegend();
+}
+
+function _createFlowLegend() {
+  if (_flowLegendEl) return;
+  var el = document.createElement('div');
+  el.id = 'energyFlowLegend';
+  el.innerHTML =
+    '<div style="font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Energy Flows</div>' +
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;"><div style="width:28px;height:3px;background:#f59e0b;border-radius:2px;box-shadow:0 0 8px #f59e0b;"></div><span style="font-size:12px;color:#f59e0b;font-weight:600;">Solar Export</span></div>' +
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;"><div style="width:28px;height:3px;background:#4ade80;border-radius:2px;box-shadow:0 0 8px #4ade80;"></div><span style="font-size:12px;color:#4ade80;font-weight:600;">Local Share</span></div>' +
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;"><div style="width:28px;height:3px;background:#38bdf8;border-radius:2px;box-shadow:0 0 8px #38bdf8;"></div><span style="font-size:12px;color:#38bdf8;font-weight:600;">Grid Import</span></div>' +
+    '<div style="display:flex;align-items:center;gap:8px;"><div style="width:12px;height:12px;background:#ef4444;border-radius:50%;box-shadow:0 0 8px #ef4444;flex-shrink:0;"></div><span style="font-size:12px;color:#ef4444;font-weight:600;">\u26a1 Grid Node</span></div>';
+  el.style.cssText =
+    'position:absolute;bottom:140px;right:20px;z-index:950;' +
+    'background:rgba(15,23,42,0.95);border:1px solid rgba(255,255,255,0.15);' +
+    'border-radius:14px;padding:14px 16px;backdrop-filter:blur(14px);' +
+    'box-shadow:0 8px 24px rgba(0,0,0,0.45);color:#e2e8f0;pointer-events:none;min-width:175px;';
+  document.body.appendChild(el);
+  _flowLegendEl = el;
+}
+
+// Create a radial glow dot canvas — parses 6-digit hex colour correctly
+function _createGlowDot(hexColor, radius) {
+  var r = Math.max(8, Math.round(radius || 14));
+  var size = r * 4;
+  var c = document.createElement('canvas');
+  c.width = c.height = size;
+  var ctx = c.getContext('2d');
+  var cx = size / 2;
+
+  // Parse 6-digit hex to RGB integers
+  var rr = 96, gg = 165, bb = 250; // fallback: blue
+  var m = (hexColor || '').match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  if (m) { rr = parseInt(m[1], 16); gg = parseInt(m[2], 16); bb = parseInt(m[3], 16); }
+
+  var grad = ctx.createRadialGradient(cx, cx, 0, cx, cx, cx);
+  grad.addColorStop(0,    'rgba(' + rr + ',' + gg + ',' + bb + ',1.0)');
+  grad.addColorStop(0.35, 'rgba(' + rr + ',' + gg + ',' + bb + ',0.70)');
+  grad.addColorStop(0.65, 'rgba(' + rr + ',' + gg + ',' + bb + ',0.25)');
+  grad.addColorStop(1,    'rgba(' + rr + ',' + gg + ',' + bb + ',0)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(cx, cx, cx, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Bright white core
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  ctx.beginPath();
+  ctx.arc(cx, cx, r * 0.45, 0, Math.PI * 2);
+  ctx.fill();
+
+  return c.toDataURL();
+}
+
+
+// ── Fix 4: PDF generation robustness patch ──
+// Wrap generatePDF to handle missing retrofitZones gracefully and add map snapshot
+(function patchPDF() {
+  const _origGeneratePDF = window.generatePDF;
+  window.generatePDF = async function() {
+    // Ensure global arrays are defined
+    if (!Array.isArray(window.retrofitZones))   window.retrofitZones   = [];
+    if (!Array.isArray(window.solarPlacements)) window.solarPlacements = [];
+    // If in LOD2 view, skip the guard and still generate without building-specific data
+    const viewRealEl = document.getElementById('viewReal');
+    if (viewRealEl && viewRealEl.classList.contains('active')) {
+      // Override: generate a map-snapshot-only PDF without requiring LOD1 selection
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+        const W = 210, H = 297;
+        const today = new Date().toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' });
+        doc.setFillColor(15, 23, 42); doc.rect(0, 0, W, 18, 'F');
+        doc.setTextColor(255,255,255); doc.setFontSize(14); doc.setFont('helvetica','bold');
+        doc.text('Twekkelerveld Smart Energy Twin', 15, 12);
+        doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(148,163,184);
+        doc.text('Generated: ' + today + '  |  LOD 2.2 View', 15, 17);
+        // Map snapshot
+        viewer.scene.requestRender();
+        await new Promise(r => setTimeout(r, 300));
+        try {
+          const mapImg = viewer.canvas.toDataURL('image/jpeg', 0.92);
+          doc.addImage(mapImg, 'JPEG', 5, 22, W - 10, 120);
+        } catch(ex) { doc.setTextColor(100,116,139); doc.text('(Map snapshot not available)', 15, 60); }
+        doc.setTextColor(15,23,42); doc.setFontSize(11); doc.setFont('helvetica','bold');
+        doc.text('3D Building Model View', 15, 148);
+        doc.setFontSize(9); doc.setFont('helvetica','normal');
+        doc.text('Switch to LOD 1 and select a building for a detailed energy report.', 15, 155);
+        const ts = new Date().toISOString().replace(/[:.]/g,'').slice(0,15);
+        doc.save('EnergyTwin_MapSnapshot_' + ts + '.pdf');
+        return;
+      } catch(ex) {
+        console.error('LOD2 PDF failed', ex);
+        alert('PDF generation failed: ' + ex.message);
+        return;
+      }
+    }
+    if (!window.selectedEnt) {
+      alert('Please click a building on the map first to generate a building report.\nFor a scenario summary (no building selection required), use the "Download Summary PDF" button below.');
+      return;
+    }
+    if (_origGeneratePDF) return _origGeneratePDF.apply(this, arguments);
+  };
+
+  const _origSummaryPDF = window.generateScenarioSummaryPDF;
+  window.generateScenarioSummaryPDF = async function() {
+    if (!Array.isArray(window.retrofitZones))   window.retrofitZones   = [];
+    if (!Array.isArray(window.solarPlacements)) window.solarPlacements = [];
+    if (_origSummaryPDF) return _origSummaryPDF.apply(this, arguments);
+  };
+})();
+
+</script>
+<!-- Retrofit Configurator enhancements imported from energy (9).html -->
+<script>
+// Define a global reset function to restore retrofit configurator controls to defaults.
+window.resetRetrofitConfig = function() {
+  const solarSlider = document.getElementById('cfgSolarPct');
+  if (solarSlider) solarSlider.value = 0;
+  const wallSel = document.getElementById('cfgWallIns');
+  if (wallSel) wallSel.value = 'none';
+  const roofSel = document.getElementById('cfgRoofIns');
+  if (roofSel) roofSel.value = 'none';
+  const hpCheck = document.getElementById('cfgHeatPump');
+  if (hpCheck) hpCheck.checked = false;
+  // Update the underlying configuration via the existing onRetrofitConfigChange handler.  This
+  // handler will synchronise the internal state based on the current control values.  Without
+  // direct access to the module‑scoped currentRetrofitConfig, we delegate the update to the
+  // provided function if it exists.
+  if (typeof window.onRetrofitConfigChange === 'function') {
+    window.onRetrofitConfigChange();
+  }
+  const results = document.getElementById('cfgResults');
+  if (results) results.style.display = 'none';
+  const solarVal = document.getElementById('cfgSolarPctVal');
+  if (solarVal) solarVal.textContent = '0%';
+};
+
+// Provide a simple colour lookup for energy labels.  Used when recolouring buildings after retrofits.
+window.labelColor = function(label) {
+  const colors = {
+    'A+': '#00b050', 'A': '#00b050', 'B': '#92d050',
+    'C': '#c4d600', 'D': '#ffc000', 'E': '#ff8c00',
+    'F': '#ff4500', 'G': '#c00000'
+  };
+  return colors[label] || '#888888';
+};
+
+// Wrap renderInfo to toggle the retrofit configurator visibility based on selection.
+(function() {
+  const _origRenderInfo = window.renderInfo;
+  if (typeof _origRenderInfo === 'function') {
+    window.renderInfo = function(ent) {
+      _origRenderInfo.call(this, ent);
+      const cfg = document.getElementById('retrofitConfigurator');
+      if (cfg) cfg.style.display = (ent && ent._b) ? 'block' : 'none';
+      if (ent && ent._b) {
+        // Reset controls so the user starts from a clean slate for each new building.
+        window.resetRetrofitConfig();
+      }
+    };
   }
 })();
+</script>
+<!-- Energy & Economic Settings Modal -->
+<div id="energy-settings-overlay" class="settings-modal-overlay">
+  <div class="settings-modal">
+    <h2>Energy &amp; Economic Settings</h2>
+    <form id="energy-settings-form">
+      <h3>Prices (€/unit)</h3>
+      <div class="field"><label for="es_price_elecImport">Electricity import (€/kWh)</label><input type="number" step="0.01" id="es_price_elecImport"></div>
+      <div class="field"><label for="es_price_gas">Gas (€/m³)</label><input type="number" step="0.01" id="es_price_gas"></div>
+      <div class="field"><label for="es_price_feedIn">Feed‑in (€/kWh)</label><input type="number" step="0.01" id="es_price_feedIn"></div>
+      <div class="field"><label for="es_price_p2p">P2P (€/kWh)</label><input type="number" step="0.01" id="es_price_p2p"></div>
+      <h3>Costs</h3>
+      <div class="field"><label for="es_cost_pvPerWp">PV cost (€/Wp)</label><input type="number" step="0.01" id="es_cost_pvPerWp"></div>
+      <div class="field"><label for="es_cost_insulation">Insulation (€/m²)</label><input type="number" step="0.1" id="es_cost_insulation"></div>
+      <div class="field"><label for="es_cost_hybridHp">Hybrid heat pump (€)</label><input type="number" step="100" id="es_cost_hybridHp"></div>
+      <div class="field"><label for="es_cost_allHp">All‑electric heat pump (€)</label><input type="number" step="100" id="es_cost_allHp"></div>
+      <h3>CO₂ factors (kg CO₂ per unit)</h3>
+      <div class="field"><label for="es_co2_elec">Electricity (kgCO₂/kWh)</label><input type="number" step="0.001" id="es_co2_elec"></div>
+      <div class="field"><label for="es_co2_gas">Gas (kgCO₂/m³)</label><input type="number" step="0.001" id="es_co2_gas"></div>
+      <h3>CBA parameters</h3>
+      <div class="field"><label for="es_cba_discount">Discount rate (%)</label><input type="number" step="0.1" id="es_cba_discount"></div>
+      <div class="field"><label for="es_cba_horizon">Horizon (years)</label><input type="number" step="1" id="es_cba_horizon"></div>
+      <h3>Budget cap</h3>
+      <div class="field"><label for="es_budget_cap">Max investment (€)</label><input type="number" step="100" id="es_budget_cap"></div>
+      <details class="field">
+        <summary>Show equations &amp; assumptions</summary>
+        <div style="margin-top:8px; font-size:12px; line-height:1.5; color:var(--text-muted)">
+          <p><strong>Energy cost:</strong> (gas × price<sub>gas</sub>) + (imported electricity × price<sub>elec</sub>) − (exported electricity × feed‑in tariff)</p>
+          <p><strong>CO₂ savings:</strong> (baseline energy − new energy) × emission factor</p>
+          <p><strong>Cost assumptions:</strong> PV cost per Wp (costs.pvPerWp), insulation per m² (costs.insulationSqM), heat pump costs (costs.hybridPump/allElectric)</p>
+          <p><strong>NPV:</strong> ∑<sub>t=1</sub><sup>T</sup> (Annual savings)/(1 + r)<sup>t</sup> − Capex</p>
+          <p><strong>BCR:</strong> Present value of benefits ÷ Capex</p>
+        </div>
+      </details>
+    </form>
+    <div class="button-row">
+      <button type="button" id="energy-settings-apply" class="save-btn">Apply</button>
+      <button type="button" id="energy-settings-cancel" class="cancel-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// -------------------------------------------------------------------------
+// Standalone energy settings management
+//
+// Provides an in‑app UI for adjusting energy prices, costs, CO₂ factors,
+// discount rate, horizon and budget when running the stand‑alone smart
+// energy twin.  Values are loaded from the PARAMS object on first run or
+// pulled from GLOBAL_ENERGY_SETTINGS in localStorage.  When the user
+// applies the settings the PARAMS object and global variables are updated
+// and key visualisations are re-rendered.  The settings button is hidden
+// automatically when this page is embedded inside the Nexus.
+(function(){
+  let energySettings = {
+    prices: {
+      elecImport: (PARAMS.prices && PARAMS.prices.elecImport) ?? 0.30,
+      gas: (PARAMS.prices && PARAMS.prices.gas) ?? 1.45,
+      feedIn: (PARAMS.prices && PARAMS.prices.feedIn) ?? 0.05,
+      p2p: (PARAMS.prices && PARAMS.prices.p2p) ?? 0.15
+    },
+    costs: {
+      pvPerWp: (PARAMS.costs && PARAMS.costs.pvPerWp) ?? 1.13,
+      insulationSqM: (PARAMS.costs && PARAMS.costs.insulationSqM) ?? 50,
+      hybridPump: (PARAMS.costs && PARAMS.costs.hybridPump) ?? 6000,
+      allElectric: (PARAMS.costs && PARAMS.costs.allElectric) ?? 14000
+    },
+    co2: {
+      elec: (PARAMS.co2 && PARAMS.co2.elec) ?? 0.268,
+      gas: (PARAMS.co2 && PARAMS.co2.gas) ?? 2.134
+    },
+    discountRate: (typeof discountRate !== 'undefined' ? discountRate : 0.04),
+    horizonYears: (typeof horizonYears !== 'undefined' ? horizonYears : 20),
+    budgetCap: (typeof budgetCap !== 'undefined' ? budgetCap : null)
+  };
+  // Load stored settings from localStorage if available
+  try {
+    const stored = localStorage.getItem('GLOBAL_ENERGY_SETTINGS');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === 'object') {
+        energySettings = Object.assign({}, energySettings, parsed);
+      }
+    }
+  } catch(e) {}
+  function openEnergySettings(){
+    const s = energySettings;
+    document.getElementById('es_price_elecImport').value = s.prices.elecImport ?? '';
+    document.getElementById('es_price_gas').value        = s.prices.gas ?? '';
+    document.getElementById('es_price_feedIn').value     = s.prices.feedIn ?? '';
+    document.getElementById('es_price_p2p').value        = s.prices.p2p ?? '';
+    document.getElementById('es_cost_pvPerWp').value     = s.costs.pvPerWp ?? '';
+    document.getElementById('es_cost_insulation').value  = s.costs.insulationSqM ?? '';
+    document.getElementById('es_cost_hybridHp').value    = s.costs.hybridPump ?? '';
+    document.getElementById('es_cost_allHp').value       = s.costs.allElectric ?? '';
+    document.getElementById('es_co2_elec').value         = s.co2.elec ?? '';
+    document.getElementById('es_co2_gas').value          = s.co2.gas ?? '';
+    document.getElementById('es_cba_discount').value     = ((s.discountRate || 0) * 100).toFixed(2);
+    document.getElementById('es_cba_horizon').value      = s.horizonYears ?? '';
+    document.getElementById('es_budget_cap').value       = s.budgetCap ?? '';
+    document.getElementById('energy-settings-overlay').classList.add('active');
+  }
+  function closeEnergySettings(){
+    document.getElementById('energy-settings-overlay').classList.remove('active');
+  }
+  function applyEnergySettingsStandalone(){
+    const pEI = parseFloat(document.getElementById('es_price_elecImport').value);
+    const pG  = parseFloat(document.getElementById('es_price_gas').value);
+    const pF  = parseFloat(document.getElementById('es_price_feedIn').value);
+    const pP  = parseFloat(document.getElementById('es_price_p2p').value);
+    const cPV = parseFloat(document.getElementById('es_cost_pvPerWp').value);
+    const cI  = parseFloat(document.getElementById('es_cost_insulation').value);
+    const cH  = parseFloat(document.getElementById('es_cost_hybridHp').value);
+    const cA  = parseFloat(document.getElementById('es_cost_allHp').value);
+    const coE = parseFloat(document.getElementById('es_co2_elec').value);
+    const coG = parseFloat(document.getElementById('es_co2_gas').value);
+    const rIn = parseFloat(document.getElementById('es_cba_discount').value);
+    const tIn = parseFloat(document.getElementById('es_cba_horizon').value);
+    const bIn = parseFloat(document.getElementById('es_budget_cap').value);
+    if (Number.isFinite(pEI)) { energySettings.prices.elecImport = pEI; PARAMS.prices.elecImport = pEI; }
+    if (Number.isFinite(pG))  { energySettings.prices.gas = pG; PARAMS.prices.gas = pG; }
+    if (Number.isFinite(pF))  { energySettings.prices.feedIn = pF; PARAMS.prices.feedIn = pF; }
+    if (Number.isFinite(pP))  { energySettings.prices.p2p = pP; PARAMS.prices.p2p = pP; }
+    if (Number.isFinite(cPV)) { energySettings.costs.pvPerWp = cPV; PARAMS.costs.pvPerWp = cPV; }
+    if (Number.isFinite(cI))  { energySettings.costs.insulationSqM = cI; PARAMS.costs.insulationSqM = cI; }
+    if (Number.isFinite(cH))  { energySettings.costs.hybridPump = cH; PARAMS.costs.hybridPump = cH; }
+    if (Number.isFinite(cA))  { energySettings.costs.allElectric = cA; PARAMS.costs.allElectric = cA; }
+    if (Number.isFinite(coE)) { energySettings.co2.elec = coE; PARAMS.co2.elec = coE; }
+    if (Number.isFinite(coG)) { energySettings.co2.gas = coG; PARAMS.co2.gas = coG; }
+    if (Number.isFinite(rIn)) { energySettings.discountRate = rIn / 100; if (typeof discountRate !== 'undefined') discountRate = rIn / 100; }
+    if (Number.isFinite(tIn)) { energySettings.horizonYears = tIn; if (typeof horizonYears !== 'undefined') horizonYears = tIn; }
+    energySettings.budgetCap = Number.isFinite(bIn) ? bIn : null;
+    if (typeof budgetCap !== 'undefined') budgetCap = (Number.isFinite(bIn) ? bIn : null);
+    // Persist to localStorage
+    try { localStorage.setItem('GLOBAL_ENERGY_SETTINGS', JSON.stringify(energySettings)); } catch(e) {}
+    // Update UI: refresh legends/visualisations if functions exist
+    try {
+      if (typeof updateLeftLegend === 'function') updateLeftLegend();
+      if (typeof updateVis === 'function') updateVis();
+      if (typeof updateEnergySegChart === 'function') updateEnergySegChart();
+    } catch(e) {}
+    closeEnergySettings();
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('settingsBtn');
+    if (btn) btn.addEventListener('click', (ev) => { ev.stopPropagation(); openEnergySettings(); });
+    const applyBtn  = document.getElementById('energy-settings-apply');
+    const cancelBtn = document.getElementById('energy-settings-cancel');
+    if (applyBtn)  applyBtn.addEventListener('click', applyEnergySettingsStandalone);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeEnergySettings);
+  });
+  // Hide settings button when embedded in iframe
+  window.addEventListener('load', () => {
+    try {
+      if (window.self !== window.top) {
+        const sb = document.getElementById('settingsBtn');
+        if (sb) sb.style.display = 'none';
+      }
+    } catch (e) {}
+  });
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ISSUE 3 — Interactive Energy Tools
+     Features: Retrofit Configurator, Zone Drawing, Solar Placement,
+     Scenario Comparison, Energy Flow Animation
+═══════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+'use strict';
+
+// ================================================================
+//  RETROFIT CONFIGURATION PARAMETERS
+// ================================================================
+const RETROFIT_PACKAGES = {
+  basic:    { label: 'Basic',        solarPct: 30,  wallIns: 'basic',    roofIns: 'basic',    heatPump: false, savingsPct: 15, costPerM2: 85  },
+  standard: { label: 'Standard',     solarPct: 60,  wallIns: 'basic',    roofIns: 'advanced', heatPump: false, savingsPct: 30, costPerM2: 150 },
+  deep:     { label: 'Deep Retrofit', solarPct: 90,  wallIns: 'advanced', roofIns: 'advanced', heatPump: true,  savingsPct: 55, costPerM2: 280 },
+  solar:    { label: 'Solar-Only',   solarPct: 80,  wallIns: 'none',     roofIns: 'none',     heatPump: false, savingsPct: 20, costPerM2: 65  }
+};
+
+const INSULATION_SAVINGS = { none: 0, basic: 0.12, advanced: 0.25 };
+const HEAT_PUMP_SAVINGS = 0.18;
+const CO2_FACTOR = 0.42; // kg CO₂ per kWh (NL grid avg)
+const SOLAR_YIELD_PER_M2 = 180; // kWh/yr per m² of panel
+const SOLAR_COST_PER_M2 = 200; // €/m² installed
+const INSULATION_COST = { none: 0, basic: 45, advanced: 95 }; // €/m² wall or roof
+const HEAT_PUMP_COST = 8500; // € per unit
+
+// ================================================================
+//  A: RETROFIT CONFIGURATOR (per-building)
+// ================================================================
+let currentRetrofitConfig = { solarPct: 0, wallIns: 'none', roofIns: 'none', heatPump: false };
+
+window.onRetrofitConfigChange = function() {
+  const solarSlider = document.getElementById('cfgSolarPct');
+  const solarVal = document.getElementById('cfgSolarPctVal');
+  if (solarSlider && solarVal) solarVal.textContent = solarSlider.value + '%';
+
+  currentRetrofitConfig = {
+    solarPct: Number(solarSlider?.value || 0),
+    wallIns: document.getElementById('cfgWallIns')?.value || 'none',
+    roofIns: document.getElementById('cfgRoofIns')?.value || 'none',
+    heatPump: document.getElementById('cfgHeatPump')?.checked || false
+  };
+
+  updateRetrofitResults();
+};
+
+function updateRetrofitResults() {
+  if (typeof selectedEnt === 'undefined' || !selectedEnt || !selectedEnt._b) return;
+  const b = selectedEnt._b;
+  const area = Number(b.Area) || 120;
+  const roofArea = Number(b.FootprintAreaM2) || area * 0.6;
+  const baseEUI = Number(b.EUI_BASE) || 180;
+  const baseEnergy = baseEUI * area;
+
+  const cfg = currentRetrofitConfig;
+  // Calculate savings
+  const wallSavings = INSULATION_SAVINGS[cfg.wallIns] || 0;
+  const roofSavings = INSULATION_SAVINGS[cfg.roofIns] || 0;
+  const hpSavings = cfg.heatPump ? HEAT_PUMP_SAVINGS : 0;
+  const insulationTotal = Math.min(wallSavings + roofSavings + hpSavings, 0.6);
+
+  const solarArea = roofArea * (cfg.solarPct / 100);
+  const solarGen = solarArea * SOLAR_YIELD_PER_M2;
+  const energyAfterInsulation = baseEnergy * (1 - insulationTotal);
+  const energyAfterAll = Math.max(energyAfterInsulation - solarGen, 0);
+  const totalSavings = baseEnergy - energyAfterAll;
+  const co2Reduction = totalSavings * CO2_FACTOR;
+
+  // Calculate cost
+  const wallCost = INSULATION_COST[cfg.wallIns] * area * 0.4; // assume 40% is wall area
+  const roofCostVal = INSULATION_COST[cfg.roofIns] * roofArea;
+  const solarCost = solarArea * SOLAR_COST_PER_M2;
+  const hpCost = cfg.heatPump ? HEAT_PUMP_COST : 0;
+  const totalCost = wallCost + roofCostVal + solarCost + hpCost;
+
+  const annualSavingEur = totalSavings * 0.25; // €0.25/kWh avg
+  const payback = annualSavingEur > 0 ? (totalCost / annualSavingEur) : Infinity;
+
+  // Determine new label
+  const newEUI = area > 0 ? energyAfterAll / area : baseEUI;
+  const newLabel = eui2label(newEUI);
+
+  // Display
+  const show = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  show('cfgNewLabel', newLabel);
+  show('cfgSavingsKwh', Math.round(totalSavings).toLocaleString() + ' kWh');
+  show('cfgCO2Red', Math.round(co2Reduction).toLocaleString() + ' kg/yr');
+  show('cfgCost', '€' + Math.round(totalCost).toLocaleString());
+  show('cfgPayback', payback < 100 ? payback.toFixed(1) + ' yrs' : '> 100 yrs');
+
+  const results = document.getElementById('cfgResults');
+  if (results) results.style.display = (cfg.solarPct > 0 || cfg.wallIns !== 'none' || cfg.roofIns !== 'none' || cfg.heatPump) ? 'block' : 'none';
+}
+
+function eui2label(eui) {
+  if (eui <= 50) return 'A+';
+  if (eui <= 75) return 'A';
+  if (eui <= 105) return 'B';
+  if (eui <= 160) return 'C';
+  if (eui <= 200) return 'D';
+  if (eui <= 250) return 'E';
+  if (eui <= 300) return 'F';
+  return 'G';
+}
+
+window.applyRetrofitToBuilding = function() {
+  if (typeof selectedEnt === 'undefined' || !selectedEnt || !selectedEnt._b) return;
+  const b = selectedEnt._b;
+  const cfg = currentRetrofitConfig;
+
+  const area = Number(b.Area) || 120;
+  const roofArea = Number(b.FootprintAreaM2) || area * 0.6;
+  const baseEUI = Number(b.EUI_BASE) || 180;
+  const baseEnergy = baseEUI * area;
+
+  const wallSavings = INSULATION_SAVINGS[cfg.wallIns] || 0;
+  const roofSavings = INSULATION_SAVINGS[cfg.roofIns] || 0;
+  const hpSavings = cfg.heatPump ? HEAT_PUMP_SAVINGS : 0;
+  const insulationTotal = Math.min(wallSavings + roofSavings + hpSavings, 0.6);
+  const solarArea = roofArea * (cfg.solarPct / 100);
+  const solarGen = solarArea * SOLAR_YIELD_PER_M2;
+  const energyAfterAll = Math.max(baseEnergy * (1 - insulationTotal) - solarGen, 0);
+  const newEUI = area > 0 ? energyAfterAll / area : baseEUI;
+  const newLabel = eui2label(newEUI);
+
+  // Preserve the original label once so we can restore the colour later when
+  // undoing retrofits.  When _origLabel is undefined it means the
+  // building has never been retrofitted before.
+  if (b._origLabel === undefined) {
+    b._origLabel = b.LabelLetter || b.ClusterLabel || '';
+  }
+  // Mark that a retrofit has been applied and store the configuration and
+  // results.  These flags are used in the scenario aggregation and when
+  // resetting or undoing retrofits.
+  b._retrofitApplied = true;
+  b._retrofitConfig = { ...cfg };
+  b._retrofitNewEUI = newEUI;
+  b._retrofitNewLabel = newLabel;
+
+  // Update building color on map
+  if (selectedEnt.polygon && selectedEnt.polygon.material) {
+    selectedEnt.polygon.material = Cesium.Color.fromCssColorString(labelColor(newLabel)).withAlpha(0.75);
+  }
+
+  addRetrofitToScenario(b);
+  showToast('Retrofit applied: ' + newLabel);
+};
+
+window.applyRetrofitToSimilar = function() {
+  if (typeof selectedEnt === 'undefined' || !selectedEnt || !selectedEnt._b) return;
+  const refB = selectedEnt._b;
+  const refYear = Number(refB.Year) || 1970;
+  const refEUI = Number(refB.EUI_BASE) || 180;
+  let count = 0;
+
+  if (typeof viewer !== 'undefined' && viewer.entities && viewer.entities.values) {
+    viewer.entities.values.forEach(ent => {
+      if (!ent._b) return;
+      const b = ent._b;
+      const year = Number(b.Year) || 1970;
+      const eui = Number(b.EUI_BASE) || 180;
+      // Match similar: same decade and within 30% EUI
+      if (Math.abs(year - refYear) <= 10 && Math.abs(eui - refEUI) / refEUI < 0.3) {
+        const area = Number(b.Area) || 120;
+        const roofArea = Number(b.FootprintAreaM2) || area * 0.6;
+        const baseEnergy = eui * area;
+        const cfg = currentRetrofitConfig;
+
+        const wallSavings = INSULATION_SAVINGS[cfg.wallIns] || 0;
+        const roofSavings = INSULATION_SAVINGS[cfg.roofIns] || 0;
+        const hpSavings = cfg.heatPump ? HEAT_PUMP_SAVINGS : 0;
+        const insulationTotal = Math.min(wallSavings + roofSavings + hpSavings, 0.6);
+        const solarGen = roofArea * (cfg.solarPct / 100) * SOLAR_YIELD_PER_M2;
+        const energyAfterAll = Math.max(baseEnergy * (1 - insulationTotal) - solarGen, 0);
+        const newEUI = area > 0 ? energyAfterAll / area : eui;
+        
+        const newLabel = euiToLabel(newEUI);
+        const labelColor = lbl => {
+          const colorMap = { 'A+++': '#006400', 'A++': '#228B22', 'A+': '#32CD32',
+            'A': '#90EE90', 'B': '#ADFF2F', 'C': '#FFD700', 'D': '#FFA500',
+            'E': '#FF8C00', 'F': '#FF4500', 'G': '#FF0000' };
+          return colorMap[lbl] || '#999';
+        };
+
+        b._retrofitApplied = true;
+        b._retrofitConfig = { ...cfg };
+        b._retrofitNewEUI = newEUI;
+        b._retrofitNewLabel = newLabel;
+
+        if (ent.polygon && ent.polygon.material) {
+          ent.polygon.material = Cesium.Color.fromCssColorString(labelColor(newLabel)).withAlpha(0.75);
+        }
+        addRetrofitToScenario(b);
+        count++;
+      }
+    });
+  }
+  showToast('Retrofit applied to ' + count + ' similar buildings.');
+};
+
+})(); // end IIFE
 </script>
 </body>
 </html>
