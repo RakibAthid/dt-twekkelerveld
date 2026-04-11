@@ -1,4 +1,3 @@
-<!-- patched file -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,11 +5,11 @@
   <title>Twekkelerveld Digital Twin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Cloudflare/R2 config (optional). Used by embedded Ecology/Energy views. -->
-  <script src="config.js"></script>
-
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Cloudflare/R2 config (optional). Used by embedded Ecology/Energy views. -->
+  <script src="config.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -43,12 +42,13 @@
     .app-header {
       flex: 0 0 auto;
       display: flex; justify-content: space-between; align-items: center;
-      padding: 14px 24px;
-      background: rgba(15, 23, 42, 0.95);
-      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      background: rgba(2,6,23,0.97);
+      border-bottom: 1px solid rgba(99,102,241,0.2);
       z-index: 100;
+      backdrop-filter: blur(12px);
     }
-    .brand h1 { margin: 0; font-size: 18px; font-weight: 600; color: #fff; }
+    .brand h1 { margin: 0; font-size: 16px; font-weight: 700; color: #e2e8f0; letter-spacing: -0.2px; }
     
     .nav-pills { display: flex; gap: 8px; }
     .nav-btn {
@@ -57,7 +57,7 @@
       transition: all 0.2s;
     }
     .nav-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
-    .nav-btn.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
+    .nav-btn.active { background: rgba(99,102,241,0.2); border-color: #818cf8; color: #a5b4fc; font-weight: 600; }
 
     /* --- BODY LAYOUT --- */
     .app-body { flex: 1; position: relative; overflow: hidden; }
@@ -582,41 +582,6 @@
       color: #000;
     }
 
-    /* Developer banner (logo and name)
-       
-       The floating banner containing the ITC/UT logo and developer name has been
-       adjusted to be more prominent and moved to the bottom‑left corner of the
-       viewport. This ensures it does not overlap with the chatbots on the right
-       side of the interface. The banner is only displayed on the Overview,
-       Ecology and Energy tabs via a small script further down in this file.
-    */
-    .developer-banner {
-      position: fixed;
-      bottom: 16px;
-      left: 16px; /* Move banner to the left side */
-      right: auto;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      padding: 10px 16px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      z-index: 4000;
-    }
-    .developer-banner img {
-      width: 60px;  /* enlarge the logo for better visibility */
-      height: auto;  /* maintain aspect ratio */
-      object-fit: contain;
-      border-radius: 4px;
-    }
-    .developer-banner .dev-name {
-      font-size: 15px; /* slightly larger text */
-      color: var(--text-main); /* use main text colour for higher contrast */
-      white-space: nowrap;
-    }
-
     .timeline-section {
       margin-top: 30px;
       display: flex;
@@ -833,34 +798,122 @@
     #interrelation-panel * { box-sizing: border-box; }
 
     #interrelation-panel .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 2px 4px 0; }
-    #interrelation-panel .top-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; opacity: 0.95; }
-    #interrelation-panel .top-title i { color: #22c55e; }
-    #interrelation-panel .top-sub { font-size: 11px; color: #9ca3af; opacity: 0.9; }
+    #interrelation-panel .top-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; opacity: 0.95; color: #e2e8f0; }
+    #interrelation-panel .top-title i { color: #a5b4fc; font-size: 12px; }
+    #interrelation-panel .top-sub { font-size: 12px; color: #64748b; opacity: 0.9; line-height: 1.5; }
     #interrelation-panel .top-actions { display: flex; gap: 8px; align-items: center; }
 
     #interrelation-panel .btn-reset {
-      border: 1px solid rgba(148,163,184,0.4); background: rgba(15,23,42,0.7);
-      color: #e5e7eb; font-size: 11px; padding: 5px 12px; border-radius: 999px;
-      cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+      border: 1px solid rgba(148,163,184,0.15); background: rgba(30,41,59,0.8);
+      color: #94a3b8; font-size: 11px; padding: 6px 12px; border-radius: 8px;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+      font-weight: 500; transition: all 0.2s;
     }
-    #interrelation-panel .btn-reset:hover { background: rgba(31,41,55,0.9); }
+    #interrelation-panel .btn-reset:hover { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.4); color: #a5b4fc; }
 
     #interrelation-panel .layout { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; min-height: 0; }
 
     #interrelation-panel .left-panel {
-      background: rgba(15, 23, 42, 0.9); border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.95); border-radius: 14px; border: 1px solid rgba(99,102,241,0.2);
       padding: 14px 14px 10px; display: flex; flex-direction: column; gap: 10px; min-height: 0;
+      transition: border-color 0.2s;
     }
-    #interrelation-panel .panel-caption { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; margin-bottom: 2px; }
+    #interrelation-panel .left-panel:hover { border-color: rgba(99,102,241,0.4); }
+    #interrelation-panel .panel-caption { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; margin-bottom: 4px; font-weight: 600; }
+
+    /* === Inline Parameter Panel === */
+    .param-panel {
+      background: rgba(15,23,42,0.7);
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 12px;
+      margin-top: 14px;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .param-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      color: #c7d2fe;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      background: rgba(99,102,241,0.15);
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .param-panel-header:hover { background: rgba(99,102,241,0.25); }
+    .param-live-dot {
+      margin-left: auto;
+      font-size: 10px;
+      color: #10b981;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .param-chevron { font-size: 10px; transition: transform 0.2s; flex-shrink: 0; }
+    .param-panel.collapsed .param-chevron { transform: rotate(-90deg); }
+    .param-panel.collapsed .param-panel-body { display: none; }
+    .param-panel-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+    .param-intro { font-size: 11px; color: #94a3b8; margin: 0 0 4px; line-height: 1.5; }
+    .param-row { display: flex; align-items: center; gap: 10px; }
+    .param-label {
+      flex: 1;
+      font-size: 11px;
+      color: #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      line-height: 1.4;
+    }
+    .param-label i { color: #a5b4fc; margin-right: 3px; font-size: 10px; }
+    .param-hint { font-size: 10px; color: #64748b; }
+    .param-input-wrap {
+      display: flex;
+      align-items: center;
+      background: rgba(30,41,59,0.9);
+      border: 1px solid rgba(148,163,184,0.2);
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: border-color 0.2s;
+    }
+    .param-input-wrap:focus-within { border-color: rgba(99,102,241,0.6); }
+    .param-prefix {
+      padding: 0 6px;
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 700;
+      border-right: 1px solid rgba(148,163,184,0.15);
+      line-height: 30px;
+    }
+    .param-input {
+      background: transparent;
+      border: none;
+      color: #f8fafc;
+      padding: 5px 8px;
+      width: 78px;
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+      text-align: right;
+    }
+    .param-input:focus { color: #a5b4fc; }
+    .param-input[type=number]::-webkit-inner-spin-button,
+    .param-input[type=number]::-webkit-outer-spin-button { opacity: 0.4; }
 
     #interrelation-panel .slider-row {
-      background: rgba(15,23,42,0.95); border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.25);
-      padding: 8px 10px 6px; display: flex; flex-direction: column; gap: 4px;
+      background: rgba(15,23,42,0.8); border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.15);
+      padding: 10px 12px; display: flex; flex-direction: column; gap: 4px;
+      transition: border-color 0.2s;
     }
+    #interrelation-panel .slider-row:hover { border-color: rgba(99,102,241,0.25); }
     #interrelation-panel .slider-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
-    #interrelation-panel .slider-label { font-size: 12px; display: flex; align-items: center; gap: 6px; color: #e5e7eb; }
-    #interrelation-panel .slider-label i { font-size: 13px; color: #a5b4fc; }
-    #interrelation-panel .slider-value { font-size: 11px; color: #9ca3af; }
+    #interrelation-panel .slider-label { font-size: 12px; display: flex; align-items: center; gap: 6px; color: #e2e8f0; font-weight: 500; }
+    #interrelation-panel .slider-label i { font-size: 12px; color: #a5b4fc; }
+    #interrelation-panel .slider-value { font-size: 11px; color: #94a3b8; font-weight: 500; }
 
     #interrelation-panel input[type="range"] {
       -webkit-appearance: none; appearance: none; width: 100%; height: 5px; border-radius: 999px;
@@ -879,27 +932,34 @@
     */
     #interrelation-panel .slider-hint {
       font-size: 10px;
-      color: #cbd5e1;
-      margin-top: 2px;
+      color: #94a3b8;
+      margin-top: 3px;
+      font-style: italic;
+      line-height: 1.4;
     }
 
     #interrelation-panel .scenario-insights {
-      margin-top: 4px; padding: 8px 9px; font-size: 11px; line-height: 1.5; border-radius: 8px;
-      background: rgba(15,23,42,0.95); border: 1px dashed rgba(148,163,184,0.5); color: #d1d5db;
+      margin-top: 6px; padding: 10px 12px; font-size: 11px; line-height: 1.6; border-radius: 10px;
+      background: rgba(15,23,42,0.8); border: 1px solid rgba(99,102,241,0.2); border-left: 3px solid rgba(99,102,241,0.6);
+      color: #94a3b8;
     }
 
     #interrelation-panel .right-panel {
-      background: rgba(15, 23, 42, 0.9); border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.95); border-radius: 14px; border: 1px solid rgba(99,102,241,0.2);
       padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow-y: auto;
+      transition: border-color 0.2s;
     }
+    #interrelation-panel .right-panel:hover { border-color: rgba(99,102,241,0.4); }
 
     #interrelation-panel .baseline-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 6px; }
     #interrelation-panel .baseline-card {
-      background: rgba(15,23,42,0.95); border-radius: 8px; border: 1px solid rgba(148, 163, 184, 0.25);
-      padding: 6px 8px; display: flex; flex-direction: column; gap: 2px;
+      background: rgba(30,41,59,0.6); border-radius: 10px; border: 1px solid rgba(99,102,241,0.2);
+      padding: 8px 10px; display: flex; flex-direction: column; gap: 3px;
+      transition: border-color 0.2s;
     }
-    #interrelation-panel .baseline-card .label { font-size: 9px; color: #9ca3af; line-height: 1.2; white-space: nowrap; }
-    #interrelation-panel .baseline-card .value { font-size: 12px; font-weight: 600; color: #e5e7eb; line-height: 1.2; }
+    #interrelation-panel .baseline-card:hover { border-color: rgba(99,102,241,0.5); }
+    #interrelation-panel .baseline-card .label { font-size: 9px; color: #64748b; line-height: 1.2; white-space: nowrap; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+    #interrelation-panel .baseline-card .value { font-size: 13px; font-weight: 700; color: #e2e8f0; line-height: 1.3; }
 
     /*
      * Make the interrelation chart grid responsive. The original layout used a fixed
@@ -917,12 +977,14 @@
       overflow-y: auto;
     }
     #interrelation-panel .chart-card {
-      background: rgba(15,23,42,0.95); border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.25);
-      padding: 6px 8px; display: flex; flex-direction: column; min-height: 0;
+      background: rgba(15,23,42,0.8); border-radius: 10px; border: 1px solid rgba(148,163,184,0.1);
+      padding: 10px 12px; display: flex; flex-direction: column; min-height: 0;
+      transition: border-color 0.2s;
     }
-    #interrelation-panel .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-    #interrelation-panel .chart-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.09em; color: #9ca3af; }
-    #interrelation-panel .chart-tag { font-size: 10px; color: #6ee7b7; }
+    #interrelation-panel .chart-card:hover { border-color: rgba(99,102,241,0.3); }
+    #interrelation-panel .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    #interrelation-panel .chart-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: #e2e8f0; font-weight: 700; }
+    #interrelation-panel .chart-tag { font-size: 9px; color: #94a3b8; background: rgba(99,102,241,0.1); padding: 2px 8px; border-radius: 99px; border: 1px solid rgba(99,102,241,0.2); }
     #interrelation-panel .chart-wrap { flex: 1; min-height: 0; position: relative; }
     #interrelation-panel canvas { width: 100% !important; height: 100% !important; }
 
@@ -962,15 +1024,16 @@
     }
 
     #interrelation-panel .summary {
-      margin-top: 10px; padding: 8px 10px; background: rgba(15,23,42,0.95); border-radius: 12px;
-      border: 1px solid rgba(148, 163, 184, 0.35); display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 8px; font-size: 11px;
+      margin-top: 10px; padding: 10px 12px; background: linear-gradient(90deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.8) 100%); border-radius: 12px;
+      border: 1px solid rgba(99,102,241,0.3); display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 8px; font-size: 11px;
     }
-    #interrelation-panel .summary-item { display: flex; flex-direction: column; gap: 2px; }
-    #interrelation-panel .summary-label { color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; }
-    #interrelation-panel .summary-value { font-size: 13px; font-weight: 600; }
-    #interrelation-panel .summary-value.positive { color: #4ade80; }
-    #interrelation-panel .summary-value.negative { color: #f97373; }
-    #interrelation-panel .summary-value.neutral { color: #e5e7eb; }
+    #interrelation-panel .summary-item { display: flex; flex-direction: column; gap: 2px; position: relative; }
+    #interrelation-panel .summary-item:not(:last-child)::after { content: ''; position: absolute; right: 0; top: 20%; height: 60%; width: 1px; background: rgba(148,163,184,0.15); }
+    #interrelation-panel .summary-label { color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+    #interrelation-panel .summary-value { font-size: 13px; font-weight: 700; letter-spacing: -0.3px; }
+    #interrelation-panel .summary-value.positive { color: #34d399; }
+    #interrelation-panel .summary-value.negative { color: #f87171; }
+    #interrelation-panel .summary-value.neutral { color: #93c5fd; }
 
     #interrelation-panel.fullscreen { position: fixed; top: 10px; left: 10px; right: 10px; bottom: 10px; z-index: 10000; background: rgba(15,23,42,0.98); border-radius: 20px; border: 1px solid rgba(148, 163, 184, 0.5); box-shadow: 0 20px 50px rgba(0,0,0,0.7); display: flex; flex-direction: column; }
 
@@ -1166,7 +1229,7 @@
     .settings-controls .settings-btn {
       background: transparent;
       border: 1px solid var(--border);
-      color: var(--accent);
+      color: var(--text-muted);
       padding: 6px 12px;
       border-radius: 20px;
       cursor: pointer;
@@ -1174,8 +1237,8 @@
       transition: all 0.2s;
     }
     .settings-controls .settings-btn:hover {
-      background: rgba(56,189,248,0.15);
-      color: var(--accent);
+      background: rgba(255,255,255,0.05);
+      color: var(--text-main);
     }
     /* Dropdown menu for consolidated settings */
     .settings-dropdown {
@@ -1202,6 +1265,7 @@
     .settings-dropdown .dropdown-item:hover {
       background: rgba(255, 255, 255, 0.05);
     }
+    /* Settings modal overlay and content */
     .settings-modal-overlay {
       position: fixed;
       top: 0;
@@ -1695,7 +1759,7 @@
 
           <div class="layout">
             <div class="left-panel">
-              <div class="panel-caption">Scenario settings</div>
+              <div class="panel-caption"><i class="fa-solid fa-sliders" style="margin-right:6px;color:#a5b4fc;font-size:10px;"></i>Intervention Controls</div>
               
               <div class="slider-row">
                 <div class="slider-top">
@@ -1761,7 +1825,60 @@
                 <div class="slider-hint">Maximum share of available space that can be used for trees and green roofs.</div>
               </div>
               <div class="slider-row" style="text-align:center;">
-                <button class="open-tab-btn" id="IR_btnOptimize">Maximize Score</button>
+                <button class="open-tab-btn" id="IR_btnOptimize" style="background:linear-gradient(135deg,rgba(99,102,241,0.3) 0%,rgba(59,130,246,0.3) 100%);border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;padding:10px 18px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;letter-spacing:0.3px;transition:all 0.2s;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Maximize Score</button>
+              </div>
+
+              <!-- Inline Investment Assumptions panel - updates instantly on change -->
+              <div class="param-panel" id="IR_paramPanel">
+                <div class="param-panel-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                  <i class="fa-solid fa-sliders"></i>
+                  <span>Investment Assumptions</span>
+                  <span class="param-live-dot" title="Updates charts in real time">● Live</span>
+                  <i class="fa-solid fa-chevron-down param-chevron"></i>
+                </div>
+                <div class="param-panel-body">
+                  <p class="param-intro">Change cost assumptions to match your local context. Charts update instantly.</p>
+                  <div class="param-row">
+                    <label class="param-label">
+                      <span><i class="fa-solid fa-tree"></i> Cost per tree</span>
+                      <span class="param-hint">Standard urban tree planting &amp; care</span>
+                    </label>
+                    <div class="param-input-wrap">
+                      <span class="param-prefix">€</span>
+                      <input type="number" id="IR_paramTreeCost" class="param-input" min="50" max="5000" step="50" value="350">
+                    </div>
+                  </div>
+                  <div class="param-row">
+                    <label class="param-label">
+                      <span><i class="fa-solid fa-solar-panel"></i> PV cost per +1% capacity</span>
+                      <span class="param-hint">Rooftop solar panels &amp; installation</span>
+                    </label>
+                    <div class="param-input-wrap">
+                      <span class="param-prefix">€</span>
+                      <input type="number" id="IR_paramPVCost" class="param-input" min="500" max="30000" step="100" value="5400">
+                    </div>
+                  </div>
+                  <div class="param-row">
+                    <label class="param-label">
+                      <span><i class="fa-solid fa-house"></i> Retrofit cost per dwelling</span>
+                      <span class="param-hint">Insulation + heat pump upgrade</span>
+                    </label>
+                    <div class="param-input-wrap">
+                      <span class="param-prefix">€</span>
+                      <input type="number" id="IR_paramRetroCost" class="param-input" min="1000" max="80000" step="500" value="12000">
+                    </div>
+                  </div>
+                  <div class="param-row">
+                    <label class="param-label">
+                      <span><i class="fa-solid fa-seedling"></i> Green roof cost per +10% coverage</span>
+                      <span class="param-hint">Vegetated roof installation</span>
+                    </label>
+                    <div class="param-input-wrap">
+                      <span class="param-prefix">€</span>
+                      <input type="number" id="IR_paramGreenRoofCost" class="param-input" min="500" max="50000" step="500" value="8000">
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div class="scenario-insights" id="IR_scenarioInsights">
@@ -1872,109 +1989,130 @@
             cites external sources on data normalisation and health impacts of greening so that the
             narrative is transparent and all references are clickable.
           -->
-          <details id="cba-explained" class="equations-info" style="margin-top: 20px; background: rgba(15,23,42,0.85); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
-            <summary style="cursor:pointer; font-size: 14px; font-weight: 600; color: var(--accent);">
-              <i class="fa-solid fa-circle-info"></i> Cost–benefit calculation explained
-            </summary>
-            <div style="margin-top: 10px; font-size: 13px; line-height: 1.5; color: var(--text-muted);">
-              <p>Cost–benefit scores allow you to compare different aspects of the scenario on a common 0–100 scale. The total project cost is divided by your selected budget and multiplied by 100. Space use is normalised in the same way against the available space budget. The benefit score is the arithmetic mean of greenness, cooling, energy savings, CO₂ reduction and a health score. Normalisation aligns values with different units to a common range and is typically applied before averaging.</p>
-              <p>The health score draws on evidence linking green space and well‑being. A scoping review found that a 25 % increase in neighbourhood tree canopy was associated with a one‑point decrease on the 5‑point Depression Anxiety and Stress Scales (DASS). Another study reported that spending 10–50 minutes in natural spaces improved mood, focus and physiological markers like blood pressure and heart rate. Both trees and green roofs therefore contribute to the health benefits shown in this dashboard.</p>
-              <p>For formal definitions of net present value (NPV) and benefit–cost ratio (BCR), and other underlying formulas, see the Equations &amp; assumptions section below.</p>
-              <p><em>Sources:</em>
-                <a href="https://en.wikipedia.org/wiki/Normalization_(statistics)#Feature_scaling" target="_blank">Wikipedia – Normalization (statistics)</a>;
-                <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7345658/#:~:text=25%25%20increase%20in%20neighbourhood%20tree%20canopy" target="_blank">Urban Trees &amp; Human Health</a>;
-                <a href="https://www.vet.cornell.edu/about-us/news/20200225/spending-time-nature-reduces-stress-and-anxiety" target="_blank">Spending time in nature reduces stress</a>.
-              </p>
-            </div>
-          </details>
-
-          <!--
-            Added equations/assumptions info section to make the combined scenario more transparent.
-            This collapsible panel lists the formulas used for key metrics, explains parameter meanings,
-            outlines default cost assumptions and highlights how energy and ecology measures interact.
-          -->
-          <details class="equations-info" style="margin-top: 20px; background: rgba(15,23,42,0.85); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
-            <summary style="cursor:pointer; font-size: 14px; font-weight: 600; color: var(--accent);">
-              <i class="fa-solid fa-circle-info"></i> Equations &amp; assumptions
-            </summary>
-            <div style="margin-top: 10px; font-size: 13px; line-height: 1.5; color: var(--text-muted);">
-              <p><strong>Energy cost:</strong> (gas consumption × price<sub>gas</sub>) + (imported electricity × price<sub>elec</sub>) − (exported electricity × feed‑in tariff).</p>
-              <p><strong>CO₂ savings:</strong> (baseline energy − new energy) × emission factor.</p>
-              <p><strong>Benefit–cost analysis:</strong> Net present value (NPV) = Σ (cash flow ÷ (1&nbsp;+&nbsp;discount&nbsp;rate)<sup>year</sup>) − capital cost; Benefit–cost ratio (BCR) = NPV of benefits ÷ NPV of costs.</p>
-              <p><strong>Tree carbon sequestration:</strong> Each additional tree is assumed to absorb ~10 kg of CO₂ per year and provides shade and cooling benefits.</p>
-              <p><strong>Green roofs &amp; vegetation:</strong> Vegetation and green roofs help cool buildings and neighborhoods by shading surfaces, deflecting solar radiation and releasing moisture.</p>
-              <p><strong>PV costs:</strong> High‑efficiency PV modules are about €0.115 per Wp; the slider's default of €5,400 per +1 % PV capacity is based on typical installed costs.</p>
-              <p><strong>Default parameter values:</strong> Tree cost €350 per tree; PV cost €5,400 per +1 % capacity; retrofit cost €12,000 per dwelling; green roof cost €8,000 per +10 % roof coverage.</p>
-              <p><strong>Health benefits:</strong> Exposure to trees and green spaces is linked to better mental and physical health. A scoping review reported that a 25 % increase in neighbourhood tree canopy correlated with a one‑point decrease on the 5‑point Depression Anxiety and Stress Scales (DASS)
-                <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7345658/#:~:text=25%25%20increase%20in%20neighbourhood%20tree%20canopy" target="_blank">[study]</a>.
-                Researchers at Cornell University found that spending 10–50 minutes in natural spaces improved mood, focus and physiological markers like blood pressure and heart rate
-                <a href="https://www.vet.cornell.edu/about-us/news/20200225/spending-time-nature-reduces-stress-and-anxiety" target="_blank">[study]</a>.
-                The health score used in this dashboard assumes that both additional trees and green roofs contribute equally to these wellness benefits.</p>
-              <p>These formulas and assumptions show how ecological (trees, green roofs) and energy (PV, retrofits) interventions interact. More trees and green roofs increase greenness and reduce urban heat, while PV and insulation reduce energy use and emissions. The combined scenario score weighs these co‑benefits against investment and space budgets over your selected time horizon.</p>
-              <p><em>Sources:</em> 
-                <a href="https://www.investopedia.com/terms/n/npv.asp" target="_blank">Investopedia – NPV formula</a>; 
-                <a href="https://www.investopedia.com/terms/b/bcr.asp" target="_blank">Investopedia – BCR</a>; 
-                <a href="https://onetreeplanted.org/blogs/stories/how-much-co2-does-tree-absorb" target="_blank">One Tree Planted – tree CO₂ absorption</a>; 
-                <a href="https://www.epa.gov/green-infrastructure/reduce-heat-islands" target="_blank">US EPA – heat‑island benefits of vegetation</a>; 
-                <a href="https://www.rinnovabili.net/business/energy/photovoltaic-module-prices-2025-updated-data/" target="_blank">Rinnovabili – PV module prices</a>.
-              </p>
-            </div>
-          </details>
+          <button onclick="openCBAModal()" style="margin-top:20px; padding:10px 20px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.4); color:#93c5fd; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; width:100%; display:flex; align-items:center; gap:8px; justify-content:center;">
+            <span>⚡</span> View Cost-Benefit Assumptions &amp; Equations
+          </button>
 
         </div>
       </section>
 
     </div>
+
+    <!-- Cost-Benefit Modal -->
+    <div id="cbaModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center;" onclick="if(event.target===this)closeCBAModal()">
+      <div style="background:#ffffff; border-radius:12px; max-width:720px; width:90%; max-height:80vh; overflow-y:auto; margin:auto; box-shadow:0 25px 60px rgba(0,0,0,0.5);">
+        <!-- Header -->
+        <div style="background:#0f172a; padding:20px 24px; border-radius:12px 12px 0 0; display:flex; justify-content:space-between; align-items:center;">
+          <h2 style="color:#ffffff; font-size:16px; font-weight:700; margin:0;">Cost-Benefit Analysis — Assumptions &amp; Equations</h2>
+          <button onclick="closeCBAModal()" style="background:none; border:none; color:#94a3b8; font-size:22px; cursor:pointer; line-height:1;">&times;</button>
+        </div>
+        <!-- Body: two columns -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; padding:24px;">
+          <!-- LEFT: Assumptions -->
+          <div>
+            <h3 style="font-size:13px; font-weight:700; color:#0f172a; margin:0 0 16px; text-transform:uppercase; letter-spacing:0.5px;">Assumptions</h3>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div style="display:flex; gap:10px; align-items:flex-start;">
+                <span style="font-size:18px;">⚡</span>
+                <div><strong style="font-size:12px; color:#0f172a;">Energy Price</strong><p style="font-size:11px; color:#64748b; margin:2px 0 0;">Electricity €0.30/kWh, Gas €0.145/m³, Feed-in €0.05/kWh</p></div>
+              </div>
+              <div style="display:flex; gap:10px; align-items:flex-start;">
+                <span style="font-size:18px;">🌿</span>
+                <div><strong style="font-size:12px; color:#0f172a;">Tree Sequestration</strong><p style="font-size:11px; color:#64748b; margin:2px 0 0;">Each tree absorbs ~10–20 kg CO₂/yr; cost €350/tree</p></div>
+              </div>
+              <div style="display:flex; gap:10px; align-items:flex-start;">
+                <span style="font-size:18px;">💰</span>
+                <div><strong style="font-size:12px; color:#0f172a;">Carbon Pricing</strong><p style="font-size:11px; color:#64748b; margin:2px 0 0;">CO₂ emissions factor: 0.268 kg/kWh (electricity), 2.134 kg/m³ (gas)</p></div>
+              </div>
+              <div style="display:flex; gap:10px; align-items:flex-start;">
+                <span style="font-size:18px;">🏗️</span>
+                <div><strong style="font-size:12px; color:#0f172a;">Investment Costs</strong><p style="font-size:11px; color:#64748b; margin:2px 0 0;">PV: €5,400 per +1% capacity; Retrofit: €12,000/dwelling; Green roof: €8,000 per +10%</p></div>
+              </div>
+              <div style="display:flex; gap:10px; align-items:flex-start;">
+                <span style="font-size:18px;">📊</span>
+                <div><strong style="font-size:12px; color:#0f172a;">Discount Rate</strong><p style="font-size:11px; color:#64748b; margin:2px 0 0;">Default 4% real discount rate over 30-year horizon</p></div>
+              </div>
+              <div style="display:flex; gap:10px; align-items:flex-start;">
+                <span style="font-size:18px;">🏥</span>
+                <div><strong style="font-size:12px; color:#0f172a;">Health Benefits</strong><p style="font-size:11px; color:#64748b; margin:2px 0 0;">25% tree canopy increase → 1-point reduction on DASS scale (scoping review)</p></div>
+              </div>
+            </div>
+          </div>
+          <!-- RIGHT: Equations -->
+          <div>
+            <h3 style="font-size:13px; font-weight:700; color:#0f172a; margin:0 0 16px; text-transform:uppercase; letter-spacing:0.5px;">Key Equations</h3>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div style="background:#f8f9fa; border-left:3px solid #3b82f6; padding:10px 12px; border-radius:0 6px 6px 0;">
+                <p style="font-size:10px; font-weight:700; color:#475569; margin:0 0 4px;">ENERGY COST</p>
+                <code style="font-size:11px; color:#1e293b; font-family:monospace;">Cost = Gas×P<sub>gas</sub> + El×P<sub>elec</sub> − Export×P<sub>feed-in</sub></code>
+              </div>
+              <div style="background:#f8f9fa; border-left:3px solid #3b82f6; padding:10px 12px; border-radius:0 6px 6px 0;">
+                <p style="font-size:10px; font-weight:700; color:#475569; margin:0 0 4px;">CO₂ SAVINGS</p>
+                <code style="font-size:11px; color:#1e293b; font-family:monospace;">ΔCO₂ = (E<sub>baseline</sub> − E<sub>new</sub>) × emission factor</code>
+              </div>
+              <div style="background:#f8f9fa; border-left:3px solid #3b82f6; padding:10px 12px; border-radius:0 6px 6px 0;">
+                <p style="font-size:10px; font-weight:700; color:#475569; margin:0 0 4px;">NET PRESENT VALUE</p>
+                <code style="font-size:11px; color:#1e293b; font-family:monospace;">NPV = Σ CF<sub>t</sub> / (1+r)<sup>t</sup> − C<sub>0</sub></code>
+              </div>
+              <div style="background:#f8f9fa; border-left:3px solid #10b981; padding:10px 12px; border-radius:0 6px 6px 0;">
+                <p style="font-size:10px; font-weight:700; color:#475569; margin:0 0 4px;">BENEFIT-COST RATIO</p>
+                <code style="font-size:11px; color:#1e293b; font-family:monospace;">BCR = NPV(benefits) / NPV(costs)</code>
+              </div>
+              <div style="background:#f8f9fa; border-left:3px solid #f59e0b; padding:10px 12px; border-radius:0 6px 6px 0;">
+                <p style="font-size:10px; font-weight:700; color:#475569; margin:0 0 4px;">BENEFIT SCORE</p>
+                <code style="font-size:11px; color:#1e293b; font-family:monospace;">B = mean(Greenness, Cooling, Energy, CO₂, Health) × 100</code>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Footer -->
+        <div style="padding:16px 24px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border-radius:0 0 12px 12px;">
+          <span style="font-size:11px; color:#94a3b8;">Last updated: April 2026 | Based on thesis baseline assumptions</span>
+          <button onclick="closeCBAModal()" style="padding:8px 16px; background:#0f172a; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600;">Close</button>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <!-- Removed scenario detail overlays as comparison pins are no longer supported -->
 
   <script>
+    // --- CBA Modal Functions ---
+    function openCBAModal() {
+      const m = document.getElementById('cbaModal');
+      if (m) { m.style.display = 'flex'; }
+    }
+    function closeCBAModal() {
+      const m = document.getElementById('cbaModal');
+      if (m) { m.style.display = 'none'; }
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeCBAModal();
+    });
+
     // --- Tab Switching Logic ---
     window.switchTab = function(targetId, btn) {
-      // Manage active state on navigation pills
-      if (btn) {
+      if(btn) {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
       } else {
         document.querySelectorAll('.nav-btn').forEach(b => {
-          if (b.onclick.toString().includes(targetId)) {
+          if(b.onclick.toString().includes(targetId)) {
             document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
             b.classList.add('active');
           }
         });
       }
 
-      // Switch the visible panel
       document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
       document.getElementById(targetId).classList.add('active');
 
-      // Conditionally show the developer/ITC banner only on specified panels
-      const devBanner = document.querySelector('.developer-banner');
-      if (devBanner) {
-        const allowedPanels = ['panel-overview', 'panel-energy', 'panel-ecology'];
-        if (allowedPanels.includes(targetId)) {
-          devBanner.style.display = 'flex';
-        } else {
-          devBanner.style.display = 'none';
-        }
-      }
-
       // Initialize interrelation on tab switch if not already done
-      if (targetId === 'panel-interrelation' && window.IR_init && !window.__IR_initialized) {
+      if (targetId === "panel-interrelation" && window.IR_init && !window.__IR_initialized) {
         window.IR_init();
       }
     };
-
-    // Ensure the banner visibility is correct on initial load
-    document.addEventListener('DOMContentLoaded', () => {
-      const initialBanner = document.querySelector('.developer-banner');
-      const activePanel = document.querySelector('.view-panel.active');
-      if (initialBanner && activePanel) {
-        const allowed = ['panel-overview', 'panel-energy', 'panel-ecology'];
-        initialBanner.style.display = allowed.includes(activePanel.id) ? 'flex' : 'none';
-      }
-    });
 
     /*
       Define a global baseline object and helper functions so that metrics can be computed
@@ -2476,7 +2614,7 @@
         IR_chartUhi.data.datasets[0].data = [IR_BASE.uhi_mean, IR_BASE.uhi_mean];
         IR_chartUhi.data.datasets[1].data = [IR_BASE.uhi_mean, s.uhiScenario];
         IR_chartUhi.update("none");
-        IR_chartEnergy.data.datasets[0].data = [IR_BASE.energy_kwh/1000, IR_BASE.pv_kwh/1000, IR_BASE_netGrid_kwh/1000];
+        IR_chartEnergy.data.datasets[0].data = [IR_BASE.energy_kwh/1000, IR_BASE.pv_kwh/1000, (IR_BASE.energy_kwh - IR_BASE.pv_kwh)/1000];
         IR_chartEnergy.data.datasets[1].data = [s.energyScenario_kwh/1000, s.pvScenario_kwh/1000, s.netGridScenario_kwh/1000];
         IR_chartEnergy.update("none");
         IR_chartRadar.data.datasets[1].data = [s.greenScore, s.coolScore, s.energyScore, s.co2Score]; IR_chartRadar.update("none");
@@ -2541,18 +2679,18 @@
             costPct = budgetVal > 0 ? (s.totalCost / budgetVal) * 100 : 0;
           }
           // Compute space usage as a percentage of the space budget.
-          let spaceUsedPct = 0;
+          let spaceUsedPct2 = 0;
           if (typeof elSpace !== 'undefined' && elSpace) {
-            const spaceBudget = parseInt(elSpace.value || 100, 10);
-            const usedTreesPct = (s.treesAdded / 1500) * 100;
-            const usedGreenPct = s.greenRoofPct;
-            const maxUsed = Math.max(usedTreesPct, usedGreenPct);
-            spaceUsedPct = spaceBudget > 0 ? (maxUsed / spaceBudget) * 100 : 0;
+            const spaceBudgetVal = parseInt(elSpace.value || 100, 10);
+            const usedTreesPct2 = (s.treesAdded / 1500) * 100;
+            const usedGreenPct2 = s.greenRoofPct;
+            const maxUsed2 = Math.max(usedTreesPct2, usedGreenPct2);
+            spaceUsedPct2 = spaceBudgetVal > 0 ? (maxUsed2 / spaceBudgetVal) * 100 : 0;
           }
           // Average benefit across greenness, cooling, energy, CO₂ reduction and health improvement.
-          const healthComponent = typeof s.healthScore !== 'undefined' ? s.healthScore : 0;
-          const benefit = (s.greenScore + s.coolScore + s.energyScore + s.co2Score + healthComponent) / 5;
-          IR_chartCostBenefit.data.datasets[0].data = [costPct, spaceUsedPct, benefit];
+          const healthComp = typeof s.healthScore !== 'undefined' ? s.healthScore : 0;
+          const benefit = (s.greenScore + s.coolScore + s.energyScore + s.co2Score + healthComp) / 5;
+          IR_chartCostBenefit.data.datasets[0].data = [costPct, spaceUsedPct2, benefit];
           IR_chartCostBenefit.update("none");
         }
 
@@ -2574,6 +2712,35 @@
       // Expose update function globally so other scripts can trigger refresh
       window.IR_updateUI = IR_updateUI;
 
+      // --- Wire inline parameter panel inputs ---
+      const paramMap = [
+        { id: 'IR_paramTreeCost',     key: 'cost_tree_eur',                    hintId: 'IR_sliderTrees', hintFn: (v) => `Trees sequester ~20kg CO₂ per year and cost ~€${v.toLocaleString()} each.` },
+        { id: 'IR_paramPVCost',       key: 'cost_pv_per_pct_eur',              hintId: 'IR_sliderPV',    hintFn: (v) => `Relative to current PV potential. Cost ~€${v.toLocaleString()} per +1%.` },
+        { id: 'IR_paramRetroCost',    key: 'retrofit_cost_per_dwelling_eur',   hintId: null,             hintFn: null },
+        { id: 'IR_paramGreenRoofCost',key: 'cost_greenRoof_per_pct_eur',       hintId: null,             hintFn: null },
+      ];
+      paramMap.forEach(function(pm) {
+        const inputEl = document.getElementById(pm.id);
+        if (!inputEl) return;
+        // Populate from current baseline
+        if (typeof IR_BASE[pm.key] === 'number') inputEl.value = IR_BASE[pm.key];
+        inputEl.addEventListener('input', function() {
+          const v = parseFloat(this.value);
+          if (!Number.isFinite(v) || v <= 0) return;
+          IR_BASE[pm.key] = v;
+          if (window.IR_BASE_GLOBAL) window.IR_BASE_GLOBAL[pm.key] = v;
+          if (pm.hintId && pm.hintFn) {
+            const slider = document.getElementById(pm.hintId);
+            if (slider) {
+              const row = slider.closest('.slider-row');
+              const hint = row ? row.querySelector('.slider-hint') : null;
+              if (hint) hint.textContent = pm.hintFn(v);
+            }
+          }
+          IR_updateUI();
+        });
+      });
+
       ["input", "change"].forEach(evt => {
         elTrees.addEventListener(evt, IR_updateUI);
         elPV.addEventListener(evt, IR_updateUI);
@@ -2591,6 +2758,7 @@
         const updateBudgetLabel = () => {
           const val = parseInt(elBudget.value || 0, 10);
           labelBudget.textContent = val.toLocaleString();
+          IR_updateUI();
         };
         elBudget.addEventListener('input', updateBudgetLabel);
         updateBudgetLabel();
@@ -2704,119 +2872,187 @@
         });
       }
 
-      async function IR_downloadPdf() {
-        const { jsPDF } = window.jspdf || {};
-        if (!jsPDF) { alert("PDF library not loaded."); return; }
-        const interPanel = document.querySelector("#panel-interrelation");
-        const oldOpacity = interPanel.style.opacity;
-        const oldPointer = interPanel.style.pointerEvents;
-        interPanel.style.opacity = 1; interPanel.style.pointerEvents = "auto";
-        await new Promise(resolve => setTimeout(resolve, 300));
-        const pdf = new jsPDF("p", "mm", "a4");
-        if (pdf.setCharSpace) pdf.setCharSpace(0);
-        const s = IR_computeScenario();
-        const greenPct = (s.ndviScenario / IR_BASE.ndvi_mean - 1) * 100;
-        const energyPct = (1 - s.energyScenario_kwh / IR_BASE.energy_kwh) * 100;
-        const co2Pct = (1 - s.co2Scenario_kg / IR_BASE.co2_kg) * 100;
-        const uhiDelta = IR_BASE.uhi_mean - s.uhiScenario;
-        const insightLines = IR_buildInsightsLines(s, greenPct, uhiDelta, energyPct, co2Pct);
-        const marginX = 18;
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const contentWidth = pageWidth - marginX * 2;
-        pdf.setFont("helvetica", "bold"); pdf.setFontSize(16);
-        pdf.text("Twekkelerveld Digital Twin", pageWidth / 2, 20, { align: "center" });
-        pdf.setFontSize(12); pdf.text("Scenario Simulation Report", pageWidth / 2, 27, { align: "center" });
-        pdf.setFontSize(9); pdf.setFont("helvetica", "normal");
-        const nowStr = new Date().toLocaleString();
-        pdf.text(`Generated: ${nowStr}`, pageWidth / 2, 33, { align: "center" });
-        let y = 40;
-        function sectionHeader(label) {
-          pdf.setDrawColor(200); pdf.setFillColor(245);
-          pdf.roundedRect(marginX, y, contentWidth, 8, 2, 2, "F");
-          pdf.setFont("helvetica", "bold"); pdf.setFontSize(10); pdf.setTextColor(60);
-          if (pdf.setCharSpace) pdf.setCharSpace(0);
-          pdf.text(label, marginX + 3, y + 5);
-          pdf.setTextColor(0); y += 12;
-        }
-        sectionHeader("SCENARIO INPUTS");
-        pdf.setFont("helvetica", "normal"); pdf.setFontSize(9);
-        const inputs = [
-          ["Additional trees", `${s.treesAdded.toLocaleString()} (baseline: ${IR_BASE.trees_existing.toLocaleString()} trees)`],
-          ["Extra rooftop PV", `${s.pvExtraPct}% (relative to current potential)`],
-          ["Insulated buildings", `${s.retroPct}% of stock (${Math.round(IR_BASE.dwellings * (s.retroPct / 100)).toLocaleString()} dwellings)`],
-          ["Green roof coverage", `${s.greenRoofPct}% of roofs`],
-          ["Heatwave severity", `Level ${s.heatLevel} (0 = normal summer, 3 = extreme)`]
-        ];
-        inputs.forEach(row => {
-          pdf.setFont("helvetica", "bold"); if (pdf.setCharSpace) pdf.setCharSpace(0);
-          pdf.text(row[0] + ":", marginX, y);
-          pdf.setFont("helvetica", "normal"); pdf.text(row[1], marginX + 48, y);
-          y += 5;
-        });
-        y += 4;
-        sectionHeader("INDICATOR CHANGES");
-        const deltas = [
-          ["Greenness (NDVI)", `${greenPct >= 0 ? "+" : ""}${Math.round(greenPct)}%`],
-          ["Urban heat island", `${uhiDelta >= 0 ? "-" : "+"}${Math.abs(uhiDelta).toFixed(1)} °C`],
-          ["Energy demand", `${energyPct >= 0 ? "-" : "+"}${Math.abs(Math.round(energyPct))}%`],
-          ["Operational CO₂", `${co2Pct >= 0 ? "-" : "+"}${Math.abs(Math.round(co2Pct))}%`]
-        ];
-        deltas.forEach(row => {
-          pdf.setFont("helvetica", "bold"); if (pdf.setCharSpace) pdf.setCharSpace(0);
-          pdf.text(row[0] + ":", marginX, y);
-          pdf.setFont("helvetica", "normal"); pdf.text(row[1], marginX + 48, y);
-          y += 5;
-        });
-        y += 4;
-        sectionHeader("FINANCIAL OVERVIEW");
-        const costLines = [
-          ["Tree planting cost", `€${Math.round(s.treeCost).toLocaleString()}`],
-          ["PV investment cost", `€${Math.round(s.pvCost).toLocaleString()}`],
-          ["Retrofit cost", `€${Math.round(s.retrofitCost).toLocaleString()}`],
-          ["Green roof cost", `€${Math.round(s.greenRoofCost).toLocaleString()}`],
-          ["Total scenario cost", `€${Math.round(s.totalCost).toLocaleString()}`]
-        ];
-        costLines.forEach(row => {
-          pdf.setFont("helvetica", "bold"); if (pdf.setCharSpace) pdf.setCharSpace(0);
-          pdf.text(row[0] + ":", marginX, y);
-          pdf.setFont("helvetica", "normal"); pdf.text(row[1], marginX + 60, y);
-          y += 5;
-        });
-        y += 4;
-        sectionHeader("SCENARIO INSIGHTS");
-        pdf.setFont("helvetica", "normal");
-        const maxWidth = contentWidth - 6;
-        insightLines.forEach(line => {
-          if (pdf.setCharSpace) pdf.setCharSpace(0);
-          const wrapped = pdf.splitTextToSize(line, maxWidth);
-          wrapped.forEach((w, i) => {
-            const prefix = i === 0 ? "• " : "  ";
-            pdf.text(prefix + w, marginX + 2, y);
-            y += 5;
-            if (y > 270) { pdf.addPage(); y = 20; }
+      async function downloadNexusReport() {
+        const btn = event?.target;
+        if (btn) { btn.disabled = true; btn.textContent = 'Generating...'; }
+
+        try {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+          const W = 210, H = 297;
+          const today = new Date().toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' });
+
+          // ---- PAGE 1: COVER ----
+          doc.setFillColor(15, 23, 42); doc.rect(0, 0, W, 60, 'F');
+          doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(20);
+          doc.text("Twekkelerveld Smart Energy Twin", 15, 25);
+          doc.setFontSize(14); doc.setFont('helvetica','normal');
+          doc.text("Scenario Analysis Report — Combined Assessment", 15, 38);
+          doc.setFontSize(9); doc.setTextColor(148,163,184);
+          doc.text(`Generated: ${today}`, 15, 50);
+          doc.text("MSc Thesis | University of Twente | Faculty of Geo-Information Science", 15, 56);
+
+          // Divider
+          doc.setTextColor(15,23,42); doc.setFontSize(13); doc.setFont('helvetica','bold');
+          doc.text("Executive Summary", 15, 78);
+          doc.setDrawColor(59,130,246); doc.setLineWidth(0.5); doc.line(15, 80, 195, 80);
+
+          doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(51,65,85);
+          const summaryText = [
+            "This report presents a combined scenario analysis for the Twekkelerveld neighbourhood in",
+            "Enschede, Netherlands. The analysis integrates energy performance data, ecological metrics,",
+            "and multi-criteria decision support to identify optimal intervention strategies.",
+            "",
+            "The assessment covers building energy efficiency, solar potential, urban heat island effects,",
+            "tree canopy cover, and biodiversity corridors. Cost-benefit analysis is performed using",
+            "standard NPV methodology with a 30-year horizon and 4% discount rate."
+          ];
+          summaryText.forEach((line, i) => { doc.text(line, 15, 90 + i * 6); });
+
+          // Key metrics box
+          const IR = window.IR_BASE_GLOBAL || {};
+          doc.setFillColor(240,248,255); doc.rect(15, 135, 180, 50, 'F');
+          doc.setDrawColor(59,130,246); doc.setLineWidth(0.3); doc.rect(15, 135, 180, 50, 'D');
+          doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(59,130,246);
+          doc.text("KEY BASELINE METRICS", 20, 143);
+          doc.setFont('helvetica','normal'); doc.setTextColor(51,65,85);
+          const metrics = [
+            [`Buildings: ~${(IR.dwellings||2500).toLocaleString()} dwellings`, `Total energy: ${((IR.energy_kwh||5000000)/1000).toFixed(0)} MWh/yr`],
+            [`Existing trees: ${(IR.trees_existing||2400).toLocaleString()}`, `Existing PV: ${((IR.pv_kwh||650000)/1000).toFixed(0)} MWh/yr`],
+            [`Mean NDVI: ${IR.ndvi_mean||0.22}`, `CO₂ baseline: ${((IR.co2_kg||1800000)/1000).toFixed(0)} tonnes/yr`],
+          ];
+          metrics.forEach(([left, right], i) => {
+            doc.text(left, 20, 153 + i*8);
+            doc.text(right, 110, 153 + i*8);
           });
-        });
-        pdf.addPage();
-        pdf.setFont("helvetica", "bold"); pdf.setFontSize(12);
-        if (pdf.setCharSpace) pdf.setCharSpace(0);
-        pdf.text("Scenario Charts", marginX, 18);
-        pdf.setFont("helvetica", "normal"); pdf.setFontSize(9);
-        pdf.text("Charts exported from the interactive interrelation dashboard.", marginX, 24);
-        const imgWidth = 80; const imgHeight = 55; const gapX = 10; const gapY = 10;
-        const x1 = marginX; const x2 = x1 + imgWidth + gapX;
-        const yTop = 30; const yBottom = yTop + imgHeight + gapY;
-        const addChartImage = (canvasId, x, yPos) => {
-          const canvas = document.getElementById(canvasId);
-          if (!canvas) return;
-          const imgData = canvas.toDataURL("image/png", 1.0);
-          pdf.addImage(imgData, "PNG", x, yPos, imgWidth, imgHeight);
-        };
-        addChartImage("IR_chartNdvi", x1, yTop); addChartImage("IR_chartUhi", x2, yTop);
-        addChartImage("IR_chartEnergy", x1, yBottom); addChartImage("IR_chartRadar", x2, yBottom);
-        interPanel.style.opacity = oldOpacity; interPanel.style.pointerEvents = oldPointer;
-        pdf.save("Twekkelerveld_scenario_simulation.pdf");
+
+          // ---- PAGE 2: CHARTS ----
+          doc.addPage();
+          doc.setFillColor(15,23,42); doc.rect(0,0,W,14,'F');
+          doc.setTextColor(255,255,255); doc.setFontSize(11); doc.setFont('helvetica','bold');
+          doc.text("Scenario Analysis — Charts", 15, 10);
+
+          // Capture charts at 2x resolution
+          const chartIds = ['IR_chartNdvi','IR_chartUhi','IR_chartEnergy','IR_chartRadar'];
+          const chartTitles = ['Greenness (NDVI)', 'Urban Heat (UHI)', 'Energy & Solar', 'Overall Balance'];
+          let yPos = 22;
+
+          for (let ci = 0; ci < chartIds.length; ci++) {
+            try {
+              const canvas = document.getElementById(chartIds[ci]);
+              if (!canvas || canvas.width === 0) continue;
+              // Force dimensions for crisp export
+              canvas.style.width = canvas.width + 'px';
+              canvas.style.height = canvas.height + 'px';
+              const imgData = canvas.toDataURL('image/png', 1.0);
+              const chartW = 80, chartH = 50;
+              const xPos = ci % 2 === 0 ? 15 : 105;
+              if (ci % 2 === 0 && ci > 0) yPos += 65;
+              doc.addImage(imgData, 'PNG', xPos, yPos, chartW, chartH);
+              doc.setFontSize(8); doc.setTextColor(100,116,139); doc.setFont('helvetica','normal');
+              doc.text(`Fig ${ci+1}: ${chartTitles[ci]}`, xPos, yPos + chartH + 4);
+            } catch(e) { console.warn('Chart capture error:', chartIds[ci], e); }
+          }
+
+          // ---- PAGE 3: COST-BENEFIT ----
+          doc.addPage();
+          doc.setFillColor(15,23,42); doc.rect(0,0,W,14,'F');
+          doc.setTextColor(255,255,255); doc.setFontSize(11); doc.setFont('helvetica','bold');
+          doc.text("Cost-Benefit Analysis", 15, 10);
+
+          doc.setTextColor(15,23,42); doc.setFontSize(12); doc.setFont('helvetica','bold');
+          doc.text("Assumptions Used", 15, 26);
+          doc.setLineWidth(0.3); doc.setDrawColor(200,200,200); doc.line(15,28,195,28);
+
+          const s = (window.DT_getSettings && window.DT_getSettings()) || {};
+          const assumptionRows = [
+            ['Electricity price', `€${(s.elec_price_eur_kwh||0.30).toFixed(3)}/kWh`],
+            ['Gas price', `€${(s.gas_price_eur_m3||0.145).toFixed(3)}/m³`],
+            ['Feed-in tariff', `€${(s.feed_in_tariff||0.05).toFixed(3)}/kWh`],
+            ['CO₂ factor (electricity)', '0.268 kg/kWh'],
+            ['Discount rate', `${s.discount_rate||4}%`],
+            ['Time horizon', `${s.time_horizon_years||30} years`],
+            ['Tree cost', `€${(s.cost_tree_eur||350).toLocaleString()}/tree`],
+            ['PV cost', `€${(s.cost_pv_per_pct_eur||5400).toLocaleString()}/+1%`],
+            ['Retrofit cost', `€${(s.retrofit_cost_per_dwelling_eur||12000).toLocaleString()}/dwelling`],
+          ];
+          doc.setFontSize(9); doc.setFont('helvetica','normal');
+          assumptionRows.forEach(([k, v], i) => {
+            const y = 36 + i * 7;
+            doc.setFillColor(i%2===0?248:255, i%2===0?250:255, i%2===0?252:255);
+            doc.rect(15, y-4, 180, 7, 'F');
+            doc.setTextColor(71,85,105); doc.text(k, 18, y);
+            doc.setTextColor(15,23,42); doc.setFont('helvetica','bold'); doc.text(v, 155, y, {align:'right'});
+            doc.setFont('helvetica','normal');
+          });
+
+          // Equations
+          doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(15,23,42);
+          doc.text("Key Equations", 15, 106);
+          doc.setLineWidth(0.3); doc.setDrawColor(200,200,200); doc.line(15,108,195,108);
+
+          const equations = [
+            ['NPV', 'NPV = Sum(CF_t / (1+r)^t) - C_0'],
+            ['BCR', 'BCR = NPV(benefits) / NPV(costs)'],
+            ['Energy Cost', 'Cost = Gas*P_gas + El*P_elec - Export*P_feedin'],
+            ['CO2 Savings', 'dCO2 = (E_baseline - E_new) * emission_factor'],
+          ];
+          doc.setFontSize(9);
+          equations.forEach(([name, eq], i) => {
+            const y = 118 + i * 14;
+            doc.setFillColor(248,249,250); doc.rect(15, y-5, 180, 12, 'F');
+            doc.setDrawColor(59,130,246); doc.setLineWidth(1); doc.line(15, y-5, 15, y+7);
+            doc.setFont('helvetica','bold'); doc.setTextColor(71,85,105); doc.text(name, 20, y);
+            doc.setFont('courier','normal'); doc.setTextColor(30,41,59); doc.text(eq, 60, y);
+          });
+
+          // ---- PAGE 4: RECOMMENDATIONS ----
+          doc.addPage();
+          doc.setFillColor(15,23,42); doc.rect(0,0,W,14,'F');
+          doc.setTextColor(255,255,255); doc.setFontSize(11); doc.setFont('helvetica','bold');
+          doc.text("Recommendations", 15, 10);
+
+          doc.setTextColor(15,23,42); doc.setFontSize(12); doc.setFont('helvetica','bold');
+          doc.text("Strategic Recommendations", 15, 26);
+          doc.setLineWidth(0.5); doc.setDrawColor(59,130,246); doc.line(15,28,195,28);
+
+          const recommendations = [
+            "Prioritise solar PV installation on buildings with the highest irradiance potential (Class 5 — dark red) and lowest energy labels (E-G), as these offer the best return on investment.",
+            "Target insulation retrofits for pre-1975 buildings, which show the highest energy use intensity. Combined with heat pump installation, these can achieve 30-40% energy reduction.",
+            "Plant 300-500 additional trees in areas identified by MCDA as heat-stressed with low vegetation cover. Prioritize street-level and courtyard locations for maximum cooling effect.",
+            "Implement green roofs on flat-roofed commercial and residential buildings where solar PV is less viable, providing both cooling and biodiversity benefits.",
+            "Consider peer-to-peer energy trading to optimize the existing solar capacity across the neighbourhood, reducing net grid imports by up to 25% during summer months."
+          ];
+
+          doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(51,65,85);
+          recommendations.forEach((rec, i) => {
+            const y = 38 + i * 22;
+            doc.setFillColor(240,248,255); doc.rect(15, y-4, 180, 18, 'F');
+            doc.setFont('helvetica','bold'); doc.setTextColor(59,130,246); doc.text(`${i+1}.`, 18, y+4);
+            doc.setFont('helvetica','normal'); doc.setTextColor(30,41,59);
+            const lines = doc.splitTextToSize(rec, 165);
+            doc.text(lines, 28, y+4);
+          });
+
+          // ---- FOOTER on every page ----
+          const pageCount = doc.internal.getNumberOfPages();
+          for (let pg = 1; pg <= pageCount; pg++) {
+            doc.setPage(pg);
+            doc.setFillColor(240,240,240); doc.rect(0, H-10, W, 10, 'F');
+            doc.setFontSize(8); doc.setTextColor(100,116,139); doc.setFont('helvetica','normal');
+            doc.text(`Page ${pg} of ${pageCount}`, W/2, H-4, { align: 'center' });
+            doc.text("Twekkelerveld Smart Energy Twin | MSc Thesis, University of Twente", 15, H-4);
+          }
+
+          doc.save(`Nexus_Scenario_Report_${new Date().toISOString().slice(0,10)}.pdf`);
+        } catch(e) {
+          console.error('Report generation failed:', e);
+          alert('Report generation failed: ' + e.message);
+        } finally {
+          if (btn) { btn.disabled = false; btn.textContent = '📄 Download Report'; }
+        }
       }
-      elPdf.addEventListener("click", IR_downloadPdf);
+      elPdf.addEventListener("click", downloadNexusReport);
       IR_updateUI();
     };
     // ============================
@@ -3238,15 +3474,6 @@
     };
 
   </script>
-
-  <!-- Developer banner: floating logo and developer name -->
-  <div class="developer-banner">
-    <!-- Use a local copy of the ITC/UT logo. The image is stored alongside this HTML
-         file as itc_logo.jpg. If an alternate logo is provided in the future,
-         simply replace the file and update this path. -->
-    <img src="itc_logo.jpg" alt="ITC Logo" />
-    <span class="dev-name">Rakibun Athid, MSc Spatial Engineering</span>
-  </div>
   <!-- Consolidated settings dropdown and ecology modal logic -->
   <script>
     // Settings dropdown logic
@@ -3282,7 +3509,8 @@
       if (el) el.classList.remove('active');
     }
     document.addEventListener('DOMContentLoaded', () => {
-      const closeBtn = document.getElementById('ecology-settings-close');
+      // Updated selector to match the advanced ecology settings modal cancel button
+      const closeBtn = document.getElementById('ecology-settings-cancel');
       if (closeBtn) {
         closeBtn.addEventListener('click', closeEcologyModal);
       }
@@ -3367,7 +3595,7 @@
         <button type="button" id="energy-settings-apply" class="save-btn">Apply</button>
         <button type="button" id="energy-settings-cancel" class="cancel-btn">Cancel</button>
       </div>
-    </div>
+      </div>
     </div>
 
     <!-- Ecology settings modal -->
@@ -3431,6 +3659,7 @@
   // and broadcast to the energy and ecology iframes via postMessage.  This
   // keeps the twins in sync with the centralised assumptions.
   (function(){
+    // Default parameters aligned with energy.html's PARAMS
     let energySettings = {
       prices: { elecImport: 0.30, gas: 1.45, feedIn: 0.05, p2p: 0.15 },
       costs: { pvPerWp: 1.13, insulationSqM: 50, hybridPump: 6000, allElectric: 14000 },
@@ -3439,6 +3668,7 @@
       horizonYears: 20,
       budgetCap: null
     };
+    // Load stored settings from localStorage if present
     try {
       const stored = localStorage.getItem('GLOBAL_ENERGY_SETTINGS');
       if (stored) {
@@ -3449,6 +3679,7 @@
       }
     } catch(e) {}
     function openEnergyModal() {
+      // populate form fields
       const s = energySettings;
       document.getElementById('g_price_elecImport').value = s.prices.elecImport ?? '';
       document.getElementById('g_price_gas').value       = s.prices.gas ?? '';
@@ -3495,7 +3726,9 @@
       if (Number.isFinite(rIn)) energySettings.discountRate = rIn / 100;
       if (Number.isFinite(tIn)) energySettings.horizonYears = tIn;
       energySettings.budgetCap = Number.isFinite(bIn) ? bIn : null;
+      // Persist settings
       try { localStorage.setItem('GLOBAL_ENERGY_SETTINGS', JSON.stringify(energySettings)); } catch(e) {}
+      // Broadcast to embedded frames
       const energyFrame = document.getElementById('energyFrame');
       const ecoFrame    = document.getElementById('ecoFrame');
       if (energyFrame && energyFrame.contentWindow) {
@@ -3514,16 +3747,16 @@
       if (applyBtn) applyBtn.addEventListener('click', applyEnergySettings);
       if (cancelBtn) cancelBtn.addEventListener('click', closeEnergyModal);
     });
-    // Expose energy settings helpers globally so they can be triggered from the settings dropdown.
-    window.openEnergyModal = openEnergyModal;
-    window.closeEnergyModal = closeEnergyModal;
-    window.applyEnergySettings = applyEnergySettings;
-  })();
+      // Expose energy helpers globally so the settings dropdown can call them
+      window.openEnergyModal = openEnergyModal;
+      window.closeEnergyModal = closeEnergyModal;
+      window.applyEnergySettings = applyEnergySettings;
+    })();
   </script>
   <!-- Ecology settings management for Nexus -->
   <script>
     (function(){
-      // Default parameters for ecology cost-benefit analysis and MCDA.  Values are modest to encourage exploring settings.
+      // Default parameters for ecology cost‑benefit analysis and MCDA.  Values are modest to encourage exploring settings.
       let ecologySettings = {
         weights: { ndvi: 0.5, uhi: 0.3, water: 0.2 },
         costs: { tree: 350, greenRoof: 100, infiltration: 80 },
@@ -3531,6 +3764,7 @@
         horizonYears: 20,
         limits: { maxTreeArea: 2000, maxGreenRoofPct: 50 }
       };
+      // Load stored settings from localStorage if present
       try {
         const stored = localStorage.getItem('GLOBAL_ECO_SETTINGS');
         if (stored) {
@@ -3578,11 +3812,20 @@
         if (Number.isFinite(tIn)) ecologySettings.horizonYears = tIn;
         if (Number.isFinite(area)) ecologySettings.limits.maxTreeArea = area;
         if (Number.isFinite(pct)) ecologySettings.limits.maxGreenRoofPct = pct;
+        // Persist settings
         try { localStorage.setItem('GLOBAL_ECO_SETTINGS', JSON.stringify(ecologySettings)); } catch(e) {}
+        // Broadcast to embedded ecology frame
         const ecoFrame = document.getElementById('ecoFrame');
         if (ecoFrame && ecoFrame.contentWindow) {
           ecoFrame.contentWindow.postMessage({ type:'ECO_SETTINGS_UPDATE', payload: ecologySettings }, '*');
         }
+        // Sync tree cost to Combined Scenario baseline
+        if (window.IR_BASE_GLOBAL && Number.isFinite(cTree)) window.IR_BASE_GLOBAL.cost_tree_eur = cTree;
+        if (window.IR_BASE && Number.isFinite(cTree)) window.IR_BASE.cost_tree_eur = cTree;
+        // Update slider hint
+        const treeHint = document.querySelector('#IR_sliderTrees')?.closest('.slider-row')?.querySelector('.slider-hint');
+        if (treeHint && Number.isFinite(cTree)) treeHint.textContent = `Trees sequester ~20kg CO₂ per year and cost ~€${cTree.toLocaleString()} each.`;
+        if (window.IR_updateUI) { try { window.IR_updateUI(); } catch(e) {} }
         closeEcologyModal();
       }
       document.addEventListener('DOMContentLoaded', () => {
@@ -4103,6 +4346,15 @@
         <div class="field"><label>CO₂ weight</label><input type="number" name="w_co2" min="0" max="1" step="0.01" /></div>
         <div class="field"><label>Equity weight</label><input type="number" name="w_equity" min="0" max="1" step="0.01" /></div>
       </form>
+      <div id="liveValuationSummary" style="margin:16px 0; padding:14px; background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.25); border-radius:10px;">
+        <div style="font-size:11px; font-weight:700; color:#93c5fd; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">Live Valuation Summary</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:11px;">
+          <div><span style="color:#94a3b8;">Total Investment:</span> <strong id="lvs_invest" style="color:#f8fafc;">€—</strong></div>
+          <div><span style="color:#94a3b8;">Annual Savings:</span> <strong id="lvs_savings" style="color:#10b981;">—</strong></div>
+          <div><span style="color:#94a3b8;">Simple Payback:</span> <strong id="lvs_payback" style="color:#f8fafc;">— yrs</strong></div>
+          <div><span style="color:#94a3b8;">NPV (30yr):</span> <strong id="lvs_npv" style="color:#f8fafc;">€—</strong></div>
+        </div>
+      </div>
       <div class="section">
         <h3 class="collapsible-header">Transparency: Equations</h3>
         <div class="collapsible-content">
@@ -4187,14 +4439,14 @@
       }
     }
 
-    // Update slider hint text based on current settings.
-    // This function ensures descriptive hints for interventions reflect the
-    // active cost assumptions. It should be called after settings are
-    // loaded or saved.
+    // Update slider hint text based on current settings. This ensures
+    // descriptive hints for interventions reflect the active cost
+    // assumptions defined in the settings. Call after loading or
+    // saving settings to keep hints in sync with the model.
     function updateSliderHints() {
       const s = getSettings();
-      // Update tree cost hint
       try {
+        // Tree slider hint
         const treeSlider = document.getElementById('IR_sliderTrees');
         if (treeSlider && treeSlider.parentElement) {
           const hint = treeSlider.parentElement.querySelector('.slider-hint');
@@ -4203,7 +4455,7 @@
             hint.textContent = `Trees sequester ~20kg CO₂ per year and cost ~€${costStr} each.`;
           }
         }
-        // Update PV cost hint
+        // PV slider hint
         const pvSlider = document.getElementById('IR_sliderPV');
         if (pvSlider && pvSlider.parentElement) {
           const hint = pvSlider.parentElement.querySelector('.slider-hint');
@@ -4212,7 +4464,7 @@
             hint.textContent = `Relative to current PV potential. Cost ~€${costStr} per +1%.`;
           }
         }
-      } catch(e) {}
+      } catch (e) {}
     }
     function openSettingsModal() {
       const overlay = document.getElementById('settings-overlay');
@@ -4253,6 +4505,7 @@
       saveSettings(newSettings);
       updateBaselineFromSettings();
       updateSliderHints();
+      updateLiveSummary();
       if (window.IR_updateUI) {
         try { window.IR_updateUI(); } catch(e) {}
       }
@@ -4291,10 +4544,65 @@
       dlAnchor.setAttribute('download', 'dt_settings_' + dateStr + '.json');
       dlAnchor.click();
     }
+    function updateLiveSummary() {
+      try {
+        const IR = window.IR_BASE_GLOBAL || {};
+        const s = collectSettingsForm ? collectSettingsForm() : {};
+        const discRate = (s.discount_rate || 4) / 100;
+        const horizon = s.time_horizon_years || 30;
+        const treeCost = s.cost_tree_eur || 350;
+        const pvCost = s.cost_pv_per_pct_eur || 5400;
+        const retroCost = s.retrofit_cost_per_dwelling_eur || 12000;
+        const greenCost = s.cost_greenRoof_per_pct_eur || 8000;
+        const elecPrice = s.elec_price_eur_kwh || 0.30;
+
+        // Get current slider values if IR is initialized
+        let treesAdded = 0, pvPct = 0, retroPct = 0, greenRoofPct = 0;
+        const slTrees = document.getElementById('IR_sliderTrees');
+        const slPV = document.getElementById('IR_sliderPV');
+        const slRetro = document.getElementById('IR_sliderRetro');
+        const slGreen = document.getElementById('IR_sliderGreenRoof');
+        if (slTrees) treesAdded = parseInt(slTrees.value) || 0;
+        if (slPV) pvPct = parseInt(slPV.value) || 0;
+        if (slRetro) retroPct = parseInt(slRetro.value) || 0;
+        if (slGreen) greenRoofPct = parseInt(slGreen.value) || 0;
+
+        const totalInvest = treesAdded * treeCost + pvPct * pvCost +
+                            (IR.dwellings || 2500) * (retroPct/100) * retroCost +
+                            greenRoofPct * greenCost;
+        const annualSavings = (pvPct/100) * (IR.pv_kwh || 650000) * elecPrice +
+                              (retroPct/100) * 0.20 * (IR.energy_kwh || 5000000) * elecPrice * 0.3;
+        const simplePayback = annualSavings > 0 ? totalInvest / annualSavings : Infinity;
+
+        // NPV calculation
+        let npv = -totalInvest;
+        for (let y = 1; y <= horizon; y++) {
+          npv += annualSavings / Math.pow(1 + discRate, y);
+        }
+
+        const fmt = (n) => isFinite(n) && !isNaN(n) ? `€${Math.round(n).toLocaleString()}` : '€—';
+        const fmtYr = (n) => isFinite(n) && !isNaN(n) ? `${Math.round(n)} yrs` : '∞';
+
+        const li = document.getElementById('lvs_invest');
+        const ls = document.getElementById('lvs_savings');
+        const lp = document.getElementById('lvs_payback');
+        const ln = document.getElementById('lvs_npv');
+        if (li) li.textContent = fmt(totalInvest);
+        if (ls) ls.textContent = fmt(annualSavings) + '/yr';
+        if (lp) lp.textContent = fmtYr(simplePayback);
+        if (ln) { ln.textContent = fmt(npv); ln.style.color = npv >= 0 ? '#10b981' : '#ef4444'; }
+      } catch(e) { console.warn('Live summary error:', e); }
+    }
     document.addEventListener('DOMContentLoaded', function() {
       updateBaselineFromSettings();
-      // Ensure slider hints reflect stored settings on page load
+      // Update slider hints on initial load to reflect persisted settings
       updateSliderHints();
+      // Eagerly initialize the Combined Scenario tab so IR_updateUI is available immediately
+      setTimeout(function() {
+        if (window.IR_init && !window.__IR_initialized) {
+          try { window.IR_init(); } catch(e) { console.warn('IR_init early init failed:', e); }
+        }
+      }, 50);
       const roleSelect = document.getElementById('role-select');
       if (roleSelect) {
         roleSelect.addEventListener('change', function() {
@@ -4333,6 +4641,16 @@
           }
         });
       });
+      // Live summary updates
+      document.querySelectorAll('.settings-modal input, .settings-modal select').forEach(el => {
+        el.addEventListener('input', updateLiveSummary);
+      });
+      // Also update when sliders change
+      ['IR_sliderTrees','IR_sliderPV','IR_sliderRetro','IR_sliderGreenRoof'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateLiveSummary);
+      });
+      setTimeout(updateLiveSummary, 1000);
     });
     window.DT_updateBaselineFromSettings = updateBaselineFromSettings;
     // Expose utility functions so they can be called from outside the module.  
